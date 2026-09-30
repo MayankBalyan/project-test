@@ -13,10 +13,12 @@ import { Blob } from '@/components/ink-art';
 import { Txt } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { startPwa } from '@/lib/pwa';
 import { AuthProvider, useAuth } from '@/state/auth';
 import { IstelProvider, useIstel } from '@/state/store';
 
 SplashScreen.preventAutoHideAsync();
+startPwa();
 
 export default function RootLayout() {
   const scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
@@ -37,6 +39,8 @@ export default function RootLayout() {
     if (Platform.OS !== 'web') return;
     document.documentElement.style.colorScheme = scheme;
     document.body.style.backgroundColor = Colors[scheme].paper;
+    // The installed app's title bar too.
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', Colors[scheme].paper));
   }, [scheme]);
 
   if (!loaded && !error) return null;

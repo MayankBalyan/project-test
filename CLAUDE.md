@@ -35,6 +35,8 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 - `site/` — the public website for `istel.space` (landing, privacy policy, delete-account page): plain HTML/CSS
   in the same theme, fonts served locally. Hosting and DNS: [docs/HOSTING.md](docs/HOSTING.md).
 - `src/state/theme.ts` — System/Light/Dark choice (per device); `hooks/use-color-scheme.ts` applies it everywhere.
+- `public/` — web shell for the installable app: `index.html`, `manifest.webmanifest`, `sw.js`, `icons/`;
+  `src/lib/pwa(.web).ts` registers the service worker and powers the Install card in Settings.
 - `src/lib/site.ts` — website links used in the app (privacy, account deletion, support email).
 - `supabase/` — local config, migrations and email template. Setup guide: [docs/SUPABASE.md](docs/SUPABASE.md).
   Every table needs row-level security so users only reach their own rows.

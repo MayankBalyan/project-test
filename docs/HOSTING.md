@@ -22,6 +22,14 @@ the `project-test` repository.
    default branch changes later, update **Settings → Git → Production Branch**.
 5. **Settings → Domains → Add** `app.istel.space`.
 
+**Installable app (PWA).** The web app can be installed from Chrome, Edge and Android (and added to the home
+screen on iPhone). The pieces are in `public/`, which the build copies to the site root:
+`index.html` (links the manifest and keeps Chrome's install offer), `manifest.webmanifest`, `sw.js` (offline
+support; registered in production builds only by `src/lib/pwa.web.ts`) and `icons/`. `vercel.json` serves
+`sw.js` with `no-cache` so updates reach installed apps. The icons are the Istel logo mark for now; replace the
+files in `public/icons/` when the final app icon is ready. If you change `sw.js` in a way that needs old caches
+dropped, bump the cache names at its top.
+
 ## 3. The website
 1. **Add New → Project →** import `project-test` again.
 2. Name it `istel-site`. Framework preset: **Other**. **Root directory: `site`**. Leave build and output empty.

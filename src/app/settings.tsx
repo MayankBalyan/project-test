@@ -9,6 +9,7 @@ import { Card, Chip, InkButton, Screen, Stepper, TextField, Toggle, Txt } from '
 import { Spacing } from '@/constants/theme';
 import { toCsvExport, toJsonExport } from '@/core/export';
 import { ISLAND_NAME_MAX } from '@/core/starters';
+import { useInstall } from '@/lib/pwa';
 import { getPermission, notificationReach, Permission, requestPermission } from '@/lib/notifications';
 import { shareTextFile } from '@/lib/share-file';
 import { openSitePage, siteLinks, SUPPORT_EMAIL } from '@/lib/site';
@@ -35,6 +36,39 @@ function formatHour(h: number) {
 
 function formatEveningHour(h: number) {
   return `${h > 12 ? h - 12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+}
+
+/** Web only: install Istel as an app from Chrome, Edge or Android. */
+function InstallCard() {
+  const { state, install } = useInstall();
+  if (!state) return null;
+  return (
+    <Card style={styles.group}>
+      <Txt variant="label" tone="inkSoft">
+        Install app
+      </Txt>
+      {state === 'installed' ? (
+        <Txt variant="caption" tone="inkSoft">
+          Istel is installed on this device. Open it from your apps, dock or home screen.
+        </Txt>
+      ) : (
+        <>
+          <Txt variant="caption" tone="inkSoft">
+            Get Istel in its own window with an icon on your desktop or home screen. It opens even when you’re
+            offline.
+          </Txt>
+          {state === 'available' ? (
+            <InkButton label="Install Istel" onPress={install} />
+          ) : (
+            <Txt variant="caption" tone="inkSoft">
+              In Chrome or Edge, click the install icon at the right of the address bar, or open the ⋮ menu and choose
+              “Install Istel”. On iPhone, tap Share → Add to Home Screen.
+            </Txt>
+          )}
+        </>
+      )}
+    </Card>
+  );
 }
 
 export default function SettingsScreen() {
@@ -112,6 +146,8 @@ export default function SettingsScreen() {
           System follows your {Platform.OS === 'web' ? 'computer or phone' : 'phone'}’s light or dark setting.
         </Txt>
       </Card>
+
+      <InstallCard />
 
       <Card style={styles.group}>
         <TextField
