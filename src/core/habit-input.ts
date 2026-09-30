@@ -7,7 +7,12 @@ export interface HabitInput {
   kind: HabitKind;
   target: number;
   schedule: Schedule;
+  /** Reminder times as "HH:MM" (24-hour), at most MAX_REMINDERS. */
+  reminders?: string[];
 }
+
+export const MAX_REMINDERS = 3;
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export const LIMITS = {
   countTarget: { min: 2, max: 99 },
@@ -34,10 +39,13 @@ export function validateHabit(input: HabitInput): string | null {
   if (s.type === 'everyNDays' && (s.n < LIMITS.everyNDays.min || s.n > LIMITS.everyNDays.max)) {
     return `Repeat every ${LIMITS.everyNDays.min}–${LIMITS.everyNDays.max} days.`;
   }
+  const reminders = input.reminders ?? [];
+  if (reminders.length > MAX_REMINDERS) return `Up to ${MAX_REMINDERS} reminders per habit.`;
+  if (reminders.some((t) => !TIME.test(t))) return 'Reminder times must look like 08:30.';
   return null;
 }
 
-/** Trims the name, forces check habits to a target of 1 and sorts weekdays. */
+/** Trims the name, forces check habits to a target of 1, and sorts weekdays and reminder times. */
 export function normalizeHabit(input: HabitInput): HabitInput {
   const schedule: Schedule =
     input.schedule.type === 'weekdays'
@@ -48,5 +56,15 @@ export function normalizeHabit(input: HabitInput): HabitInput {
     kind: input.kind,
     target: input.kind === 'check' ? 1 : input.target,
     schedule,
+    reminders: [...new Set(input.reminders ?? [])].sort(),
   };
+}
+
+export function formatTime(hour: number, minute: number): string {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+export function parseTime(time: string): { hour: number; minute: number } {
+  const [hour, minute] = time.split(':').map(Number);
+  return { hour, minute };
 }

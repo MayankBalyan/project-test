@@ -1,13 +1,14 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Heading3D } from '@/components/heading-3d';
 import { Blob } from '@/components/ink-art';
-import { Card, Chip, InkButton, Screen, Stepper, TextField, Txt } from '@/components/ui';
+import { Card, Chip, InkButton, Screen, Stepper, TextField, Toggle, Txt } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
 import { toCsvExport, toJsonExport } from '@/core/export';
 import { ISLAND_NAME_MAX } from '@/core/starters';
+import { getPermission, notificationReach, Permission, requestPermission } from '@/lib/notifications';
 import { shareTextFile } from '@/lib/share-file';
 import { useRootline } from '@/state/store';
 
@@ -21,8 +22,29 @@ function formatHour(h: number) {
   return `${h}:00 AM`;
 }
 
+function formatEveningHour(h: number) {
+  return `${h > 12 ? h - 12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+}
+
 export default function SettingsScreen() {
-  const { settings, updateSettings, habits, events, sessions, today, eraseAll } = useRootline();
+  const { settings, updateSettings, habits, events, sessions, today, eraseAll, refreshNotifications } = useRootline();
+  const [permission, setPermission] = useState<Permission | null>(null);
+
+  useEffect(() => {
+    getPermission().then(setPermission);
+  }, []);
+
+  const allow = async () => {
+    await requestPermission();
+    setPermission(await getPermission());
+    refreshNotifications();
+  };
+
+  const notify = settings.notifications;
+  const setNotify = (patch: Partial<typeof notify>) => {
+    updateSettings({ notifications: { ...notify, ...patch } });
+    if (permission === 'undetermined') allow();
+  };
   const [islandName, setIslandName] = useState(settings.islandName);
   const [status, setStatus] = useState<string | null>(null);
   const [confirmErase, setConfirmErase] = useState(false);
@@ -105,6 +127,50 @@ export default function SettingsScreen() {
         <Txt variant="caption" tone="inkSoft">
           Anything you do before this time counts for the day before, so late nights don’t break your streak.
         </Txt>
+      </Card>
+
+      <Card style={styles.group}>
+        <Txt variant="label" tone="inkSoft">
+          Notifications
+        </Txt>
+        <Toggle
+          label="Streak at risk"
+          detail="An evening nudge if nothing has counted toward your streak yet."
+          value={notify.streakAtRisk}
+          onChange={(v) => setNotify({ streakAtRisk: v })}
+        />
+        {notify.streakAtRisk && (
+          <Stepper
+            label="streak nudge hour"
+            value={notify.streakAtRiskHour}
+            min={17}
+            max={23}
+            format={(h) => String(h > 12 ? h - 12 : h)}
+            unit={`${formatEveningHour(notify.streakAtRiskHour)}`}
+            onChange={(h) => setNotify({ streakAtRiskHour: h })}
+          />
+        )}
+        <Toggle
+          label="Focus finished"
+          detail="Tells you when a focus session ends, even if you left the app."
+          value={notify.focusEnd}
+          onChange={(v) => setNotify({ focusEnd: v })}
+        />
+        <Txt variant="caption" tone="inkSoft">
+          Habit reminders are set on each habit.
+        </Txt>
+        {permission === 'denied' && (
+          <Txt variant="bodyBold" role="alert">
+            ✦ Notifications are blocked for Rootline. Allow them in your device or browser settings.
+          </Txt>
+        )}
+        {permission === 'undetermined' && <InkButton label="Allow notifications" onPress={allow} />}
+        {notificationReach === 'while-open' && (
+          <Txt variant="caption" tone="muted">
+            In the browser, notifications only show while Rootline is open in a tab. Install the phone app for
+            reminders at any time.
+          </Txt>
+        )}
       </Card>
 
       <Card style={styles.group}>

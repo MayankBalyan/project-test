@@ -163,17 +163,24 @@ export function Stepper({
   unit,
   label,
   onChange,
+  step = 1,
+  format = String,
+  compact = false,
 }: {
   value: number;
   min: number;
   max: number;
-  unit: string;
+  unit?: string;
   label: string;
   onChange: (value: number) => void;
+  step?: number;
+  format?: (value: number) => string;
+  /** Smaller buttons so two steppers fit on one phone row (e.g. hours and minutes). */
+  compact?: boolean;
 }) {
   const palette = usePalette();
   const button = (sign: -1 | 1) => {
-    const next = value + sign;
+    const next = value + sign * step;
     const disabled = next < min || next > max;
     return (
       <Pressable
@@ -181,7 +188,11 @@ export function Stepper({
         aria-label={`${sign < 0 ? 'Decrease' : 'Increase'} ${label}`}
         disabled={disabled}
         onPress={() => onChange(next)}
-        style={[styles.stepButton, { borderColor: palette.ink, opacity: disabled ? 0.3 : 1 }]}>
+        style={[
+          styles.stepButton,
+          compact && styles.stepButtonCompact,
+          { borderColor: palette.ink, opacity: disabled ? 0.3 : 1 },
+        ]}>
         <Txt variant="section" style={styles.stepSign}>
           {sign < 0 ? '−' : '+'}
         </Txt>
@@ -189,14 +200,55 @@ export function Stepper({
     );
   };
   return (
-    <View style={styles.stepper} aria-label={label}>
+    <View style={[styles.stepper, compact && styles.stepperCompact]} aria-label={label}>
       {button(-1)}
-      <Txt style={[styles.stepValue, { color: palette.ink }]}>{value}</Txt>
-      {button(1)}
-      <Txt variant="caption" tone="inkSoft">
-        {unit}
+      <Txt style={[styles.stepValue, compact && styles.stepValueCompact, { color: palette.ink }]} aria-live="polite">
+        {format(value)}
       </Txt>
+      {button(1)}
+      {unit ? (
+        <Txt variant="caption" tone="inkSoft">
+          {unit}
+        </Txt>
+      ) : null}
     </View>
+  );
+}
+
+/** Ink switch: a pill with a knob, filled when on. */
+export function Toggle({
+  label,
+  detail,
+  value,
+  onChange,
+}: {
+  label: string;
+  detail?: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  const palette = usePalette();
+  return (
+    <Pressable role="switch" aria-checked={value} aria-label={label} onPress={() => onChange(!value)} style={styles.toggleRow}>
+      <View style={styles.toggleText}>
+        <Txt variant="label" style={styles.toggleLabel}>
+          {label}
+        </Txt>
+        {detail ? (
+          <Txt variant="caption" tone="inkSoft">
+            {detail}
+          </Txt>
+        ) : null}
+      </View>
+      <View style={[styles.track, { borderColor: palette.ink, backgroundColor: value ? palette.ink : 'transparent' }]}>
+        <View
+          style={[
+            styles.knob,
+            { backgroundColor: value ? palette.paper : palette.ink, alignSelf: value ? 'flex-end' : 'flex-start' },
+          ]}
+        />
+      </View>
+    </Pressable>
   );
 }
 
@@ -257,7 +309,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepSign: { lineHeight: 24 },
+  stepperCompact: { gap: 6 },
+  stepButtonCompact: { width: 32, height: 32, borderRadius: 16 },
+  stepValueCompact: { fontSize: 26, lineHeight: 32, minWidth: 32 },
   stepValue: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 36, minWidth: 36, textAlign: 'center' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  toggleText: { flex: 1, gap: 2 },
+  toggleLabel: { fontSize: 15 },
+  track: { width: 52, height: 30, borderRadius: 15, borderWidth: 2, padding: 3, justifyContent: 'center' },
+  knob: { width: 20, height: 20, borderRadius: 10 },
   sectionTitle: {
     flexDirection: 'row',
     alignItems: 'baseline',

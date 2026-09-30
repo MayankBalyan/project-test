@@ -7,7 +7,8 @@ import { globalStreak } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { endsAt, formatRemaining, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
-import { normalizeHabit, validateHabit } from '../habit-input';
+import { formatTime, normalizeHabit, validateHabit } from '../habit-input';
+import { planNotifications } from '../notify-plan';
 import { STARTER_HABITS } from '../starters';
 import { toCsvExport, toJsonExport } from '../export';
 
@@ -241,5 +242,64 @@ describe('export', () => {
 
   it('writes JSON with a version', () => {
     expect(JSON.parse(toJsonExport(data))).toMatchObject({ app: 'rootline', version: 1, habits: data.habits });
+  });
+});
+
+describe('notification plan', () => {
+  // Treat dates as UTC so the test does not depend on the machine's time zone.
+  const toInstant = (date: string, h: number, m: number) => Date.parse(`${date}T${formatTime(h, m)}:00Z`);
+  const base = {
+    now: Date.parse('2026-09-30T10:00:00Z'),
+    today: '2026-09-30',
+    dayConfig: { timeZone: 'UTC', dayStartHour: 4 },
+    habits: [
+      { id: 'read', name: 'Read', schedule: { type: 'daily' as const }, createdOn: '2026-09-01', reminders: ['08:00', '21:00'] },
+      { id: 'gym', name: 'Gym', schedule: { type: 'weekdays' as const, days: [4] }, createdOn: '2026-09-01', reminders: ['18:00'] },
+    ],
+    doneToday: new Set<string>(),
+    qualifiedToday: false,
+    currentStreak: 12,
+    streakAtRisk: { enabled: true, hour: 20 },
+    focusEnd: { enabled: true, at: Date.parse('2026-09-30T10:25:00Z') },
+    toInstant,
+    days: 2,
+  };
+
+  it('plans reminders, the streak nudge and the focus end in time order, skipping the past', () => {
+    expect(planNotifications(base).map((n) => n.id)).toEqual([
+      'focus:end',
+      'streak:2026-09-30',
+      'habit:read:2026-09-30:21:00',
+      'habit:read:2026-10-01:08:00',
+      'habit:gym:2026-10-01:18:00', // Thursday only
+      'streak:2026-10-01',
+      'habit:read:2026-10-01:21:00',
+    ]);
+    expect(planNotifications(base)[1].title).toBe('Your 12-day streak is at risk');
+  });
+
+  it('skips today for done habits and the nudge once today counts', () => {
+    const ids = planNotifications({ ...base, doneToday: new Set(['read']), qualifiedToday: true }).map((n) => n.id);
+    expect(ids).not.toContain('habit:read:2026-09-30:21:00');
+    expect(ids).not.toContain('streak:2026-09-30');
+    expect(ids).toContain('habit:read:2026-10-01:08:00');
+  });
+
+  it('respects switches, archived habits and the cap', () => {
+    const off = planNotifications({
+      ...base,
+      streakAtRisk: { enabled: false, hour: 20 },
+      focusEnd: { enabled: false, at: null },
+      habits: base.habits.map((h) => ({ ...h, archivedAt: 1 })),
+    });
+    expect(off).toEqual([]);
+    expect(planNotifications({ ...base, days: 30, max: 5 })).toHaveLength(5);
+  });
+
+  it('validates reminder times', () => {
+    const habit = { name: 'Read', kind: 'check' as const, target: 1, schedule: { type: 'daily' as const } };
+    expect(validateHabit({ ...habit, reminders: ['8:00'] })).toMatch(/08:30/);
+    expect(validateHabit({ ...habit, reminders: ['07:00', '08:00', '09:00', '10:00'] })).toMatch(/3/);
+    expect(normalizeHabit({ ...habit, reminders: ['21:00', '07:30', '21:00'] }).reminders).toEqual(['07:30', '21:00']);
   });
 });

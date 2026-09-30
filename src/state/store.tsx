@@ -7,11 +7,14 @@ import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn, isScheduledOn } 
 import { DayActivity, dailyScore, isQualifyingDay } from '@/core/score';
 import { globalStreak } from '@/core/streaks';
 import { elapsedMs, endsAt, pause, plannedEndAt, resume, startTimer, TimerState } from '@/core/timer';
+import { planNotifications } from '@/core/notify-plan';
 import { FocusSessionRecord, growPlants } from '@/core/world';
+
+import { applyPlan } from '@/lib/notifications';
 
 import { load, save } from './persist';
 
-export type NamedHabit = Habit & { name: string; archivedAt?: number };
+export type NamedHabit = Habit & { name: string; archivedAt?: number; reminders?: string[] };
 export type TaggedSession = FocusSessionRecord & { tag: string };
 export type ActiveFocus = { timer: TimerState; minutes: number; tag: string };
 
@@ -23,6 +26,12 @@ export type Settings = {
   focusMinutes: number;
   /** Hour (0–23) when a new day starts. */
   dayStartHour: number;
+  notifications: {
+    /** Evening nudge when nothing has counted toward the streak yet today. */
+    streakAtRisk: boolean;
+    streakAtRiskHour: number;
+    focusEnd: boolean;
+  };
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -30,6 +39,7 @@ export const DEFAULT_SETTINGS: Settings = {
   islandName: 'My island',
   focusMinutes: 25,
   dayStartHour: DEFAULT_DAY_START_HOUR,
+  notifications: { streakAtRisk: true, streakAtRiskHour: 20, focusEnd: true },
 };
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -228,8 +238,30 @@ function useRootlineState() {
     };
   }, [habits, activeHabits, values, events, sessions, today]);
 
+  // Re-plan notifications whenever something they depend on changes (and on launch).
+  const [notificationsVersion, setNotificationsVersion] = useState(0);
+  const refreshNotifications = useCallback(() => setNotificationsVersion((v) => v + 1), []);
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const plan = planNotifications({
+        now: Date.now(),
+        today,
+        dayConfig,
+        habits,
+        doneToday: new Set(derived.habitStats.filter((h) => h.done).map((h) => h.habit.id)),
+        qualifiedToday: isQualifyingDay(derived.todayActivity.activity),
+        currentStreak: derived.global.current,
+        streakAtRisk: { enabled: settings.notifications.streakAtRisk, hour: settings.notifications.streakAtRiskHour },
+        focusEnd: { enabled: settings.notifications.focusEnd, at: focus ? plannedEndAt(focus.timer) : null },
+      });
+      applyPlan(plan).catch(() => {});
+    }, 400);
+    return () => clearTimeout(id);
+  }, [today, dayConfig, habits, derived, settings.notifications, focus, notificationsVersion]);
+
   return {
     today,
+    refreshNotifications,
     habits,
     sessions,
     focus,

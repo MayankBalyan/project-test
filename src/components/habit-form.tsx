@@ -4,9 +4,18 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import { LocalDate } from '@/core/dates';
-import { HABIT_NAME_MAX, HabitInput, LIMITS, validateHabit } from '@/core/habit-input';
+import {
+  formatTime,
+  HABIT_NAME_MAX,
+  HabitInput,
+  LIMITS,
+  MAX_REMINDERS,
+  parseTime,
+  validateHabit,
+} from '@/core/habit-input';
 import { HabitKind, Schedule } from '@/core/habits';
 import { usePalette } from '@/hooks/use-palette';
+import { getPermission, notificationReach, requestPermission } from '@/lib/notifications';
 
 import { Heading3D } from './heading-3d';
 import { Blob } from './ink-art';
@@ -72,7 +81,27 @@ export function HabitForm({
   const [days, setDays] = useState<number[]>(s?.type === 'weekdays' ? s.days : [1, 2, 3, 4, 5]);
   const [times, setTimes] = useState(s?.type === 'timesPerWeek' ? s.times : 3);
   const [everyN, setEveryN] = useState(s?.type === 'everyNDays' ? s.n : 2);
+  const [reminders, setReminders] = useState<string[]>(initial?.reminders ?? []);
+  const [permissionNote, setPermissionNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const addReminder = async () => {
+    const used = new Set(reminders);
+    const next = ['09:00', '12:00', '18:00', '21:00'].find((t) => !used.has(t)) ?? '08:00';
+    setReminders((prev) => [...prev, next]);
+    if ((await getPermission()) === 'granted') return setPermissionNote(null);
+    const granted = await requestPermission();
+    setPermissionNote(
+      granted
+        ? notificationReach === 'while-open'
+          ? 'In the browser, reminders only show while Rootline is open in a tab.'
+          : null
+        : 'Notifications are turned off for Rootline. Allow them in your device or browser settings.',
+    );
+  };
+
+  const setReminderAt = (i: number, hour: number, minute: number) =>
+    setReminders((prev) => prev.map((t, j) => (j === i ? formatTime(hour, minute) : t)));
 
   const schedule = (): Schedule => {
     switch (scheduleType) {
@@ -88,7 +117,13 @@ export function HabitForm({
   };
 
   const submit = () => {
-    const input: HabitInput = { name, kind, target: kind === 'count' ? target : 1, schedule: schedule() };
+    const input: HabitInput = {
+      name,
+      kind,
+      target: kind === 'count' ? target : 1,
+      schedule: schedule(),
+      reminders,
+    };
     const problem = validateHabit(input);
     setError(problem);
     if (!problem) onSubmit(input);
@@ -183,6 +218,60 @@ export function HabitForm({
         )}
       </Card>
 
+      <Card style={styles.group}>
+        <Txt variant="label" tone="inkSoft">
+          Reminders
+        </Txt>
+        {reminders.length === 0 && (
+          <Txt variant="caption" tone="inkSoft">
+            No reminders. Add one to get a nudge on the days this habit is due.
+          </Txt>
+        )}
+        {reminders.map((time, i) => {
+          const { hour, minute } = parseTime(time);
+          return (
+            <View key={i} style={styles.reminder}>
+              <Stepper
+                label={`reminder ${i + 1} hour`}
+                value={hour}
+                min={0}
+                max={23}
+                format={(v) => String(v).padStart(2, '0')}
+                onChange={(h) => setReminderAt(i, h, minute)}
+                compact
+              />
+              <Txt variant="section">:</Txt>
+              <Stepper
+                label={`reminder ${i + 1} minutes`}
+                value={minute}
+                min={0}
+                max={55}
+                step={5}
+                format={(v) => String(v).padStart(2, '0')}
+                onChange={(m) => setReminderAt(i, hour, m)}
+                compact
+              />
+              <Pressable
+                role="button"
+                aria-label={`Remove reminder ${time}`}
+                onPress={() => setReminders((prev) => prev.filter((_, j) => j !== i))}
+                hitSlop={8}
+                style={styles.removeReminder}>
+                <Txt variant="label">✕</Txt>
+              </Pressable>
+            </View>
+          );
+        })}
+        {reminders.length < MAX_REMINDERS && (
+          <InkButton kind="outline" label="+ Add reminder" onPress={addReminder} />
+        )}
+        {permissionNote && (
+          <Txt variant="caption" role="status">
+            {permissionNote}
+          </Txt>
+        )}
+      </Card>
+
       {error && (
         <Txt variant="bodyBold" role="alert">
           ✦ {error}
@@ -202,6 +291,8 @@ const styles = StyleSheet.create({
   group: { gap: Spacing.three },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   days: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  reminder: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  removeReminder: { marginLeft: 'auto', padding: Spacing.one },
   day: {
     width: 38,
     height: 38,

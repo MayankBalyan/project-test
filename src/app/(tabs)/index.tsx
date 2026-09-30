@@ -111,9 +111,10 @@ export default function TodayScreen() {
                 key={habit.id}
                 name={habit.name}
                 detail={
-                  habit.kind === 'count'
+                  (habit.kind === 'count'
                     ? `${value}/${habit.target} today · tap to add`
-                    : describeSchedule(habit.schedule)
+                    : describeSchedule(habit.schedule)) +
+                  (habit.reminders?.length ? ` · reminds ${habit.reminders.join(', ')}` : '')
                 }
                 done={done}
                 progress={habit.kind === 'count' ? Math.min(1, value / habit.target) : undefined}
