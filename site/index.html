@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Istel — habits, focus and a growing island</title>
+  <meta name="description" content="Istel is a calm habit tracker with GitHub-style streaks, a Pomodoro focus timer and a little island in space that grows as you stay consistent.">
+  <meta name="theme-color" content="#e8e7e3">
+  <meta property="og:title" content="Istel">
+  <meta property="og:description" content="Build habits, focus deeply, and watch your island grow.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/Anton_400Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="nav">
+      <a class="brand" href="/" aria-label="Istel home">
+        <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29a13 13 0 1 1 12-18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M16 23a7 7 0 1 1 6-10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M16 17v-6M16 13c-3-1-4-3-4-5 3 0 4 2 4 5zM16 12c2-2 4-3 6-3 0 3-3 4-6 3z" fill="currentColor" stroke="currentColor" stroke-width="1.4"/></svg>
+        Istel
+      </a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href="https://app.istel.space">Open app</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/delete-account">Delete account</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="art" aria-hidden="true">
+          <svg class="blob blob-a float" viewBox="0 0 200 200">
+            <defs><clipPath id="b1"><path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z"/></clipPath></defs>
+            <path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z" fill="var(--space)"/>
+            <g clip-path="url(#b1)" fill="#fff">
+              <circle cx="40" cy="60" r="1.6"/><circle cx="150" cy="40" r="1.2"/><circle cx="120" cy="150" r="1.8"/><circle cx="70" cy="140" r="1"/><circle cx="170" cy="110" r="1.4"/><circle cx="95" cy="30" r="1"/><circle cx="30" cy="110" r="1.2"/><circle cx="140" cy="175" r="1"/>
+              <path d="M150 80q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z"/><path d="M60 170q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/>
+            </g>
+          </svg>
+          <svg class="planet float" viewBox="0 0 200 140">
+            <ellipse cx="100" cy="74" rx="92" ry="22" fill="none" stroke="var(--ink)" stroke-width="3" transform="rotate(-14 100 74)"/>
+            <circle cx="100" cy="70" r="44" fill="#fff" stroke="var(--ink)" stroke-width="3"/>
+            <g stroke="var(--ink)"><line x1="68" y1="42" x2="132" y2="45" stroke-width="2.4"/><line x1="60" y1="52" x2="140" y2="55" stroke-width="1.2"/><line x1="57" y1="62" x2="143" y2="65" stroke-width="2.4"/><line x1="57" y1="72" x2="143" y2="75" stroke-width="1.2"/><line x1="60" y1="82" x2="140" y2="85" stroke-width="2.4"/><line x1="66" y1="92" x2="134" y2="95" stroke-width="1.2"/></g>
+            <path d="M18 86 Q100 114 184 62" fill="none" stroke="var(--ink)" stroke-width="3"/>
+          </svg>
+          <svg class="blob blob-b float" viewBox="0 0 200 200">
+            <path d="M104 8c38 2 78 26 88 66 10 42-8 92-48 112-40 20-100 14-128-20C-10 132 2 76 28 42 46 18 72 6 104 8z" fill="var(--space)"/>
+            <g fill="#fff"><circle cx="120" cy="60" r="1.4"/><circle cx="150" cy="120" r="1.8"/><circle cx="90" cy="100" r="1"/><path d="M130 150q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
+          </svg>
+          <svg class="moon float" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/>
+            <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle cx="32" cy="30" r="9"/><circle cx="62" cy="24" r="5"/><circle cx="70" cy="52" r="10"/><circle cx="40" cy="62" r="6"/><circle cx="55" cy="76" r="5"/></g>
+          </svg>
+        </div>
+        <div class="copy">
+          <h1 class="h3d xl">Grow your<br>island</h1>
+          <p class="lead">Istel is a calm habit tracker. Keep streaks like GitHub, focus with a Pomodoro timer, and watch a little island in space grow as you show up.</p>
+          <div class="actions">
+            <a class="btn primary" href="https://app.istel.space">Open the web app</a>
+            <a class="btn" aria-disabled="true" role="link" aria-label="Android app coming soon to Google Play">Android · coming soon</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="features" aria-label="What Istel does">
+        <article class="card">
+          <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="9.5" y="3" width="5" height="5" rx="1" fill="currentColor"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="9.5" width="5" height="5" rx="1" fill="currentColor"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><rect x="16" y="9.5" width="5" height="5" rx="1" fill="currentColor"/><rect x="3" y="16" width="5" height="5" rx="1"/><rect x="9.5" y="16" width="5" height="5" rx="1" fill="currentColor"/><rect x="16" y="16" width="5" height="5" rx="1"/></g></svg>
+          <h3>Habits &amp; streaks</h3>
+          <p>Daily, weekly or every few days. A year-long grid shows every day you showed up, and Rain Days protect a streak when life happens.</p>
+        </article>
+        <article class="card">
+          <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13.5" r="8"/><path d="M12 9v4.5l3 2M9.5 2.5h5"/></g></svg>
+          <h3>Deep focus</h3>
+          <p>A Pomodoro timer or stopwatch that stays in sync across your devices. Finished sessions can count toward habits like “read 30 minutes”.</p>
+        </article>
+        <article class="card">
+          <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 13h18l-5 6h-8z"/><path d="M12 13V6M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zM12 7c0-2 2-4 4-4 0 3-2 4-4 4z"/></g></svg>
+          <h3>Your island</h3>
+          <p>Every focus session plants something. Days with habits water it. Streaks unlock a stream, birds, a waterfall and seasons.</p>
+        </article>
+      </section>
+
+      <section class="band" aria-label="Your data">
+        <div>
+          <h2>Yours, and quiet</h2>
+          <p>No ads, no tracking, no selling data. Use Istel without an account and everything stays on your device, or sign in to keep your phone and laptop in sync.</p>
+        </div>
+        <svg viewBox="0 0 360 220" aria-hidden="true" style="width:100%;max-width:420px;justify-self:center">
+          <g fill="#fff"><circle cx="30" cy="30" r="1.4"/><circle cx="320" cy="40" r="1.8"/><circle cx="60" cy="180" r="1.2"/><circle cx="300" cy="170" r="1.4"/><circle cx="200" cy="20" r="1"/><path d="M280 90q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z"/></g>
+          <path d="M70 110 C90 170 160 180 180 214 C200 180 270 170 290 110z" fill="#fff" stroke="#0e0e0e" stroke-width="2.5"/>
+          <g stroke="#0e0e0e" stroke-width="1.2"><line x1="120" y1="125" x2="124" y2="165"/><line x1="150" y1="125" x2="154" y2="185"/><line x1="180" y1="125" x2="184" y2="200"/><line x1="210" y1="125" x2="214" y2="185"/><line x1="240" y1="125" x2="244" y2="165"/></g>
+          <ellipse cx="180" cy="110" rx="110" ry="24" fill="#fff" stroke="#0e0e0e" stroke-width="2.5"/>
+          <g fill="#fff" stroke="#0e0e0e" stroke-width="1.6">
+            <rect x="128" y="86" width="4" height="16"/><circle cx="130" cy="78" r="12"/>
+            <rect x="198" y="80" width="4" height="22"/><path d="M200 40l14 20h-28zM200 52l16 22h-32z"/>
+            <path d="M160 108q-4-12 6-14q2-10 10-6q8-6 12 4q8 2 0 16z"/>
+            <rect x="238" y="84" width="4" height="18"/><path d="M222 84q-6-16 8-20q2-14 16-10q12-8 18 6q12 4 4 20q-8 8-22 4q-14 6-24 0z"/>
+          </g>
+        </svg>
+      </section>
+    </main>
+
+    <footer>
+      <span>© 2026 Istel</span>
+      <nav aria-label="Legal">
+        <a href="/privacy">Privacy policy</a>
+        <a href="/delete-account">Delete your account</a>
+        <a href="mailto:support@istel.space">support@istel.space</a>
+      </nav>
+    </footer>
+  </div>
+</body>
+</html>

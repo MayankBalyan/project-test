@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import Constants from 'expo-constants';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { Heading3D } from '@/components/heading-3d';
 import { Blob } from '@/components/ink-art';
@@ -10,7 +11,10 @@ import { toCsvExport, toJsonExport } from '@/core/export';
 import { ISLAND_NAME_MAX } from '@/core/starters';
 import { getPermission, notificationReach, Permission, requestPermission } from '@/lib/notifications';
 import { shareTextFile } from '@/lib/share-file';
+import { openSitePage, siteLinks, SUPPORT_EMAIL } from '@/lib/site';
 import { useIstel } from '@/state/store';
+
+const appVersion = Constants.expoConfig?.version ?? '';
 
 function close() {
   if (router.canGoBack()) router.back();
@@ -211,6 +215,26 @@ export default function SettingsScreen() {
           in, your account keeps a copy and it syncs back; delete the account to remove that too.
         </Txt>
       </Card>
+
+      <Card style={styles.group}>
+        <Txt variant="label" tone="inkSoft">
+          About
+        </Txt>
+        <View style={styles.links}>
+          <Pressable role="link" onPress={() => openSitePage(siteLinks.privacy)} hitSlop={8}>
+            <Txt variant="label">Privacy policy ↗</Txt>
+          </Pressable>
+          <Pressable role="link" onPress={() => openSitePage(siteLinks.deleteAccount)} hitSlop={8}>
+            <Txt variant="label">Delete your account ↗</Txt>
+          </Pressable>
+          <Pressable role="link" onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} hitSlop={8}>
+            <Txt variant="label">Help · {SUPPORT_EMAIL}</Txt>
+          </Pressable>
+        </View>
+        <Txt variant="caption" tone="muted">
+          Istel {appVersion}
+        </Txt>
+      </Card>
     </Screen>
   );
 }
@@ -222,4 +246,5 @@ const styles = StyleSheet.create({
   group: { gap: Spacing.three },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   half: { flexGrow: 1, flexBasis: 140 },
+  links: { gap: Spacing.three },
 });
