@@ -58,6 +58,14 @@ cratered moon, sparkles, telescope, and the floating island with plants.
 Plant growth stages: seed → sprout → young → mature. A given-up session leaves a **wilted** sprout (drooping
 leaves), never a dead tree.
 
+## Logo mark
+- Two open ink rings (a spiral opening to the upper right) with a small sapling (stem and two leaves)
+  centered in the middle of the rings. Drawn on a 32×32 grid, rings centered on (16,16); the sapling sits on
+  that same center and must not touch the inner ring.
+- One source: `LogoMark` in `src/components/ink-art.tsx`. The same paths are in `site/favicon.svg`,
+  `public/favicon.svg` and the site headers. The PNG icons (`public/icons/`, `assets/images/icon.png`,
+  favicon, Android adaptive icon, splash) are rendered from `site/favicon.svg`. Change them all together.
+
 ## Layout
 
 - Phone: content column with 20px gutters and a floating ink pill tab bar at the bottom.

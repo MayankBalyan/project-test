@@ -140,7 +140,9 @@ export function LogoMark({ size = 28, color }: { size?: number; color?: string }
     <Svg width={size} height={size} viewBox="0 0 32 32">
       <Path d="M16 29a13 13 0 1 1 12-18" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
       <Path d="M16 23a7 7 0 1 1 6-10" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
-      <Path d="M16 17v-6M16 13c-3-1-4-3-4-5 3 0 4 2 4 5zM16 12c2-2 4-3 6-3 0 3-3 4-6 3z" fill={ink} stroke={ink} strokeWidth={1.4} />
+      {/* Sapling: stem and two leaves, centered on the rings' middle (16,16). */}
+      <Path d="M16 18.8v-4.8" fill="none" stroke={ink} strokeWidth={1.3} strokeLinecap="round" />
+      <Path d="M16 15.6c-2.08 0-2.88-1.28-2.88-2.88 1.92 0 2.88 1.12 2.88 2.88zM16 14.56c0-1.6.96-2.96 2.88-2.96 0 1.76-.96 2.96-2.88 2.96z" fill={ink} stroke={ink} strokeWidth={0.72} strokeLinejoin="round" />
     </Svg>
   );
 }
