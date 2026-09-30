@@ -150,6 +150,19 @@ export default function SettingsScreen() {
       <InstallCard />
 
       <Card style={styles.group}>
+        <Toggle
+          label="Habits"
+          detail={
+            settings.habitsEnabled
+              ? 'Turn off to use Istel just for focus. The Today tab hides; your habits and check-ins are kept.'
+              : 'Off: Istel is just the focus timer and your island. Turn on to track habits again.'
+          }
+          value={settings.habitsEnabled}
+          onChange={(on) => updateSettings({ habitsEnabled: on })}
+        />
+      </Card>
+
+      <Card style={styles.group}>
         <TextField
           label="Island name"
           value={islandName}

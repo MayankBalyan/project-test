@@ -10,11 +10,15 @@ export interface DayActivity {
   longestSessionMinutes: number;
 }
 
-/** 0–100: up to 60 points from habits and up to 40 from focus time (capped at 2 hours). */
+/**
+ * 0–100: up to 60 points from habits and up to 40 from focus time (capped at 2 hours). On days with no
+ * habits due (rest days, or people who only use focus) focus time alone can reach 100.
+ */
 export function dailyScore(a: DayActivity): number {
-  const habitPart = a.habitsScheduled > 0 ? (Math.min(a.habitsCompleted, a.habitsScheduled) / a.habitsScheduled) * 60 : 0;
-  const focusPart = (Math.min(a.focusMinutes, FOCUS_CAP_MIN) / FOCUS_CAP_MIN) * 40;
-  return Math.round(habitPart + focusPart);
+  const focusShare = Math.min(a.focusMinutes, FOCUS_CAP_MIN) / FOCUS_CAP_MIN;
+  if (a.habitsScheduled === 0) return Math.round(focusShare * 100);
+  const habitPart = (Math.min(a.habitsCompleted, a.habitsScheduled) / a.habitsScheduled) * 60;
+  return Math.round(habitPart + focusShare * 40);
 }
 
 export type HeatLevel = 0 | 1 | 2 | 3 | 4;

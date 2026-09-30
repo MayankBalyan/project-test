@@ -1,11 +1,11 @@
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import { AccountButton, SettingsButton } from '@/components/account-button';
+import { PhoneTopBar } from '@/components/account-button';
 import { describeSchedule, HabitRow } from '@/components/habit-row';
 import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
-import { Blob, LogoMark, Planet, RainDrop } from '@/components/ink-art';
+import { Blob, Planet, RainDrop } from '@/components/ink-art';
 import { Island } from '@/components/island';
 import { Card, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
@@ -32,7 +32,14 @@ function formatToday(date: string) {
   });
 }
 
-export default function TodayScreen() {
+export default function TodayRoute() {
+  const { settings } = useIstel();
+  // Focus-only people have no Today tab; send links to "/" to Focus.
+  if (!settings.habitsEnabled) return <Redirect href="/focus" />;
+  return <TodayScreen />;
+}
+
+function TodayScreen() {
   const palette = usePalette();
   const wide = useIsWide();
   const { width } = useWindowDimensions();
@@ -45,18 +52,7 @@ export default function TodayScreen() {
 
   return (
     <Screen>
-      {!wide && (
-        <View style={styles.topRow}>
-          <View style={styles.brand}>
-            <LogoMark size={24} />
-            <Txt variant="label">Istel</Txt>
-          </View>
-          <View style={styles.brand}>
-            <SettingsButton />
-            <AccountButton />
-          </View>
-        </View>
-      )}
+      {!wide && <PhoneTopBar />}
       <Hero
         title={'Keep it\ngrowing'}
         subtitle={`${formatToday(state.today)} · day score ${todayActivity.score}`}
@@ -168,7 +164,7 @@ export default function TodayScreen() {
             ))}
             <InkButton kind="outline" label="+ Add habit" onPress={() => router.push('/habit/new')} />
             <Txt variant="caption" tone="muted" style={styles.hint}>
-              Tap to check off · long-press to edit
+              Tap to check off · ⋯ to edit or delete
             </Txt>
           </>
         )}
@@ -199,8 +195,6 @@ export default function TodayScreen() {
 }
 
 const styles = StyleSheet.create({
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   heroBlob: { position: 'absolute', right: -60, top: -10 },
   heroPlanet: { position: 'absolute', right: -10, top: 30 },
   streakCard: {

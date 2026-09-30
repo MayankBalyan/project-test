@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { Schedule } from '@/core/habits';
@@ -40,7 +40,7 @@ export function HabitRow({
   streak: number;
   streakUnit: string;
   onToggle: () => void;
-  /** Long press opens the habit's edit screen. */
+  /** The ⋯ button (or a long press) opens the habit's edit screen, where it can be archived or deleted. */
   onEdit?: () => void;
 }) {
   const palette = usePalette();
@@ -78,6 +78,20 @@ export function HabitRow({
           {streakUnit}
         </Txt>
       </View>
+      {onEdit && (
+        <Pressable
+          role="button"
+          aria-label={`Edit or delete ${name}`}
+          onPress={onEdit}
+          hitSlop={8}
+          style={({ pressed }) => [styles.more, { borderColor: palette.line, opacity: pressed ? 0.6 : 1 }]}>
+          <Svg width={18} height={18} viewBox="0 0 24 24">
+            {[5, 12, 19].map((x) => (
+              <Circle key={x} cx={x} cy={12} r={2.2} fill={palette.ink} />
+            ))}
+          </Svg>
+        </Pressable>
+      )}
     </Pressable>
   );
 }
@@ -105,5 +119,14 @@ const styles = StyleSheet.create({
   text: { flex: 1, gap: 2 },
   name: { fontSize: 17 },
   streak: { alignItems: 'center', minWidth: 48 },
+  more: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -Spacing.two,
+  },
   streakNumber: { fontFamily: Fonts.display, fontSize: 26, lineHeight: 30 },
 });

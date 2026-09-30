@@ -71,6 +71,8 @@ export type Settings = {
   focusMinutes: number;
   /** Hour (0–23) when a new day starts. */
   dayStartHour: number;
+  /** False for people who only use the focus timer: hides the Today tab and habit sections. */
+  habitsEnabled: boolean;
   /** Leaving the app for more than a few seconds during a session wilts it. */
   stayFocused: boolean;
   notifications: {
@@ -86,6 +88,7 @@ export const DEFAULT_SETTINGS: Settings = {
   islandName: 'My island',
   focusMinutes: 25,
   dayStartHour: DEFAULT_DAY_START_HOUR,
+  habitsEnabled: true,
   stayFocused: false,
   notifications: { streakAtRisk: true, streakAtRiskHour: 20, focusEnd: true },
 };
@@ -335,6 +338,7 @@ function useIstelState() {
     return () => clearTimeout(id);
   }, [focus, endFocus]);
 
+  const habitsEnabled = settings.habitsEnabled;
   const derived = useMemo(() => {
     const focusByDay = new Map<LocalDate, { minutes: number; longest: number }>();
     for (const s of sessions) {
@@ -347,8 +351,9 @@ function useIstelState() {
       let scheduled = 0;
       let completed = 0;
       for (const h of habits) {
-        // Past completions of archived habits still count; only active habits can be missed.
-        const exists = !h.archivedAt && daysBetween(h.createdOn, date) >= 0;
+        // Past completions of archived habits still count; only active habits can be missed, and none
+        // while habits are turned off (focus only).
+        const exists = habitsEnabled && !h.archivedAt && daysBetween(h.createdOn, date) >= 0;
         if (exists && isScheduledOn(h.schedule, date) && h.schedule.type !== 'timesPerWeek') scheduled++;
         if (isDoneOn(h, values.get(h.id)!, date)) completed++;
       }
@@ -386,7 +391,7 @@ function useIstelState() {
       lifetimeFocusMinutes: sessions.filter((s) => s.status === 'done').reduce((sum, s) => sum + s.minutes, 0),
       sessionsToday: sessions.filter((s) => s.date === today && s.status === 'done'),
     };
-  }, [habits, activeHabits, values, events, sessions, today]);
+  }, [habits, activeHabits, values, events, sessions, today, habitsEnabled]);
 
   // Re-plan notifications whenever something they depend on changes (and on launch).
   const [notificationsVersion, setNotificationsVersion] = useState(0);
@@ -397,7 +402,7 @@ function useIstelState() {
         now: Date.now(),
         today,
         dayConfig,
-        habits,
+        habits: habitsEnabled ? habits : [],
         doneToday: new Set(derived.habitStats.filter((h) => h.done).map((h) => h.habit.id)),
         qualifiedToday: isQualifyingDay(derived.todayActivity.activity),
         currentStreak: derived.global.current,
@@ -410,7 +415,7 @@ function useIstelState() {
       applyPlan(plan).catch(() => {});
     }, 400);
     return () => clearTimeout(id);
-  }, [today, dayConfig, habits, derived, settings.notifications, focus, notificationsVersion]);
+  }, [today, dayConfig, habits, habitsEnabled, derived, settings.notifications, focus, notificationsVersion]);
 
   // Sync
   const latest = useRef<SyncState<Settings, ActiveFocus>>({

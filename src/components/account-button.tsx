@@ -6,6 +6,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { usePalette } from '@/hooks/use-palette';
 import { useAuth } from '@/state/auth';
 
+import { LogoMark } from './ink-art';
 import { Txt } from './ui';
 
 /** "Sign in" pill when signed out; the account's initial in an ink circle when signed in. */
@@ -39,6 +40,22 @@ export function AccountButton() {
         </View>
       )}
     </Pressable>
+  );
+}
+
+/** Phone-only header row: brand on the left, settings and account on the right. */
+export function PhoneTopBar() {
+  return (
+    <View style={styles.topRow}>
+      <View style={styles.row}>
+        <LogoMark size={24} />
+        <Txt variant="label">Istel</Txt>
+      </View>
+      <View style={[styles.row, styles.gap]}>
+        <SettingsButton />
+        <AccountButton />
+      </View>
+    </View>
   );
 }
 
@@ -84,4 +101,6 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   initial: { fontSize: 15 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 },
+  gap: { gap: Spacing.two },
 });

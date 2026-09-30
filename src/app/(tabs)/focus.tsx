@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
+import { PhoneTopBar } from '@/components/account-button';
 import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
 import { Blob, Moon } from '@/components/ink-art';
@@ -99,6 +100,8 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
 
   return (
     <Screen>
+      {/* With habits off, Focus is the home tab, so it carries the settings and account buttons. */}
+      {!wide && !settings.habitsEnabled && <PhoneTopBar />}
       <Hero
         title={'Deep\nfocus'}
         subtitle="Stay with it. When the timer ends, a seed lands on your island."

@@ -36,7 +36,9 @@ function formatDay(date: string) {
 
 export default function StreaksScreen() {
   const palette = usePalette();
-  const { days, global, habitStats, habits, today, sessions, habitValues } = useIstel();
+  const { days, global, habitStats: allHabitStats, habits, today, sessions, habitValues, settings } = useIstel();
+  // Focus-only mode hides everything about habits.
+  const habitStats = settings.habitsEnabled ? allHabitStats : [];
   const [heatHabit, setHeatHabit] = useState<string | null>(null);
   const chosen = heatHabit ? habitStats.find((h) => h.habit.id === heatHabit) : undefined;
   const chosenValues = chosen ? habitValues.get(chosen.habit.id) : undefined;
@@ -46,7 +48,7 @@ export default function StreaksScreen() {
   );
   const summary = chosen ? habitSummary(chosen.habit, chosenValues ?? new Map(), today) : null;
   const focus = useMemo(() => focusStats(sessions, today), [sessions, today]);
-  const archived = habits.filter((h) => h.archivedAt);
+  const archived = settings.habitsEnabled ? habits.filter((h) => h.archivedAt) : [];
   const edit = (id: string) => router.push({ pathname: '/habit/[id]', params: { id } });
   const [selected, setSelected] = useState(today);
   const day = days.find((d) => d.date === selected) ?? days[days.length - 1];
@@ -131,7 +133,7 @@ export default function StreaksScreen() {
           <Txt variant="caption" tone="inkSoft">
             {chosen && habitDay
               ? describeHabitDay(chosen.habit, habitDay, today)
-              : `Score ${day.score} · ${day.activity.habitsCompleted}/${day.activity.habitsScheduled} habits · ${day.activity.focusMinutes} min focus${global.rainDaysUsedOn.includes(day.date) ? ' · a Rain Day kept the streak' : ''}`}
+              : `Score ${day.score}${settings.habitsEnabled ? ` · ${day.activity.habitsCompleted}/${day.activity.habitsScheduled} habits` : ''} · ${day.activity.focusMinutes} min focus${global.rainDaysUsedOn.includes(day.date) ? ' · a Rain Day kept the streak' : ''}`}
           </Txt>
         </View>
       </Card>
@@ -165,56 +167,58 @@ export default function StreaksScreen() {
         <TagBars byTag={focus.byTag} />
       </Card>
 
-      <View style={styles.list}>
-        <SectionTitle>By habit</SectionTitle>
-        {habitStats.length === 0 && (
-          <Txt variant="caption" tone="inkSoft">
-            Add a habit on Today to see its streak here.
-          </Txt>
-        )}
-        {habitStats.map(({ habit, streak }) => {
-          const unit = habit.schedule.type === 'timesPerWeek' ? 'wk' : 'd';
-          return (
-            <Pressable
-              key={habit.id}
-              role="button"
-              accessibilityLabel={`Edit ${habit.name}`}
-              onPress={() => edit(habit.id)}
-              style={[styles.habitRow, { borderColor: palette.line }]}>
-              <Txt variant="label" style={styles.habitName}>
-                {habit.name}
-              </Txt>
-              <Txt variant="caption" tone="inkSoft">
-                now {streak.current}
-                {unit} · best {streak.longest}
-                {unit} · edit →
-              </Txt>
-            </Pressable>
-          );
-        })}
-        {archived.length > 0 && (
-          <>
-            <Txt variant="label" tone="muted" style={styles.archivedTitle}>
-              Archived
+      {settings.habitsEnabled && (
+        <View style={styles.list}>
+          <SectionTitle>By habit</SectionTitle>
+          {habitStats.length === 0 && (
+            <Txt variant="caption" tone="inkSoft">
+              Add a habit on Today to see its streak here.
             </Txt>
-            {archived.map((h) => (
+          )}
+          {habitStats.map(({ habit, streak }) => {
+            const unit = habit.schedule.type === 'timesPerWeek' ? 'wk' : 'd';
+            return (
               <Pressable
-                key={h.id}
+                key={habit.id}
                 role="button"
-                accessibilityLabel={`Edit archived habit ${h.name}`}
-                onPress={() => edit(h.id)}
+                accessibilityLabel={`Edit ${habit.name}`}
+                onPress={() => edit(habit.id)}
                 style={[styles.habitRow, { borderColor: palette.line }]}>
-                <Txt variant="label" tone="muted" style={styles.habitName}>
-                  {h.name}
+                <Txt variant="label" style={styles.habitName}>
+                  {habit.name}
                 </Txt>
-                <Txt variant="caption" tone="muted">
-                  restore →
+                <Txt variant="caption" tone="inkSoft">
+                  now {streak.current}
+                  {unit} · best {streak.longest}
+                  {unit} · edit →
                 </Txt>
               </Pressable>
-            ))}
-          </>
-        )}
-      </View>
+            );
+          })}
+          {archived.length > 0 && (
+            <>
+              <Txt variant="label" tone="muted" style={styles.archivedTitle}>
+                Archived
+              </Txt>
+              {archived.map((h) => (
+                <Pressable
+                  key={h.id}
+                  role="button"
+                  accessibilityLabel={`Edit archived habit ${h.name}`}
+                  onPress={() => edit(h.id)}
+                  style={[styles.habitRow, { borderColor: palette.line }]}>
+                  <Txt variant="label" tone="muted" style={styles.habitName}>
+                    {h.name}
+                  </Txt>
+                  <Txt variant="caption" tone="muted">
+                    restore →
+                  </Txt>
+                </Pressable>
+              ))}
+            </>
+          )}
+        </View>
+      )}
     </Screen>
   );
 }

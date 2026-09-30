@@ -189,7 +189,8 @@ The user owns a small floating island that starts as bare soil and grows into a 
 | A1 | Sign-in required: the app opens on a sign-in screen; data is saved on the device and synced to the account | P0 |
 | A2 | Sign in with email magic link, Google, and Apple | P0 |
 | A3 | Local data merges into the account when the user signs up | P0 |
-| A4 | Onboarding in 3 screens or less: choose 1–3 starter habits, pick a focus length, name the island | P0 |
+| A4 | Onboarding in 4 screens or less: habits + focus or just focus, optional starter habits (up to 3, removable), focus length, island name | P0 |
+| A6 | Focus-only mode: habits can be turned off (Settings); the Today tab hides, Focus becomes home, and focus alone fills the day's score | P0 |
 | A5 | Export all data (JSON/CSV) and delete account | P0 |
 
 ### 7.8 Notifications

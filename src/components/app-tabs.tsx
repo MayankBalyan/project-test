@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
+import { useIstel } from '@/state/store';
 
 import { AccountButton, SettingsButton } from './account-button';
 import { LogoMark, TabIcon, TabIconName } from './ink-art';
@@ -22,6 +23,7 @@ const TABS: { name: string; href: '/' | '/focus' | '/island' | '/streaks'; label
  */
 export default function AppTabs() {
   const wide = useIsWide();
+  const { settings } = useIstel();
   return (
     <Tabs>
       {wide ? null : <TabSlot style={styles.slot} />}
@@ -29,7 +31,7 @@ export default function AppTabs() {
         <Bar wide={wide}>
           {TABS.map((t) => (
             <TabTrigger key={t.name} name={t.name} href={t.href} asChild>
-              <TabButton icon={t.icon} wide={wide}>
+              <TabButton icon={t.icon} wide={wide} hidden={t.name === 'index' && !settings.habitsEnabled}>
                 {t.label}
               </TabButton>
             </TabTrigger>
@@ -77,9 +79,12 @@ function TabButton({
   isFocused,
   icon,
   wide,
+  hidden,
   ...props
-}: TabTriggerSlotProps & { icon: TabIconName; wide: boolean }) {
+}: TabTriggerSlotProps & { icon: TabIconName; wide: boolean; hidden?: boolean }) {
   const palette = usePalette();
+  // Habits turned off: the Today tab stays routable but has no button.
+  if (hidden) return null;
   if (wide) {
     return (
       <Pressable {...props} style={styles.topLink}>

@@ -119,6 +119,13 @@ describe('score', () => {
     expect(isQualifyingDay({ ...a, habitsCompleted: 0 })).toBe(true);
     expect(isQualifyingDay({ ...a, habitsCompleted: 0, longestSessionMinutes: 20 })).toBe(false);
   });
+
+  it('lets focus alone fill the day when no habits are due', () => {
+    const focusOnly = { habitsScheduled: 0, habitsCompleted: 0, focusMinutes: 60, longestSessionMinutes: 60 };
+    expect(dailyScore(focusOnly)).toBe(50);
+    expect(dailyScore({ ...focusOnly, focusMinutes: 150 })).toBe(100);
+    expect(dailyScore({ ...focusOnly, focusMinutes: 0 })).toBe(0);
+  });
 });
 
 describe('timer', () => {

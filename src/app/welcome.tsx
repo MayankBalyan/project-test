@@ -14,6 +14,13 @@ import { speciesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
 
+type Use = 'both' | 'focus';
+
+const USES: { value: Use; title: string; note: string }[] = [
+  { value: 'both', title: 'Habits + focus', note: 'Track daily habits and grow your island with focus sessions.' },
+  { value: 'focus', title: 'Just focus', note: 'Only the focus timer and your island. Turn habits on later in Settings.' },
+];
+
 const FOCUS_OPTIONS = [
   { minutes: 25, note: 'A good start. Grows a shrub.' },
   { minutes: 50, note: 'Deep work. Grows a pine.' },
@@ -39,6 +46,7 @@ function Option({
   selected,
   disabled,
   role,
+  trailing,
   onPress,
 }: {
   title: string;
@@ -46,6 +54,8 @@ function Option({
   selected: boolean;
   disabled?: boolean;
   role: 'checkbox' | 'radio';
+  /** Shown at the right edge, e.g. a remove hint on picked habits. */
+  trailing?: string;
   onPress: () => void;
 }) {
   const palette = usePalette();
@@ -74,19 +84,20 @@ function Option({
           {note}
         </Txt>
       </View>
+      {trailing && <Txt variant="label">{trailing}</Txt>}
     </Pressable>
   );
 }
 
-function Steps({ step }: { step: number }) {
+function Steps({ step, total }: { step: number; total: number }) {
   const palette = usePalette();
   return (
-    <View style={styles.steps} aria-label={`Step ${step + 1} of 3`}>
-      {[0, 1, 2].map((i) => (
+    <View style={styles.steps} aria-label={`Step ${step + 1} of ${total}`}>
+      {Array.from({ length: total }, (_, i) => (
         <View key={i} style={[styles.stepDot, { borderColor: palette.ink, backgroundColor: i <= step ? palette.ink : 'transparent' }]} />
       ))}
       <Txt variant="label" tone="inkSoft">
-        {step + 1} / 3
+        {step + 1} / {total}
       </Txt>
     </View>
   );
@@ -97,6 +108,7 @@ export default function WelcomeScreen() {
   const { width } = useWindowDimensions();
   const { habitActions, updateSettings, settings } = useIstel();
   const [step, setStep] = useState(0);
+  const [use, setUse] = useState<Use>('both');
   const [picked, setPicked] = useState<string[]>([]);
   const [custom, setCustom] = useState('');
   const [minutes, setMinutes] = useState(settings.focusMinutes);
@@ -106,12 +118,15 @@ export default function WelcomeScreen() {
   const customName = custom.trim();
   const picks = picked.length + (customName ? 1 : 0);
   const headingSize = wide ? 96 : 58;
+  const steps =
+    use === 'focus' ? (['use', 'focus', 'island'] as const) : (['use', 'habits', 'focus', 'island'] as const);
+  const current = steps[step];
 
   const toggle = (id: string) =>
     setPicked((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
 
   const next = () => {
-    if (step === 0 && customName) {
+    if (current === 'habits' && customName) {
       const problem = validateHabit({ name: customName, kind: 'check', target: 1, schedule: { type: 'daily' } });
       if (problem) return setError(problem);
     }
@@ -120,12 +135,13 @@ export default function WelcomeScreen() {
   };
 
   const finish = (withChoices: boolean) => {
-    if (withChoices) {
+    if (withChoices && use === 'both') {
       for (const s of STARTER_HABITS) if (picked.includes(s.id)) habitActions.add(s.input);
       if (customName) habitActions.add({ name: customName, kind: 'check', target: 1, schedule: { type: 'daily' } });
     }
     updateSettings({
       onboarded: true,
+      habitsEnabled: !withChoices || use === 'both',
       focusMinutes: minutes,
       islandName: islandName.trim() || settings.islandName,
     });
@@ -135,7 +151,7 @@ export default function WelcomeScreen() {
   return (
     <Screen>
       <View style={styles.top}>
-        <Steps step={step} />
+        <Steps step={step} total={steps.length} />
         {step === 0 && (
           <Pressable role="button" onPress={() => finish(false)} hitSlop={12}>
             <Txt variant="label">Skip</Txt>
@@ -148,7 +164,32 @@ export default function WelcomeScreen() {
         )}
       </View>
 
-      {step === 0 && (
+      {current === 'use' && (
+        <>
+          <View style={styles.hero}>
+            <Blob size={150} variant={2} stars={20} style={styles.blob} />
+            <Heading3D size={headingSize}>{'How will you\nuse Istel?'}</Heading3D>
+          </View>
+          <Txt variant="bodyBold" tone="inkSoft">
+            Every focus session grows your island either way. You can change this any time in Settings.
+          </Txt>
+          <View style={styles.options} role="radiogroup">
+            {USES.map((u) => (
+              <Option
+                key={u.value}
+                role="radio"
+                title={u.title}
+                note={u.note}
+                selected={use === u.value}
+                onPress={() => setUse(u.value)}
+              />
+            ))}
+          </View>
+          <InkButton label="Next" onPress={next} />
+        </>
+      )}
+
+      {current === 'habits' && (
         <>
           <View style={styles.hero}>
             <Blob size={150} variant={1} stars={20} style={styles.blob} />
@@ -156,7 +197,7 @@ export default function WelcomeScreen() {
             <Heading3D size={headingSize}>{'Plant your\nfirst habits'}</Heading3D>
           </View>
           <Txt variant="bodyBold" tone="inkSoft">
-            Pick up to {MAX_STARTER_PICKS}. Small ones you can keep every day beat big ones you can’t.
+            Optional. Pick up to {MAX_STARTER_PICKS}, tap a picked one again to remove it, or skip and add habits later.
           </Txt>
           <View style={styles.options}>
             {STARTER_HABITS.map((s) => {
@@ -168,6 +209,7 @@ export default function WelcomeScreen() {
                   title={s.input.name}
                   note={s.note}
                   selected={on}
+                  trailing={on ? '✕ Remove' : undefined}
                   disabled={!on && picks >= MAX_STARTER_PICKS}
                   onPress={() => toggle(s.id)}
                 />
@@ -182,19 +224,35 @@ export default function WelcomeScreen() {
             maxLength={HABIT_NAME_MAX}
             editable={!!customName || picks < MAX_STARTER_PICKS}
           />
+          {picks > 0 && (
+            <Pressable
+              role="button"
+              onPress={() => {
+                setPicked([]);
+                setCustom('');
+              }}
+              hitSlop={8}
+              style={styles.clear}>
+              <Txt variant="label">✕ Clear all picks</Txt>
+            </Pressable>
+          )}
           {error && (
             <Txt variant="bodyBold" role="alert">
               ✦ {error}
             </Txt>
           )}
-          <InkButton label={picks ? `Next · ${picks} picked` : 'Next'} onPress={next} />
+          <InkButton
+            label={picks ? `Next · ${picks} picked` : 'Skip for now'}
+            kind={picks ? 'primary' : 'outline'}
+            onPress={next}
+          />
           <Txt variant="caption" tone="muted" style={styles.center}>
             You can change, add or remove habits any time.
           </Txt>
         </>
       )}
 
-      {step === 1 && (
+      {current === 'focus' && (
         <>
           <View style={styles.hero}>
             <Blob size={150} variant={0} stars={20} style={styles.blob} />
@@ -220,7 +278,7 @@ export default function WelcomeScreen() {
         </>
       )}
 
-      {step === 2 && (
+      {current === 'island' && (
         <>
           <View style={styles.hero}>
             <Heading3D size={headingSize}>{'Name your\nisland'}</Heading3D>
@@ -246,8 +304,8 @@ export default function WelcomeScreen() {
               Your start
             </Txt>
             <Txt variant="caption">
-              {picks ? `${picks} habit${picks > 1 ? 's' : ''}` : 'No habits yet'} · {minutes}-minute focus (plants a{' '}
-              {speciesFor(minutes) === 'oak' ? 'rare oak' : speciesFor(minutes)})
+              {use === 'focus' ? 'Just focus' : picks ? `${picks} habit${picks > 1 ? 's' : ''}` : 'No habits yet'} ·{' '}
+              {minutes}-minute focus (plants a {speciesFor(minutes) === 'oak' ? 'rare oak' : speciesFor(minutes)})
             </Txt>
           </Card>
           <InkButton label="Start growing" onPress={() => finish(true)} />
@@ -286,5 +344,6 @@ const styles = StyleSheet.create({
   optionText: { flex: 1, gap: 2 },
   optionTitle: { fontSize: 17 },
   summary: { gap: Spacing.one },
+  clear: { alignSelf: 'flex-start', paddingVertical: Spacing.one },
   center: { textAlign: 'center' },
 });
