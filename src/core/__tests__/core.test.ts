@@ -5,6 +5,7 @@ import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn } from '../habits
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
+import { focusStats, formatMinutes } from '../focus-stats';
 import { endsAt, formatRemaining, leftTooLong, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
 import { formatTime, normalizeHabit, validateHabit } from '../habit-input';
@@ -356,5 +357,37 @@ describe('stay focused', () => {
   it('does not wilt a session that finished while away', () => {
     // Left 5 s before the end, came back much later: only 5 s of the session were missed.
     expect(leftTooLong(t, 25 * 60_000 - 5_000, 40 * 60_000)).toBe(false);
+  });
+});
+
+describe('focus stats', () => {
+  const s = (date: string, minutes: number, tag = 'Study', status: 'done' | 'given_up' = 'done') => ({ date, minutes, tag, status });
+  const sessions = [
+    s('2026-09-30', 25), // Wed, this week
+    s('2026-09-28', 50, 'Work'), // Mon, this week
+    s('2026-09-27', 25), // Sun, last week
+    s('2026-09-29', 10, 'Work', 'given_up'),
+    s('2026-07-01', 90), // outside 12 weeks and 30 days
+  ];
+
+  it('totals finished focus by day, week, month and all time', () => {
+    const st = focusStats(sessions, '2026-09-30');
+    expect(st.totals).toEqual({ today: 25, week: 75, month: 100, allTime: 190 });
+    expect(st.completionRate).toBe(0.8);
+  });
+
+  it('buckets weeks from Monday and ranks tags', () => {
+    const st = focusStats(sessions, '2026-09-30');
+    expect(st.weeks).toHaveLength(12);
+    expect(st.weeks[11]).toEqual({ start: '2026-09-28', minutes: 75, sessions: 2 });
+    expect(st.weeks[10]).toEqual({ start: '2026-09-21', minutes: 25, sessions: 1 });
+    expect(st.byTag).toEqual([
+      { tag: 'Study', minutes: 50 },
+      { tag: 'Work', minutes: 50 },
+    ]);
+  });
+
+  it('formats minutes', () => {
+    expect([formatMinutes(45), formatMinutes(60), formatMinutes(135)]).toEqual(['45m', '1h', '2h 15m']);
   });
 });

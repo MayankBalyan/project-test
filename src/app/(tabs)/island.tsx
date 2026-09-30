@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Hero } from '@/components/hero';
@@ -5,9 +6,34 @@ import { Blob, Planet } from '@/components/ink-art';
 import { Island } from '@/components/island';
 import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { islandTier, nextUnlock, STREAK_UNLOCKS, unlocksFor } from '@/core/world';
+import { islandTier, nextUnlock, PlantStage, Species, STREAK_UNLOCKS, unlocksFor, WATERINGS_TO_MATURE } from '@/core/world';
 import { usePalette } from '@/hooks/use-palette';
 import { useRootline } from '@/state/store';
+
+const SPECIES_LABEL: Record<Species, string> = {
+  flower: 'Flower',
+  shrub: 'Shrub',
+  sapling: 'Sapling',
+  pine: 'Pine',
+  oak: 'Rare oak',
+};
+
+const STAGE_LABEL: Record<PlantStage, string> = {
+  seed: 'Seed',
+  sprout: 'Sprout',
+  young: 'Growing',
+  mature: 'Fully grown',
+  wilted: 'Wilted',
+};
+
+function formatDay(date: string) {
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+}
 
 function Stat({ value, label }: { value: string; label: string }) {
   const palette = usePalette();
@@ -24,7 +50,10 @@ function Stat({ value, label }: { value: string; label: string }) {
 export default function IslandScreen() {
   const palette = usePalette();
   const { width } = useWindowDimensions();
-  const { plants, global, lifetimeFocusMinutes, settings } = useRootline();
+  const { plants, global, lifetimeFocusMinutes, settings, sessions } = useRootline();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = plants.find((p) => p.id === selectedId);
+  const session = sessions.find((s) => s.id === selectedId);
   const unlocks = unlocksFor(global.longest);
   const next = nextUnlock(global.longest);
   const tier = islandTier(lifetimeFocusMinutes);
@@ -49,8 +78,35 @@ export default function IslandScreen() {
         tier={tier}
         stars={20 + global.current * 2}
         unlocks={unlocks}
+        selectedId={selectedId ?? undefined}
+        onPlantPress={(id) => setSelectedId((cur) => (cur === id ? null : id))}
         width={Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2)}
       />
+
+      {selected && session ? (
+        <Card style={styles.plantCard}>
+          <View style={styles.plantHead}>
+            <Txt variant="section">{SPECIES_LABEL[selected.species]}</Txt>
+            <Txt variant="label" tone="inkSoft">
+              {STAGE_LABEL[selected.stage]}
+            </Txt>
+          </View>
+          <Txt variant="caption">
+            Planted {formatDay(selected.plantedOn)} from a {session.minutes}-minute {session.tag} session.
+          </Txt>
+          <Txt variant="caption" tone="inkSoft">
+            {selected.stage === 'wilted'
+              ? 'That session was given up. Finish your next session to bring this sprout back.'
+              : selected.stage === 'mature'
+                ? 'Fully grown.'
+                : `Watered on ${selected.waterings} of ${WATERINGS_TO_MATURE} habit days. Do a habit to help it grow.`}
+          </Txt>
+        </Card>
+      ) : plants.length > 0 ? (
+        <Txt variant="caption" tone="muted" style={styles.emptyNote}>
+          Tap a plant to see where it came from.
+        </Txt>
+      ) : null}
 
       {plants.length === 0 && (
         <Txt variant="bodyBold" tone="inkSoft" style={styles.emptyNote}>
@@ -106,6 +162,8 @@ const styles = StyleSheet.create({
   heroBlob: { position: 'absolute', right: -30, top: 10 },
   heroPlanet: { position: 'absolute', right: 70, top: 0 },
   emptyNote: { textAlign: 'center' },
+  plantCard: { gap: Spacing.one + 2 },
+  plantHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   stat: { flexGrow: 1, flexBasis: 140, gap: 2, borderRadius: Radius.card - 6 },
   statValue: { fontFamily: Fonts.display, fontSize: 34, lineHeight: 40 },

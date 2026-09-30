@@ -135,7 +135,12 @@ export function Island({
   unlocks,
   width,
   style,
+  selectedId,
+  onPlantPress,
 }: {
+  selectedId?: string;
+  /** Makes plants tappable (e.g. to show which session planted them). */
+  onPlantPress?: (plantId: string) => void;
   plants: Plant[];
   tier: number;
   stars: number;
@@ -211,7 +216,16 @@ export function Island({
         />
       )}
       {placed.map(({ p, x, y, s }) => (
-        <PlantArt key={p.id} species={p.species} stage={p.stage} x={x} y={y} s={s} c={c} />
+        <G key={p.id} onPress={onPlantPress ? () => onPlantPress(p.id) : undefined}>
+          {onPlantPress && <Circle cx={x} cy={y - 12 * s} r={16 * s} fill="#000" opacity={0.001} />}
+          {p.id === selectedId && (
+            <G>
+              <Circle cx={x} cy={y - 12 * s} r={20 * s} fill="none" stroke={c.face} strokeWidth={5} />
+              <Circle cx={x} cy={y - 12 * s} r={20 * s} fill="none" stroke={c.ink} strokeWidth={2} strokeDasharray="4 3" />
+            </G>
+          )}
+          <PlantArt species={p.species} stage={p.stage} x={x} y={y} s={s} c={c} />
+        </G>
       ))}
     </Svg>
   );

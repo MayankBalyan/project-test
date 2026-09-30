@@ -17,6 +17,8 @@ export interface Plant {
   species: Species;
   stage: PlantStage;
   plantedOn: LocalDate;
+  /** Habit days on or after planting, capped at WATERINGS_TO_MATURE. */
+  waterings: number;
 }
 
 /** Days a plant must be watered (days with at least one habit done) to reach maturity. */
@@ -44,11 +46,10 @@ export function growPlants(sessions: FocusSessionRecord[], wateredDays: Iterable
     const species = speciesFor(s.minutes);
     if (s.status === 'given_up') {
       const revived = ordered.slice(i + 1).some((later) => later.status === 'done');
-      return { id: s.id, species, plantedOn: s.date, stage: revived ? 'sprout' : 'wilted' };
+      return { id: s.id, species, plantedOn: s.date, stage: revived ? 'sprout' : 'wilted', waterings: 0 };
     }
-    const waterings = watered.filter((d) => daysBetween(s.date, d) >= 0).length;
-    const stage = STAGES[Math.min(waterings, WATERINGS_TO_MATURE)];
-    return { id: s.id, species, plantedOn: s.date, stage };
+    const waterings = Math.min(watered.filter((d) => daysBetween(s.date, d) >= 0).length, WATERINGS_TO_MATURE);
+    return { id: s.id, species, plantedOn: s.date, stage: STAGES[waterings], waterings };
   });
 }
 

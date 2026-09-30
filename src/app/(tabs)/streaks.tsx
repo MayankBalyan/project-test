@@ -1,13 +1,15 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Heading3D } from '@/components/heading-3d';
+import { TagBars, WeeklyFocusChart } from '@/components/focus-charts';
 import { Heatmap } from '@/components/heatmap';
 import { Hero } from '@/components/hero';
 import { Blob, Moon } from '@/components/ink-art';
 import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
+import { focusStats, formatMinutes } from '@/core/focus-stats';
 import { usePalette } from '@/hooks/use-palette';
 import { useRootline } from '@/state/store';
 
@@ -23,7 +25,8 @@ function formatDay(date: string) {
 
 export default function StreaksScreen() {
   const palette = usePalette();
-  const { days, global, habitStats, habits, today } = useRootline();
+  const { days, global, habitStats, habits, today, sessions } = useRootline();
+  const focus = useMemo(() => focusStats(sessions, today), [sessions, today]);
   const archived = habits.filter((h) => h.archivedAt);
   const edit = (id: string) => router.push({ pathname: '/habit/[id]', params: { id } });
   const [selected, setSelected] = useState(today);
@@ -79,6 +82,35 @@ export default function StreaksScreen() {
             {global.rainDaysUsedOn.includes(day.date) ? ' · a Rain Day kept the streak' : ''}
           </Txt>
         </View>
+      </Card>
+
+      <View style={styles.list}>
+        <SectionTitle>Focus</SectionTitle>
+        <View style={styles.focusTiles}>
+          {[
+            [formatMinutes(focus.totals.today), 'Today'],
+            [formatMinutes(focus.totals.week), 'This week'],
+            [formatMinutes(focus.totals.month), 'Last 30 days'],
+            [focus.completionRate === null ? '–' : `${Math.round(focus.completionRate * 100)}%`, 'Finished'],
+          ].map(([value, label]) => (
+            <Card key={label} style={styles.focusTile}>
+              <Txt style={[styles.tileValue, { color: palette.ink }]}>{value}</Txt>
+              <Txt variant="caption" tone="inkSoft">
+                {label}
+              </Txt>
+            </Card>
+          ))}
+        </View>
+      </View>
+
+      <Card style={styles.heatCard}>
+        <SectionTitle>Last 12 weeks</SectionTitle>
+        <WeeklyFocusChart weeks={focus.weeks} />
+      </Card>
+
+      <Card style={styles.heatCard}>
+        <SectionTitle>By tag · 30 days</SectionTitle>
+        <TagBars byTag={focus.byTag} />
       </Card>
 
       <View style={styles.list}>
@@ -156,6 +188,8 @@ const styles = StyleSheet.create({
   },
   tileValue: { fontFamily: Fonts.display, fontSize: 26, lineHeight: 32 },
   heatCard: { gap: Spacing.three },
+  focusTiles: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  focusTile: { flexGrow: 1, flexBasis: 140, gap: 2, paddingVertical: 10, borderRadius: Radius.card - 6 },
   dayDetail: { borderTopWidth: 1, paddingTop: Spacing.two + 2, gap: 2 },
   list: { gap: Spacing.one },
   habitRow: {
