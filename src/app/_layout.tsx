@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AuthProvider } from '@/state/auth';
 import { RootlineProvider } from '@/state/store';
 
 SplashScreen.preventAutoHideAsync();
@@ -38,13 +39,17 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <RootlineProvider>
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors[scheme].paper } }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
-        </Stack>
-      </RootlineProvider>
+      <AuthProvider>
+        <RootlineProvider>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors[scheme].paper } }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="account" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="auth/callback" />
+          </Stack>
+        </RootlineProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

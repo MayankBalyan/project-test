@@ -1,15 +1,16 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
+import { AccountButton } from '@/components/account-button';
 import { describeSchedule, HabitRow } from '@/components/habit-row';
 import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
-import { Blob, Planet } from '@/components/ink-art';
+import { Blob, LogoMark, Planet } from '@/components/ink-art';
 import { Island } from '@/components/island';
 import { Card, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { islandTier, unlocksFor } from '@/core/world';
-import { usePalette } from '@/hooks/use-palette';
+import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useRootline } from '@/state/store';
 
 function formatToday(date: string) {
@@ -23,6 +24,7 @@ function formatToday(date: string) {
 
 export default function TodayScreen() {
   const palette = usePalette();
+  const wide = useIsWide();
   const { width } = useWindowDimensions();
   const state = useRootline();
   const { global, habitStats, todayActivity, plants, lifetimeFocusMinutes } = state;
@@ -32,6 +34,15 @@ export default function TodayScreen() {
 
   return (
     <Screen>
+      {!wide && (
+        <View style={styles.topRow}>
+          <View style={styles.brand}>
+            <LogoMark size={24} />
+            <Txt variant="label">Rootline</Txt>
+          </View>
+          <AccountButton />
+        </View>
+      )}
       <Hero
         title={'Keep it\ngrowing'}
         subtitle={`${formatToday(state.today)} · day score ${todayActivity.score}`}
@@ -142,6 +153,8 @@ export default function TodayScreen() {
 }
 
 const styles = StyleSheet.create({
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', zIndex: 1 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   heroBlob: { position: 'absolute', right: -60, top: -10 },
   heroPlanet: { position: 'absolute', right: -10, top: 30 },
   streakCard: {

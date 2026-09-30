@@ -6,6 +6,7 @@ import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { endsAt, formatRemaining, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
+import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
 import { normalizeHabit, validateHabit } from '../habit-input';
 
 const done = (habitId: string, date: string, value = 1, id = `${habitId}-${date}`): HabitEvent => ({
@@ -183,5 +184,29 @@ describe('timer end', () => {
     t = resume(pause(t, 60_000), 120_000);
     expect(plannedEndAt(t)).toBe(26 * 60_000);
     expect(plannedEndAt(pause(t, 180_000))).toBeNull();
+  });
+});
+
+describe('auth input', () => {
+  it('validates and normalizes emails', () => {
+    expect(isValidEmail('  Mayank@Example.com ')).toBe(true);
+    expect(normalizeEmail('  Mayank@Example.com ')).toBe('mayank@example.com');
+    expect(isValidEmail('mayank@example')).toBe(false);
+    expect(isValidEmail('not an email')).toBe(false);
+  });
+
+  it('accepts pasted codes with spaces', () => {
+    expect(normalizeOtp('123 456')).toBe('123456');
+    expect(isCompleteOtp('12-34-5')).toBe(false);
+    expect(normalizeOtp('1234567')).toBe('123456');
+  });
+
+  it('reads codes and errors from OAuth redirects', () => {
+    expect(parseAuthRedirect('rootline://auth/callback?code=abc123')).toEqual({ code: 'abc123' });
+    expect(parseAuthRedirect('http://localhost:8081/auth/callback?code=x#')).toEqual({ code: 'x' });
+    expect(parseAuthRedirect('rootline://auth/callback#error=access_denied&error_description=User+cancelled')).toEqual({
+      error: 'User cancelled',
+    });
+    expect(parseAuthRedirect('rootline://auth/callback')).toEqual({});
   });
 });

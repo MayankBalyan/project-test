@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 
+import { AccountButton } from './account-button';
 import { LogoMark, TabIcon, TabIconName } from './ink-art';
 import { Txt } from './ui';
 
@@ -53,7 +54,10 @@ function Bar({ wide, children, ...props }: TabListProps & { wide: boolean }) {
               Rootline
             </Txt>
           </View>
-          <View style={styles.topLinks}>{children}</View>
+          <View style={styles.topLinks}>
+            {children}
+            <AccountButton />
+          </View>
         </View>
       </View>
     );
@@ -112,7 +116,7 @@ const styles = StyleSheet.create({
   },
   brand: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   brandText: { fontSize: 15 },
-  topLinks: { flexDirection: 'row', gap: Spacing.five },
+  topLinks: { flexDirection: 'row', alignItems: 'center', gap: Spacing.five },
   topLink: { paddingVertical: Spacing.one, alignItems: 'center' },
   topLinkText: { fontSize: 14 },
   underline: { height: 2, alignSelf: 'stretch', marginTop: 3 },

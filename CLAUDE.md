@@ -21,7 +21,12 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 - `src/core/` — pure, platform-free domain logic (dates, streaks, scores, timer). No React or Expo imports here.
 - `src/components/`, `src/hooks/`, `src/constants/` — UI building blocks.
 - `src/state/` — app state (`store.tsx`) and on-device saving (`persist.ts`, localStorage on web, SQLite-backed on iOS/Android).
-- `src/app/(tabs)/` — the four tab screens; `src/app/habit/` — add/edit habit screens (modal).
+- `src/app/(tabs)/` — the four tab screens; `src/app/habit/` — add/edit habit screens (modal);
+  `src/app/account.tsx` — sign in / account; `src/app/auth/callback.tsx` — OAuth return page.
+- `src/lib/supabase.ts` — Supabase client (null when `.env` has no Supabase settings; the app must keep working).
+- `src/state/auth.tsx` — session and sign-in actions (email code, Google, sign out).
+- `supabase/` — local config, migrations and email template. Setup guide: [docs/SUPABASE.md](docs/SUPABASE.md).
+  Every table needs row-level security so users only reach their own rows.
 
 ## Checks
 
