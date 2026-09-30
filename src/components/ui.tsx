@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -6,6 +6,8 @@ import {
   StyleProp,
   StyleSheet,
   Text,
+  TextInput,
+  TextInputProps,
   TextProps,
   View,
   ViewStyle,
@@ -118,6 +120,86 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
   );
 }
 
+export function TextField({ label, ...props }: TextInputProps & { label: string }) {
+  const palette = usePalette();
+  const [focused, setFocused] = useState(false);
+  return (
+    <View style={styles.field}>
+      <Txt variant="label" tone="inkSoft">
+        {label}
+      </Txt>
+      <TextInput
+        {...props}
+        aria-label={label}
+        placeholderTextColor={palette.muted}
+        onFocus={(e) => {
+          setFocused(true);
+          props.onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setFocused(false);
+          props.onBlur?.(e);
+        }}
+        style={[
+          styles.input,
+          {
+            color: palette.ink,
+            backgroundColor: palette.surface,
+            borderColor: palette.ink,
+            borderWidth: focused ? 3 : 2,
+            paddingHorizontal: focused ? Spacing.three - 1 : Spacing.three,
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
+/** − value + control for small whole numbers. */
+export function Stepper({
+  value,
+  min,
+  max,
+  unit,
+  label,
+  onChange,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
+  label: string;
+  onChange: (value: number) => void;
+}) {
+  const palette = usePalette();
+  const button = (sign: -1 | 1) => {
+    const next = value + sign;
+    const disabled = next < min || next > max;
+    return (
+      <Pressable
+        role="button"
+        aria-label={`${sign < 0 ? 'Decrease' : 'Increase'} ${label}`}
+        disabled={disabled}
+        onPress={() => onChange(next)}
+        style={[styles.stepButton, { borderColor: palette.ink, opacity: disabled ? 0.3 : 1 }]}>
+        <Txt variant="section" style={styles.stepSign}>
+          {sign < 0 ? '−' : '+'}
+        </Txt>
+      </Pressable>
+    );
+  };
+  return (
+    <View style={styles.stepper} aria-label={label}>
+      {button(-1)}
+      <Txt style={[styles.stepValue, { color: palette.ink }]}>{value}</Txt>
+      {button(1)}
+      <Txt variant="caption" tone="inkSoft">
+        {unit}
+      </Txt>
+    </View>
+  );
+}
+
 export function SectionTitle({ children, right }: { children: string; right?: ReactNode }) {
   return (
     <View style={styles.sectionTitle}>
@@ -158,6 +240,24 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 14,
   },
+  field: { gap: Spacing.two },
+  input: {
+    fontFamily: Fonts.body,
+    fontSize: 16,
+    borderRadius: Radius.card - 6,
+    paddingVertical: 14,
+  },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  stepButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepSign: { lineHeight: 24 },
+  stepValue: { fontFamily: Fonts.display, fontSize: 30, lineHeight: 36, minWidth: 36, textAlign: 'center' },
   sectionTitle: {
     flexDirection: 'row',
     alignItems: 'baseline',

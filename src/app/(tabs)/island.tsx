@@ -52,6 +52,12 @@ export default function IslandScreen() {
         width={Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2)}
       />
 
+      {plants.length === 0 && (
+        <Txt variant="bodyBold" tone="inkSoft" style={styles.emptyNote}>
+          Bare soil for now. Finish a focus session to plant your first seed.
+        </Txt>
+      )}
+
       <View style={styles.stats}>
         <Stat value={String(plants.length)} label="Planted" />
         <Stat value={String(mature)} label="Fully grown" />
@@ -99,6 +105,7 @@ export default function IslandScreen() {
 const styles = StyleSheet.create({
   heroBlob: { position: 'absolute', right: -30, top: 10 },
   heroPlanet: { position: 'absolute', right: 70, top: 0 },
+  emptyNote: { textAlign: 'center' },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   stat: { flexGrow: 1, flexBasis: 140, gap: 2, borderRadius: Radius.card - 6 },
   statValue: { fontFamily: Fonts.display, fontSize: 34, lineHeight: 40 },

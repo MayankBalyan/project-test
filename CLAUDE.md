@@ -20,7 +20,8 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 - `src/app/` — Expo Router screens only.
 - `src/core/` — pure, platform-free domain logic (dates, streaks, scores, timer). No React or Expo imports here.
 - `src/components/`, `src/hooks/`, `src/constants/` — UI building blocks.
-- `src/state/` — app state (`store.tsx`) and temporary sample data (`demo-data.ts`, remove after onboarding exists).
+- `src/state/` — app state (`store.tsx`) and on-device saving (`persist.ts`, localStorage on web, SQLite-backed on iOS/Android).
+- `src/app/(tabs)/` — the four tab screens; `src/app/habit/` — add/edit habit screens (modal).
 
 ## Checks
 

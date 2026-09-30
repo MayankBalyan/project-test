@@ -2,12 +2,11 @@ import { Anton_400Regular } from '@expo-google-fonts/anton';
 import { Oswald_500Medium, Oswald_700Bold } from '@expo-google-fonts/oswald';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
-import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { RootlineProvider } from '@/state/store';
@@ -40,7 +39,11 @@ export default function RootLayout() {
     <ThemeProvider value={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <RootlineProvider>
-        <AppTabs />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors[scheme].paper } }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
+        </Stack>
       </RootlineProvider>
     </ThemeProvider>
   );

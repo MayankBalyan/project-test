@@ -69,26 +69,52 @@ export default function TodayScreen() {
       <View style={styles.section}>
         <SectionTitle
           right={
-            <Txt variant="bodyBold">
-              {doneCount}/{due.length}
-            </Txt>
+            due.length > 0 ? (
+              <Txt variant="bodyBold">
+                {doneCount}/{due.length}
+              </Txt>
+            ) : undefined
           }>
           Today&apos;s habits
         </SectionTitle>
-        {due.map(({ habit, done, value, streak }) => (
-          <HabitRow
-            key={habit.id}
-            name={habit.name}
-            detail={
-              habit.kind === 'count' ? `${value}/${habit.target} today · tap to add` : describeSchedule(habit.schedule)
-            }
-            done={done}
-            progress={habit.kind === 'count' ? Math.min(1, value / habit.target) : undefined}
-            streak={streak.current}
-            streakUnit={habit.schedule.type === 'timesPerWeek' ? 'weeks' : 'days'}
-            onToggle={() => state.toggleHabit(habit.id)}
-          />
-        ))}
+        {habitStats.length === 0 ? (
+          <Card style={styles.empty}>
+            <Txt variant="section">No habits yet</Txt>
+            <Txt variant="caption" tone="inkSoft">
+              Start small. One habit you can do every day is enough to grow your first streak.
+            </Txt>
+            <InkButton label="Add your first habit" onPress={() => router.push('/habit/new')} />
+          </Card>
+        ) : (
+          <>
+            {due.length === 0 && (
+              <Txt variant="caption" tone="inkSoft">
+                Nothing due today. Enjoy the rest day.
+              </Txt>
+            )}
+            {due.map(({ habit, done, value, streak }) => (
+              <HabitRow
+                key={habit.id}
+                name={habit.name}
+                detail={
+                  habit.kind === 'count'
+                    ? `${value}/${habit.target} today · tap to add`
+                    : describeSchedule(habit.schedule)
+                }
+                done={done}
+                progress={habit.kind === 'count' ? Math.min(1, value / habit.target) : undefined}
+                streak={streak.current}
+                streakUnit={habit.schedule.type === 'timesPerWeek' ? 'weeks' : 'days'}
+                onToggle={() => state.toggleHabit(habit.id)}
+                onEdit={() => router.push({ pathname: '/habit/[id]', params: { id: habit.id } })}
+              />
+            ))}
+            <InkButton kind="outline" label="+ Add habit" onPress={() => router.push('/habit/new')} />
+            <Txt variant="caption" tone="muted" style={styles.hint}>
+              Tap to check off · long-press to edit
+            </Txt>
+          </>
+        )}
       </View>
 
       <Card style={styles.focusCard}>
@@ -131,6 +157,8 @@ const styles = StyleSheet.create({
   streakMeta: { alignItems: 'flex-end', gap: 4 },
   onSpace: { color: '#D8D7D2' },
   section: { gap: Spacing.two + 2 },
+  empty: { gap: Spacing.two + 2 },
+  hint: { textAlign: 'center' },
   focusCard: { gap: Spacing.three },
   focusText: { gap: Spacing.one },
 });

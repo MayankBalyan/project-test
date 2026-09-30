@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Heading3D } from '@/components/heading-3d';
 import { Heatmap } from '@/components/heatmap';
@@ -22,7 +23,9 @@ function formatDay(date: string) {
 
 export default function StreaksScreen() {
   const palette = usePalette();
-  const { days, global, habitStats, today } = useRootline();
+  const { days, global, habitStats, habits, today } = useRootline();
+  const archived = habits.filter((h) => h.archivedAt);
+  const edit = (id: string) => router.push({ pathname: '/habit/[id]', params: { id } });
   const [selected, setSelected] = useState(today);
   const day = days.find((d) => d.date === selected) ?? days[days.length - 1];
   const activeDays = days.filter((d) => d.score > 0).length;
@@ -79,21 +82,53 @@ export default function StreaksScreen() {
 
       <View style={styles.list}>
         <SectionTitle>By habit</SectionTitle>
+        {habitStats.length === 0 && (
+          <Txt variant="caption" tone="inkSoft">
+            Add a habit on Today to see its streak here.
+          </Txt>
+        )}
         {habitStats.map(({ habit, streak }) => {
           const unit = habit.schedule.type === 'timesPerWeek' ? 'wk' : 'd';
           return (
-            <View key={habit.id} style={[styles.habitRow, { borderColor: palette.line }]}>
+            <Pressable
+              key={habit.id}
+              role="button"
+              accessibilityLabel={`Edit ${habit.name}`}
+              onPress={() => edit(habit.id)}
+              style={[styles.habitRow, { borderColor: palette.line }]}>
               <Txt variant="label" style={styles.habitName}>
                 {habit.name}
               </Txt>
               <Txt variant="caption" tone="inkSoft">
                 now {streak.current}
                 {unit} · best {streak.longest}
-                {unit}
+                {unit} · edit →
               </Txt>
-            </View>
+            </Pressable>
           );
         })}
+        {archived.length > 0 && (
+          <>
+            <Txt variant="label" tone="muted" style={styles.archivedTitle}>
+              Archived
+            </Txt>
+            {archived.map((h) => (
+              <Pressable
+                key={h.id}
+                role="button"
+                accessibilityLabel={`Edit archived habit ${h.name}`}
+                onPress={() => edit(h.id)}
+                style={[styles.habitRow, { borderColor: palette.line }]}>
+                <Txt variant="label" tone="muted" style={styles.habitName}>
+                  {h.name}
+                </Txt>
+                <Txt variant="caption" tone="muted">
+                  restore →
+                </Txt>
+              </Pressable>
+            ))}
+          </>
+        )}
       </View>
     </Screen>
   );
@@ -129,5 +164,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
-  habitName: { fontSize: 16 },
+  habitName: { fontSize: 16, flexShrink: 1 },
+  archivedTitle: { marginTop: Spacing.three },
 });

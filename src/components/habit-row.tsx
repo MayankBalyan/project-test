@@ -30,6 +30,7 @@ export function HabitRow({
   streak,
   streakUnit,
   onToggle,
+  onEdit,
 }: {
   name: string;
   detail: string;
@@ -39,6 +40,8 @@ export function HabitRow({
   streak: number;
   streakUnit: string;
   onToggle: () => void;
+  /** Long press opens the habit's edit screen. */
+  onEdit?: () => void;
 }) {
   const palette = usePalette();
   return (
@@ -47,6 +50,7 @@ export function HabitRow({
       aria-checked={done}
       accessibilityLabel={`${name}, ${detail}`}
       onPress={onToggle}
+      onLongPress={onEdit}
       style={({ pressed }) => [
         styles.row,
         { borderColor: palette.ink, backgroundColor: palette.surface, transform: [{ scale: pressed ? 0.98 : 1 }] },

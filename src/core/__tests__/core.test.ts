@@ -5,7 +5,8 @@ import { dailyValues, Habit, HabitEvent, habitStreak } from '../habits';
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
-import { endsAt, formatRemaining, pause, remainingMs, resume, startTimer } from '../timer';
+import { endsAt, formatRemaining, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
+import { normalizeHabit, validateHabit } from '../habit-input';
 
 const done = (habitId: string, date: string, value = 1, id = `${habitId}-${date}`): HabitEvent => ({
   id,
@@ -151,5 +152,36 @@ describe('world', () => {
     expect(unlocksFor(31)).toEqual(['stream', 'creatures']);
     expect(nextUnlock(31)?.days).toBe(100);
     expect(islandTier(60 * 60)).toBe(2);
+  });
+});
+
+describe('habit input', () => {
+  const base = { name: '  Read  ', kind: 'check' as const, target: 1, schedule: { type: 'daily' as const } };
+
+  it('accepts a valid habit and normalizes it', () => {
+    expect(validateHabit(base)).toBeNull();
+    expect(normalizeHabit({ ...base, target: 5 })).toMatchObject({ name: 'Read', target: 1 });
+    expect(normalizeHabit({ ...base, schedule: { type: 'weekdays', days: [5, 1, 1] } }).schedule).toEqual({
+      type: 'weekdays',
+      days: [1, 5],
+    });
+  });
+
+  it('rejects empty names, bad goals and empty schedules', () => {
+    expect(validateHabit({ ...base, name: '   ' })).toMatch(/name/);
+    expect(validateHabit({ ...base, name: 'x'.repeat(41) })).toMatch(/40/);
+    expect(validateHabit({ ...base, kind: 'count', target: 1 })).toMatch(/goal/);
+    expect(validateHabit({ ...base, schedule: { type: 'weekdays', days: [] } })).toMatch(/day/);
+    expect(validateHabit({ ...base, schedule: { type: 'timesPerWeek', times: 7 } })).toMatch(/week/);
+    expect(validateHabit({ ...base, schedule: { type: 'everyNDays', n: 1, anchor: '2026-09-30' } })).toMatch(/every/i);
+  });
+});
+
+describe('timer end', () => {
+  it('knows when a session ended even if the app was closed', () => {
+    let t = startTimer(0, 25);
+    t = resume(pause(t, 60_000), 120_000);
+    expect(plannedEndAt(t)).toBe(26 * 60_000);
+    expect(plannedEndAt(pause(t, 180_000))).toBeNull();
   });
 });

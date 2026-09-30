@@ -67,3 +67,10 @@ export function formatRemaining(ms: number): string {
   const s = total % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
+
+/** The instant the countdown reached (or will reach) zero, given no further pauses. Null while paused. */
+export function plannedEndAt(t: TimerState): number | null {
+  if (isPaused(t)) return null;
+  const paused = t.pauses.reduce((sum, p) => sum + ((p.end ?? p.start) - p.start), 0);
+  return t.startedAt + t.plannedMs + paused;
+}
