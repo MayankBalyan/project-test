@@ -47,3 +47,28 @@ export function globalStreak(
   result.rainDaysLeft = bank;
   return result;
 }
+
+export const STREAK_MILESTONES = [7, 30, 100, 365];
+
+export interface StreakStatus {
+  /** The most recent missed day a Rain Day covered, if it was in the last 3 days. */
+  rescuedOn: LocalDate | null;
+  /** The next milestone above the current streak (grows by a year past 365). */
+  nextMilestone: number;
+  daysToNext: number;
+  /** The streak was broken: nothing now, but there was a streak before. */
+  restarting: boolean;
+}
+
+export function streakStatus(streak: GlobalStreak, today: LocalDate): StreakStatus {
+  const last = streak.rainDaysUsedOn[streak.rainDaysUsedOn.length - 1];
+  const rescuedOn = last && daysBetween(last, today) <= 3 ? last : null;
+  const nextMilestone =
+    STREAK_MILESTONES.find((m) => m > streak.current) ?? (Math.floor(streak.current / 365) + 1) * 365;
+  return {
+    rescuedOn,
+    nextMilestone,
+    daysToNext: nextMilestone - streak.current,
+    restarting: streak.current === 0 && streak.longest > 0,
+  };
+}

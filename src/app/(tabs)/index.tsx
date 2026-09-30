@@ -5,13 +5,23 @@ import { AccountButton, SettingsButton } from '@/components/account-button';
 import { describeSchedule, HabitRow } from '@/components/habit-row';
 import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
-import { Blob, LogoMark, Planet } from '@/components/ink-art';
+import { Blob, LogoMark, Planet, RainDrop } from '@/components/ink-art';
 import { Island } from '@/components/island';
 import { Card, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { MAX_RAIN_DAYS, streakStatus } from '@/core/streaks';
 import { islandTier, unlocksFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useRootline } from '@/state/store';
+
+function formatShort(date: string) {
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+}
 
 function formatToday(date: string) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
@@ -29,6 +39,7 @@ export default function TodayScreen() {
   const state = useRootline();
   const { global, habitStats, todayActivity, plants, lifetimeFocusMinutes } = state;
   const due = habitStats.filter((h) => h.scheduledToday);
+  const status = streakStatus(global, state.today);
   const doneCount = due.filter((h) => h.done).length;
   const contentWidth = Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2);
 
@@ -59,24 +70,49 @@ export default function TodayScreen() {
 
       <View style={[styles.streakCard, { backgroundColor: palette.space }]}>
         <Blob size={160} variant={2} stars={16} style={styles.streakBlob} />
-        <View>
-          <Heading3D size={76} depth={6} face="#FFFFFF" ink="#5E5E5B">
-            {String(global.current)}
-          </Heading3D>
-          <Txt variant="label" tone="face" style={styles.streakLabel}>
-            Day streak
-          </Txt>
+        <View style={styles.streakTop}>
+          <View>
+            <Heading3D size={76} depth={6} face="#FFFFFF" ink="#5E5E5B">
+              {String(global.current)}
+            </Heading3D>
+            <Txt variant="label" tone="face" style={styles.streakLabel}>
+              Day streak
+            </Txt>
+          </View>
+          <View style={styles.streakMeta}>
+            <Txt variant="caption" style={styles.onSpace}>
+              Best · {global.longest} days
+            </Txt>
+            <View style={styles.drops} aria-label={`${global.rainDaysLeft} of ${MAX_RAIN_DAYS} Rain Days saved`}>
+              <Txt variant="caption" style={styles.onSpace}>
+                Rain days
+              </Txt>
+              {Array.from({ length: MAX_RAIN_DAYS }, (_, i) => (
+                <RainDrop key={i} size={14} filled={i < global.rainDaysLeft} color="#D8D7D2" />
+              ))}
+            </View>
+            <Txt variant="caption" style={styles.onSpace}>
+              Focus today · {todayActivity.activity.focusMinutes} min
+            </Txt>
+          </View>
         </View>
-        <View style={styles.streakMeta}>
-          <Txt variant="caption" style={styles.onSpace}>
-            Longest · {global.longest} days
-          </Txt>
-          <Txt variant="caption" style={styles.onSpace}>
-            Rain days · {global.rainDaysLeft}/3
-          </Txt>
-          <Txt variant="caption" style={styles.onSpace}>
-            Focus today · {todayActivity.activity.focusMinutes} min
-          </Txt>
+        <View style={styles.streakNote}>
+          {status.rescuedOn ? (
+            <>
+              <RainDrop size={14} filled color="#FFFFFF" />
+              <Txt variant="caption" tone="face" style={styles.noteText}>
+                A Rain Day covered {formatShort(status.rescuedOn)} and kept your streak alive.
+              </Txt>
+            </>
+          ) : (
+            <Txt variant="caption" style={[styles.onSpace, styles.noteText]}>
+              {status.restarting
+                ? `Your best is ${global.longest} days. One habit or a 25-minute focus starts a new streak today.`
+                : global.current === 0
+                  ? 'One habit or a 25-minute focus starts your first streak.'
+                  : `${status.daysToNext} ${status.daysToNext === 1 ? 'day' : 'days'} to your ${status.nextMilestone}-day milestone. Every 7 days earns a Rain Day.`}
+            </Txt>
+          )}
         </View>
       </View>
 
@@ -164,11 +200,20 @@ const styles = StyleSheet.create({
   streakCard: {
     borderRadius: Radius.card + 8,
     padding: Spacing.four,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    gap: Spacing.three,
     overflow: 'hidden',
   },
+  streakTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  drops: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  streakNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+    borderTopWidth: 1,
+    borderTopColor: '#3A3A38',
+    paddingTop: Spacing.two + 2,
+  },
+  noteText: { flex: 1 },
   streakBlob: { position: 'absolute', right: -40, top: -50, opacity: 0.9 },
   streakLabel: { fontSize: 15 },
   streakMeta: { alignItems: 'flex-end', gap: 4 },

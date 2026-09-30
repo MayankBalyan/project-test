@@ -193,3 +193,17 @@ export function TabIcon({ name, color, size = 22 }: { name: TabIconName; color: 
     </Svg>
   );
 }
+
+/** A rain drop: filled when a Rain Day is saved up, outlined when the slot is empty. */
+export function RainDrop({ size = 16, filled, color }: { size?: number; filled: boolean; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path
+        d="M12 2.5C9 7 5.5 10.6 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10.6 15 7 12 2.5z"
+        fill={filled ? color : 'none'}
+        stroke={color}
+        strokeWidth={2}
+      />
+    </Svg>
+  );
+}

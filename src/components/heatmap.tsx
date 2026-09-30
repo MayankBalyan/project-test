@@ -18,14 +18,18 @@ export function Heatmap({
   days,
   selected,
   onSelect,
+  rainDays = [],
 }: {
   days: HeatDay[];
+  /** Missed days a Rain Day covered; drawn with a dot. */
+  rainDays?: LocalDate[];
   selected?: LocalDate;
   onSelect: (date: LocalDate) => void;
 }) {
   const palette = usePalette();
   const scroll = useRef<ScrollView>(null);
   if (days.length === 0) return null;
+  const rain = new Set(rainDays);
 
   // Pad the start so the first column begins on a Monday.
   const lead = (weekday(days[0].date) + 6) % 7;
@@ -71,7 +75,7 @@ export function Heatmap({
                     day ? (
                       <Pressable
                         key={day.date}
-                        accessibilityLabel={`${day.date}: score ${day.score}`}
+                        accessibilityLabel={`${day.date}: score ${day.score}${rain.has(day.date) ? ', Rain Day' : ''}`}
                         onPress={() => onSelect(day.date)}
                         onHoverIn={() => onSelect(day.date)}
                         hitSlop={1}
@@ -79,8 +83,9 @@ export function Heatmap({
                           styles.cell,
                           { backgroundColor: palette.heat[heatLevel(day.score)] },
                           day.date === selected && { borderWidth: 2, borderColor: palette.ink, transform: [{ scale: 1.25 }] },
-                        ]}
-                      />
+                        ]}>
+                        {rain.has(day.date) && <View style={[styles.rainDot, { backgroundColor: palette.ink }]} />}
+                      </Pressable>
                     ) : (
                       <View key={`pad${di}`} style={styles.cell} />
                     ),
@@ -92,6 +97,16 @@ export function Heatmap({
         </ScrollView>
       </View>
       <View style={styles.legend}>
+        {rain.size > 0 && (
+          <>
+            <View style={[styles.cell, styles.center, { backgroundColor: palette.heat[0] }]}>
+              <View style={[styles.rainDot, { backgroundColor: palette.ink }]} />
+            </View>
+            <Txt variant="caption" tone="muted" style={styles.rainLegend}>
+              Rain Day
+            </Txt>
+          </>
+        )}
         <Txt variant="caption" tone="muted">
           Less
         </Txt>
@@ -115,6 +130,9 @@ const styles = StyleSheet.create({
   monthLabel: { position: 'absolute', width: 40, fontSize: 10 },
   grid: { flexDirection: 'row', gap: GAP },
   column: { gap: GAP },
-  cell: { width: CELL, height: CELL, borderRadius: 3 },
+  cell: { width: CELL, height: CELL, borderRadius: 3, alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  rainDot: { width: 4, height: 4, borderRadius: 2 },
+  rainLegend: { marginRight: 10 },
   legend: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 10 },
 });

@@ -70,12 +70,13 @@ export default function StreaksScreen() {
 
       <Card style={styles.heatCard}>
         <SectionTitle>Last 12 months</SectionTitle>
-        <Heatmap days={days} selected={selected} onSelect={setSelected} />
+        <Heatmap days={days} rainDays={global.rainDaysUsedOn} selected={selected} onSelect={setSelected} />
         <View style={[styles.dayDetail, { borderColor: palette.line }]}>
           <Txt variant="bodyBold">{formatDay(day.date)}</Txt>
           <Txt variant="caption" tone="inkSoft">
             Score {day.score} · {day.activity.habitsCompleted}/{day.activity.habitsScheduled} habits ·{' '}
             {day.activity.focusMinutes} min focus
+            {global.rainDaysUsedOn.includes(day.date) ? ' · a Rain Day kept the streak' : ''}
           </Txt>
         </View>
       </Card>

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { addDays, daysBetween, toLocalDate, weekday } from '../dates';
 import { dailyValues, Habit, HabitEvent, habitStreak } from '../habits';
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
-import { globalStreak } from '../streaks';
+import { globalStreak, streakStatus } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { endsAt, formatRemaining, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
@@ -301,5 +301,27 @@ describe('notification plan', () => {
     expect(validateHabit({ ...habit, reminders: ['8:00'] })).toMatch(/08:30/);
     expect(validateHabit({ ...habit, reminders: ['07:00', '08:00', '09:00', '10:00'] })).toMatch(/3/);
     expect(normalizeHabit({ ...habit, reminders: ['21:00', '07:30', '21:00'] }).reminders).toEqual(['07:30', '21:00']);
+  });
+});
+
+describe('streak status', () => {
+  const s = { current: 10, longest: 12, rainDaysLeft: 0, rainDaysUsedOn: ['2026-09-28'] };
+
+  it('reports a recent rescue and the next milestone', () => {
+    expect(streakStatus(s, '2026-09-30')).toEqual({
+      rescuedOn: '2026-09-28',
+      nextMilestone: 30,
+      daysToNext: 20,
+      restarting: false,
+    });
+    expect(streakStatus(s, '2026-10-05').rescuedOn).toBeNull();
+  });
+
+  it('knows when a streak restarts and handles streaks past a year', () => {
+    expect(streakStatus({ ...s, current: 0, rainDaysUsedOn: [] }, '2026-09-30')).toMatchObject({
+      restarting: true,
+      nextMilestone: 7,
+    });
+    expect(streakStatus({ ...s, current: 400 }, '2026-09-30').nextMilestone).toBe(730);
   });
 });
