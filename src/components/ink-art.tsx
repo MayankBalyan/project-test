@@ -97,7 +97,7 @@ export function Planet({ size, style }: { size: number; style?: StyleProp<ViewSt
   return (
     <Svg width={size} height={size * 0.7} viewBox="0 0 200 140" style={style} pointerEvents="none">
       <Ellipse cx={100} cy={74} rx={92} ry={22} fill="none" stroke={ink} strokeWidth={3} transform="rotate(-14 100 74)" />
-      <Circle cx={100} cy={70} r={44} fill={palette.face} stroke={ink} strokeWidth={3} />
+      <Circle cx={100} cy={70} r={44} fill={palette.artFill} stroke={ink} strokeWidth={3} />
       {Array.from({ length: 7 }, (_, i) => {
         const y = 38 + i * 10;
         const half = Math.sqrt(Math.max(0, 44 * 44 - (y - 70) ** 2));
@@ -123,7 +123,7 @@ export function Moon({ size, style }: { size: number; style?: StyleProp<ViewStyl
   const palette = usePalette();
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100" style={style} pointerEvents="none">
-      <Circle cx={50} cy={50} r={46} fill={palette.face} stroke={palette.ink} strokeWidth={2.5} />
+      <Circle cx={50} cy={50} r={46} fill={palette.artFill} stroke={palette.ink} strokeWidth={2.5} />
       {CRATERS.map(([x, y, r], i) => (
         <Circle key={i} cx={x} cy={y} r={r} fill="none" stroke={palette.ink} strokeWidth={1.6} />
       ))}

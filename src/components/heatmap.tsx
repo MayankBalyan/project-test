@@ -11,7 +11,8 @@ const CELL = 12;
 const GAP = 3;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-export type HeatDay = { date: LocalDate; score: number };
+/** `muted`: a day that didn't ask for anything (e.g. a habit's day off); drawn as an empty outline. */
+export type HeatDay = { date: LocalDate; score: number; muted?: boolean };
 
 /** GitHub-style contribution grid: one column per week (Mon–Sun), ink intensity = daily score. */
 export function Heatmap({
@@ -30,6 +31,8 @@ export function Heatmap({
   const scroll = useRef<ScrollView>(null);
   if (days.length === 0) return null;
   const rain = new Set(rainDays);
+  const anyMuted = days.some((d) => d.muted);
+  const mutedStyle = { backgroundColor: 'transparent', borderWidth: 1, borderColor: palette.line };
 
   // Pad the start so the first column begins on a Monday.
   const lead = (weekday(days[0].date) + 6) % 7;
@@ -75,13 +78,13 @@ export function Heatmap({
                     day ? (
                       <Pressable
                         key={day.date}
-                        accessibilityLabel={`${day.date}: score ${day.score}${rain.has(day.date) ? ', Rain Day' : ''}`}
+                        accessibilityLabel={`${day.date}: ${day.muted ? 'not due' : `score ${day.score}`}${rain.has(day.date) ? ', Rain Day' : ''}`}
                         onPress={() => onSelect(day.date)}
                         onHoverIn={() => onSelect(day.date)}
                         hitSlop={1}
                         style={[
                           styles.cell,
-                          { backgroundColor: palette.heat[heatLevel(day.score)] },
+                          day.muted ? mutedStyle : { backgroundColor: palette.heat[heatLevel(day.score)] },
                           day.date === selected && { borderWidth: 2, borderColor: palette.ink, transform: [{ scale: 1.25 }] },
                         ]}>
                         {rain.has(day.date) && <View style={[styles.rainDot, { backgroundColor: palette.ink }]} />}
@@ -97,6 +100,14 @@ export function Heatmap({
         </ScrollView>
       </View>
       <View style={styles.legend}>
+        {anyMuted && (
+          <>
+            <View style={[styles.cell, mutedStyle]} />
+            <Txt variant="caption" tone="muted" style={styles.rainLegend}>
+              Not due
+            </Txt>
+          </>
+        )}
         {rain.size > 0 && (
           <>
             <View style={[styles.cell, styles.center, { backgroundColor: palette.heat[0] }]}>

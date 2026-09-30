@@ -6,6 +6,7 @@ import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { focusStats, formatMinutes } from '../focus-stats';
+import { habitHeatDays, habitSummary } from '../habit-heat';
 import {
   addToOutbox,
   applyPulled,
@@ -476,5 +477,37 @@ describe('sync merge', () => {
     expect(c).toBe('2026-10-01T12:00:15.123Z');
     expect(nextCursor(c, [])).toBe(c);
     expect(nextCursor(c, ['2026-10-01T12:00:16.000Z'])).toBe(c);
+  });
+});
+
+describe('per-habit heatmap', () => {
+  const mwf: Habit = { id: 'h', kind: 'check', target: 1, schedule: { type: 'weekdays', days: [1, 3, 5] }, createdOn: '2026-09-21' };
+  // Mon 21, Wed 23 done; Fri 25 missed; Mon 28 done; Tue 29 extra (not due but logged).
+  const values = dailyValues(['2026-09-21', '2026-09-23', '2026-09-28', '2026-09-29'].map((d) => done('h', d)));
+
+  it('marks done, missed and not-due days', () => {
+    const days = habitHeatDays(mwf, values, '2026-09-30', 12);
+    const by = Object.fromEntries(days.map((d) => [d.date, d]));
+    expect(by['2026-09-20']).toMatchObject({ muted: true, score: 0 }); // before the habit existed
+    expect(by['2026-09-21']).toMatchObject({ done: true, score: 100, muted: false });
+    expect(by['2026-09-22']).toMatchObject({ muted: true }); // Tuesday, not due
+    expect(by['2026-09-25']).toMatchObject({ done: false, muted: false, score: 0 }); // missed Friday
+    expect(by['2026-09-29']).toMatchObject({ done: true, muted: false }); // logged on a day off still shows
+    expect(days).toHaveLength(12);
+  });
+
+  it('gives partial scores for counts', () => {
+    const water: Habit = { ...mwf, kind: 'count', target: 8, schedule: { type: 'daily' } };
+    const v = dailyValues([done('h', '2026-09-30', 6)]);
+    expect(habitHeatDays(water, v, '2026-09-30', 1)[0]).toMatchObject({ score: 75, done: false, value: 6 });
+  });
+
+  it('summarizes the last 30 days', () => {
+    // Due: 21, 23, 25, 28 (30th is a Wednesday but not done yet, so it isn't counted) → 3 of 4.
+    expect(habitSummary(mwf, values, '2026-09-30')).toEqual({ rate30: 0.75, totalDone: 4 });
+    const gym: Habit = { ...mwf, createdOn: '2026-09-14', schedule: { type: 'timesPerWeek', times: 2 } };
+    const g = dailyValues(['2026-09-15', '2026-09-17', '2026-09-22', '2026-09-29', '2026-09-30'].map((d) => done('h', d)));
+    // Week of 14th: 2/2 met; week of 21st: 1 (missed); this week: 2, already met → 2 of 3.
+    expect(habitSummary(gym, g, '2026-09-30').rate30).toBeCloseTo(2 / 3);
   });
 });

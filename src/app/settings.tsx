@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import Constants from 'expo-constants';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Heading3D } from '@/components/heading-3d';
 import { Blob } from '@/components/ink-art';
@@ -13,8 +13,15 @@ import { getPermission, notificationReach, Permission, requestPermission } from 
 import { shareTextFile } from '@/lib/share-file';
 import { openSitePage, siteLinks, SUPPORT_EMAIL } from '@/lib/site';
 import { useIstel } from '@/state/store';
+import { setThemePreference, ThemePreference, useThemePreference } from '@/state/theme';
 
 const appVersion = Constants.expoConfig?.version ?? '';
+
+const THEMES: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 function close() {
   if (router.canGoBack()) router.back();
@@ -33,6 +40,7 @@ function formatEveningHour(h: number) {
 export default function SettingsScreen() {
   const { settings, updateSettings, habits, events, sessions, today, eraseAll, refreshNotifications } = useIstel();
   const [permission, setPermission] = useState<Permission | null>(null);
+  const theme = useThemePreference();
 
   useEffect(() => {
     getPermission().then(setPermission);
@@ -90,6 +98,20 @@ export default function SettingsScreen() {
           {'Settings'}
         </Heading3D>
       </View>
+
+      <Card style={styles.group}>
+        <Txt variant="label" tone="inkSoft">
+          Appearance
+        </Txt>
+        <View style={styles.row} role="radiogroup" aria-label="Appearance">
+          {THEMES.map((t) => (
+            <Chip key={t.value} label={t.label} selected={theme === t.value} onPress={() => setThemePreference(t.value)} />
+          ))}
+        </View>
+        <Txt variant="caption" tone="inkSoft">
+          System follows your {Platform.OS === 'web' ? 'computer or phone' : 'phone'}’s light or dark setting.
+        </Txt>
+      </Card>
 
       <Card style={styles.group}>
         <TextField

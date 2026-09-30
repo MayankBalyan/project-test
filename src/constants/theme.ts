@@ -12,6 +12,8 @@ export const Colors = {
     line: '#C9C8C3',
     face: '#FFFFFF',
     space: '#0E0E0E',
+    /** Fill for drawn objects (planet, moon): white paper in light mode, dark paper in dark mode. */
+    artFill: '#FFFFFF',
     heat: ['#C9C8C3', '#A8A7A3', '#737270', '#3D3D3B', '#0E0E0E'],
   },
   dark: {
@@ -22,7 +24,9 @@ export const Colors = {
     muted: '#6E6D6A',
     line: '#2E2E2E',
     face: '#FFFFFF',
-    space: '#000000',
+    // Lifted above the dark paper so blobs, the island sky and dark cards still stand out.
+    space: '#2A2A28',
+    artFill: '#1A1A1A',
     heat: ['#2E2E2E', '#55554F', '#8A8985', '#BDBCB8', '#ECEBE7'],
   },
 } as const;

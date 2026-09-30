@@ -475,6 +475,8 @@ function useIstelState() {
     interruption,
     clearInterruption: () => setInterruption(null),
     habits,
+    /** Logged value per habit per day, for per-habit views. */
+    habitValues: values,
     sessions,
     focus,
     events,

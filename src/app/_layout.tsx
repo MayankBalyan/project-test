@@ -6,6 +6,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -27,6 +28,13 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded || error) SplashScreen.hideAsync();
   }, [loaded, error]);
+
+  // Browser scrollbars, form controls and the page behind the app follow the chosen theme too.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    document.documentElement.style.colorScheme = scheme;
+    document.body.style.backgroundColor = Colors[scheme].paper;
+  }, [scheme]);
 
   if (!loaded && !error) return null;
 

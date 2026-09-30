@@ -23,11 +23,13 @@ them, and streaks light up more stars around it.
 | `muted` | `#8C8B87` | `#6E6D6A` | Hints, disabled, captions |
 | `line` | `#C9C8C3` | `#2E2E2E` | Dividers, empty heatmap cells |
 | `face` | `#FFFFFF` | `#FFFFFF` | Front face of 3D headings, stars |
-| `space` | `#0E0E0E` | `#000000` | Blobs and the island sky; always dark in both modes |
+| `space` | `#0E0E0E` | `#2A2A28` | Blobs, dark cards and the island sky; in dark mode lifted above the paper so they still stand out |
+| `artFill` | `#FFFFFF` | `#1A1A1A` | Fill of drawn objects (planet, moon) so their ink lines stay visible |
 
 Heatmap (sequential, one "hue" — ink): levels 0–4 are `line`, 30%, 55%, 80% and 100% ink blended over `paper`.
 
-Dark mode swaps paper and ink. Blobs and the space sky stay black in both modes.
+Dark mode swaps paper and ink. Blobs and the space sky use the `space` token, a dark grey in dark mode so they stay visible.
+People choose System, Light or Dark in Settings → Appearance (saved per device).
 
 ## Typography
 
