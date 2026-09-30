@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
 
 import { Heading3D } from '@/components/heading-3d';
@@ -8,10 +8,18 @@ import { Hero } from '@/components/hero';
 import { Blob, Moon } from '@/components/ink-art';
 import { Card, Chip, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
-import { canPause, formatRemaining, isPaused, MAX_PAUSES, remainingMs } from '@/core/timer';
+import {
+  canPause,
+  elapsedMs,
+  formatRemaining,
+  isPaused,
+  MAX_PAUSES,
+  remainingMs,
+  STOPWATCH_CAP_MINUTES,
+} from '@/core/timer';
 import { speciesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
-import { useNow, useRootline } from '@/state/store';
+import { FocusMode, useNow, useRootline } from '@/state/store';
 
 const PRESETS = [10, 25, 50, 90];
 const TAGS = ['Study', 'Work', 'Reading'];
@@ -66,7 +74,8 @@ export default function FocusScreen() {
 
 function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const wide = useIsWide();
-  const { focus, focusActions, sessionsToday, settings, habitStats } = useRootline();
+  const { focus, focusActions, sessionsToday, settings, habitStats, interruption, clearInterruption } = useRootline();
+  const [mode, setMode] = useState<FocusMode>('timer');
   const durationHabits = habitStats.filter((h) => h.habit.kind === 'duration');
   const initial = durationHabits.find((h) => h.habit.id === initialHabitId);
   const leftFor = (h: (typeof durationHabits)[number]) => Math.max(5, Math.ceil((h.habit.target - h.value) / 5) * 5);
@@ -77,9 +86,13 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const linked = durationHabits.find((h) => h.habit.id === (focus ? focus.habitId : habitId));
   const presets = [...new Set([...PRESETS, minutes])].sort((a, b) => a - b);
 
+  const activeMode: FocusMode = focus ? (focus.mode ?? 'timer') : mode;
+  const stopwatch = activeMode === 'stopwatch';
   const planned = focus ? focus.minutes : minutes;
   const remaining = focus ? remainingMs(focus.timer, now) : planned * 60_000;
-  const progress = focus ? 1 - remaining / focus.timer.plannedMs : 0;
+  const elapsed = focus ? elapsedMs(focus.timer, now) : 0;
+  const progress = stopwatch ? (elapsed % 3_600_000) / 3_600_000 : focus ? 1 - remaining / focus.timer.plannedMs : 0;
+  const species = SPECIES_NAME[speciesFor(stopwatch ? Math.floor(elapsed / 60_000) : planned)];
   const paused = focus ? isPaused(focus.timer) : false;
   const pausesLeft = focus ? MAX_PAUSES - focus.timer.pauses.length : MAX_PAUSES;
   const focusedToday = sessionsToday.reduce((sum, s) => sum + s.minutes, 0);
@@ -100,10 +113,18 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
       <View style={styles.center}>
         <TimerRing size={wide ? 340 : 300} progress={progress}>
           <Heading3D size={wide ? 84 : 72} depth={6} align="center">
-            {formatRemaining(remaining)}
+            {formatRemaining(stopwatch ? Math.floor(elapsed / 1000) * 1000 : remaining)}
           </Heading3D>
           <Txt variant="label" tone="inkSoft">
-            {focus ? (paused ? 'Paused' : (linked?.habit.name ?? focus.tag)) : `Plants ${SPECIES_NAME[speciesFor(planned)]}`}
+            {focus
+              ? paused
+                ? 'Paused'
+                : stopwatch
+                  ? `Counting up · ${species} so far`
+                  : (linked?.habit.name ?? focus.tag)
+              : stopwatch
+                ? 'Stopwatch · stop when you’re done'
+                : `Plants ${species}`}
           </Txt>
           {linked && (
             <Txt variant="caption" tone="inkSoft">
@@ -124,19 +145,54 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
               disabled={!canPause(focus.timer, now)}
             />
           )}
-          <InkButton label="Give up" kind="outline" onPress={focusActions.giveUp} />
-          <Txt variant="caption" tone="muted" style={styles.note}>
-            Giving up leaves a wilted sprout. Finish your next session to bring it back.
-          </Txt>
+          {stopwatch ? (
+            <>
+              <InkButton label="Stop · plant it" kind="outline" onPress={focusActions.complete} />
+              <Txt variant="caption" tone="muted" style={styles.note}>
+                Stops by itself after {STOPWATCH_CAP_MINUTES / 60} hours. Under a minute isn’t saved.
+              </Txt>
+            </>
+          ) : (
+            <>
+              <InkButton label="Give up" kind="outline" onPress={focusActions.giveUp} />
+              <Txt variant="caption" tone="muted" style={styles.note}>
+                Giving up leaves a wilted sprout. Finish your next session to bring it back.
+              </Txt>
+            </>
+          )}
+          {settings.stayFocused && (
+            <Txt variant="caption" tone="inkSoft" style={styles.note}>
+              Stay Focused is on: leaving the app for more than 10 seconds wilts this session.
+            </Txt>
+          )}
         </View>
       ) : (
         <Card style={styles.setup}>
-          <SectionTitle>Length</SectionTitle>
+          {interruption && (
+            <View style={styles.interruption} role="alert">
+              <Txt variant="bodyBold">
+                You left Rootline for {interruption.awaySeconds}s, so that session wilted.
+              </Txt>
+              <Pressable role="button" onPress={clearInterruption} hitSlop={8}>
+                <Txt variant="label">OK</Txt>
+              </Pressable>
+            </View>
+          )}
+          <SectionTitle>Mode</SectionTitle>
           <View style={styles.chips}>
-            {presets.map((m) => (
-              <Chip key={m} label={`${m} min`} selected={minutes === m} onPress={() => setMinutes(m)} />
-            ))}
+            <Chip label="Timer" selected={mode === 'timer'} onPress={() => setMode('timer')} />
+            <Chip label="Stopwatch" selected={mode === 'stopwatch'} onPress={() => setMode('stopwatch')} />
           </View>
+          {mode === 'timer' && (
+            <>
+              <SectionTitle>Length</SectionTitle>
+              <View style={styles.chips}>
+                {presets.map((m) => (
+                  <Chip key={m} label={`${m} min`} selected={minutes === m} onPress={() => setMinutes(m)} />
+                ))}
+              </View>
+            </>
+          )}
           {durationHabits.length > 0 && (
             <>
               <SectionTitle>Counts toward</SectionTitle>
@@ -162,7 +218,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
               <Chip key={t} label={t} selected={tag === t} onPress={() => setTag(t)} />
             ))}
           </View>
-          <InkButton label="Start focus" onPress={() => focusActions.start(minutes, tag, habitId)} style={styles.start} />
+          <InkButton label="Start focus" onPress={() => focusActions.start(minutes, tag, habitId, mode)} style={styles.start} />
         </Card>
       )}
 
@@ -182,6 +238,7 @@ const styles = StyleSheet.create({
   actions: { gap: Spacing.two + 2 },
   note: { textAlign: 'center' },
   setup: { gap: Spacing.three },
+  interruption: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.three, justifyContent: 'space-between' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   start: { marginTop: Spacing.one },
   today: { alignItems: 'center' },

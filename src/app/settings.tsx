@@ -110,6 +110,12 @@ export default function SettingsScreen() {
             />
           ))}
         </View>
+        <Toggle
+          label="Stay Focused mode"
+          detail="Leaving the app for more than 10 seconds during a session wilts its plant."
+          value={settings.stayFocused}
+          onChange={(v) => updateSettings({ stayFocused: v })}
+        />
       </Card>
 
       <Card style={styles.group}>

@@ -1,12 +1,23 @@
 import { randomUUID } from 'expo-crypto';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { addDays, daysBetween, DEFAULT_DAY_START_HOUR, LocalDate, toLocalDate } from '@/core/dates';
 import { HabitInput, normalizeHabit } from '@/core/habit-input';
 import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn, isScheduledOn } from '@/core/habits';
 import { DayActivity, dailyScore, isQualifyingDay } from '@/core/score';
 import { globalStreak } from '@/core/streaks';
-import { elapsedMs, endsAt, pause, plannedEndAt, resume, startTimer, TimerState } from '@/core/timer';
+import {
+  elapsedMs,
+  endsAt,
+  leftTooLong,
+  pause,
+  plannedEndAt,
+  resume,
+  startTimer,
+  STOPWATCH_CAP_MINUTES,
+  TimerState,
+} from '@/core/timer';
 import { planNotifications } from '@/core/notify-plan';
 import { FocusSessionRecord, growPlants } from '@/core/world';
 
@@ -17,7 +28,15 @@ import { load, save } from './persist';
 export type NamedHabit = Habit & { name: string; archivedAt?: number; reminders?: string[] };
 export type TaggedSession = FocusSessionRecord & { tag: string; habitId?: string };
 /** `habitId` links the session to a duration habit, which gets the focused minutes when it finishes. */
-export type ActiveFocus = { timer: TimerState; minutes: number; tag: string; habitId?: string };
+export type ActiveFocus = {
+  timer: TimerState;
+  minutes: number;
+  tag: string;
+  habitId?: string;
+  /** Countdown (default) or a stopwatch that counts up until stopped. */
+  mode?: FocusMode;
+};
+export type FocusMode = 'timer' | 'stopwatch';
 
 export type Settings = {
   /** False until the first-launch setup is finished or skipped. */
@@ -27,6 +46,8 @@ export type Settings = {
   focusMinutes: number;
   /** Hour (0–23) when a new day starts. */
   dayStartHour: number;
+  /** Leaving the app for more than a few seconds during a session wilts it. */
+  stayFocused: boolean;
   notifications: {
     /** Evening nudge when nothing has counted toward the streak yet today. */
     streakAtRisk: boolean;
@@ -40,6 +61,7 @@ export const DEFAULT_SETTINGS: Settings = {
   islandName: 'My island',
   focusMinutes: 25,
   dayStartHour: DEFAULT_DAY_START_HOUR,
+  stayFocused: false,
   notifications: { streakAtRisk: true, streakAtRiskHour: 20, focusEnd: true },
 };
 
@@ -78,6 +100,8 @@ function useRootlineState() {
     ...load<Partial<Settings>>('settings', {}),
   }));
   const today = useToday(settings.dayStartHour);
+  /** Set when Stay Focused ended a session because the app was left; shown on the Focus screen. */
+  const [interruption, setInterruption] = useState<{ awaySeconds: number } | null>(null);
   const dayConfig = useMemo(() => ({ timeZone, dayStartHour: settings.dayStartHour }), [settings.dayStartHour]);
 
   useEffect(() => save('settings', settings), [settings]);
@@ -139,7 +163,10 @@ function useRootlineState() {
       // A session that ended while the app was closed is recorded at the moment it actually ended.
       const at = Math.min(Date.now(), plannedEndAt(focus.timer) ?? Date.now());
       const date = toLocalDate(new Date(at), dayConfig);
-      const minutes = Math.round(elapsedMs(focus.timer, at) / 60_000);
+      const minutes = Math.floor(elapsedMs(focus.timer, at) / 60_000);
+      setFocus(null);
+      // A stopwatch stopped within the first minute is simply discarded.
+      if (status === 'done' && minutes === 0) return;
       setSessions((prev) => [
         ...prev,
         { id: randomUUID(), date, minutes, status, createdAt: at, tag: focus.tag, habitId: focus.habitId },
@@ -148,7 +175,6 @@ function useRootlineState() {
         const habitId = focus.habitId;
         setEvents((prev) => [...prev, { id: randomUUID(), habitId, date, type: 'complete', value: minutes, createdAt: at }]);
       }
-      setFocus(null);
     },
     [focus, dayConfig],
   );
@@ -166,8 +192,11 @@ function useRootlineState() {
 
   const focusActions = useMemo(
     () => ({
-      start: (minutes: number, tag: string, habitId?: string) =>
-        setFocus({ timer: startTimer(Date.now(), minutes), minutes, tag, habitId }),
+      start: (minutes: number, tag: string, habitId?: string, mode: FocusMode = 'timer') => {
+        const length = mode === 'stopwatch' ? STOPWATCH_CAP_MINUTES : minutes;
+        setInterruption(null);
+        setFocus({ timer: startTimer(Date.now(), length), minutes: length, tag, habitId, mode });
+      },
       pause: () => setFocus((f) => f && { ...f, timer: pause(f.timer, Date.now()) }),
       resume: () => setFocus((f) => f && { ...f, timer: resume(f.timer, Date.now()) }),
       giveUp: () => endFocus('given_up'),
@@ -175,6 +204,26 @@ function useRootlineState() {
     }),
     [endFocus],
   );
+
+  // Stay Focused: leaving the app for too long during a session gives it up (the plant wilts).
+  const leftAt = useRef<number | null>(null);
+  useEffect(() => {
+    if (!settings.stayFocused || !focus) return;
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'background') {
+        leftAt.current = Date.now();
+      } else if (state === 'active' && leftAt.current !== null) {
+        const away = Date.now() - leftAt.current;
+        const broke = leftTooLong(focus.timer, leftAt.current, Date.now());
+        leftAt.current = null;
+        if (broke) {
+          setInterruption({ awaySeconds: Math.round(away / 1000) });
+          endFocus('given_up');
+        }
+      }
+    });
+    return () => sub.remove();
+  }, [settings.stayFocused, focus, endFocus]);
 
   // Record the session as soon as the countdown reaches zero.
   useEffect(() => {
@@ -253,7 +302,10 @@ function useRootlineState() {
         qualifiedToday: isQualifyingDay(derived.todayActivity.activity),
         currentStreak: derived.global.current,
         streakAtRisk: { enabled: settings.notifications.streakAtRisk, hour: settings.notifications.streakAtRiskHour },
-        focusEnd: { enabled: settings.notifications.focusEnd, at: focus ? plannedEndAt(focus.timer) : null },
+        focusEnd: {
+          enabled: settings.notifications.focusEnd && focus?.mode !== 'stopwatch',
+          at: focus ? plannedEndAt(focus.timer) : null,
+        },
       });
       applyPlan(plan).catch(() => {});
     }, 400);
@@ -263,6 +315,8 @@ function useRootlineState() {
   return {
     today,
     refreshNotifications,
+    interruption,
+    clearInterruption: () => setInterruption(null),
     habits,
     sessions,
     focus,

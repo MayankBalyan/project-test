@@ -74,3 +74,19 @@ export function plannedEndAt(t: TimerState): number | null {
   const paused = t.pauses.reduce((sum, p) => sum + ((p.end ?? p.start) - p.start), 0);
   return t.startedAt + t.plannedMs + paused;
 }
+
+/** Stopwatch sessions count up and stop on their own after this long. */
+export const STOPWATCH_CAP_MINUTES = 180;
+
+/** Stay Focused mode: how long someone can leave the app during a session before it wilts. */
+export const STAY_FOCUSED_GRACE_MS = 10_000;
+
+/**
+ * Whether time spent outside the app breaks a Stay Focused session. Paused sessions are safe,
+ * and so is leaving after the countdown already finished.
+ */
+export function leftTooLong(t: TimerState, leftAt: number, backAt: number, graceMs = STAY_FOCUSED_GRACE_MS): boolean {
+  if (isPaused(t) || isFinished(t, leftAt)) return false;
+  const finishedAt = plannedEndAt(t) ?? Infinity;
+  return Math.min(backAt, finishedAt) - leftAt > graceMs;
+}

@@ -5,7 +5,7 @@ import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn } from '../habits
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
-import { endsAt, formatRemaining, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
+import { endsAt, formatRemaining, leftTooLong, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
 import { formatTime, normalizeHabit, validateHabit } from '../habit-input';
 import { planNotifications } from '../notify-plan';
@@ -342,5 +342,19 @@ describe('duration habits', () => {
     const values = dailyValues(events);
     expect(isDoneOn(h, values, '2026-09-29')).toBe(true);
     expect(isDoneOn(h, values, '2026-09-30')).toBe(false);
+  });
+});
+
+describe('stay focused', () => {
+  const t = startTimer(0, 25);
+  it('wilts only when away longer than the grace period during a running session', () => {
+    expect(leftTooLong(t, 60_000, 65_000)).toBe(false);
+    expect(leftTooLong(t, 60_000, 90_000)).toBe(true);
+    expect(leftTooLong(pause(t, 50_000), 60_000, 600_000)).toBe(false);
+  });
+
+  it('does not wilt a session that finished while away', () => {
+    // Left 5 s before the end, came back much later: only 5 s of the session were missed.
+    expect(leftTooLong(t, 25 * 60_000 - 5_000, 40 * 60_000)).toBe(false);
   });
 });
