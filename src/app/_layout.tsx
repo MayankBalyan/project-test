@@ -6,12 +6,15 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { Heading3D } from '@/components/heading-3d';
+import { Blob } from '@/components/ink-art';
+import { Txt } from '@/components/ui';
+import { Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { AuthProvider } from '@/state/auth';
-import { IstelProvider } from '@/state/store';
+import { AuthProvider, useAuth } from '@/state/auth';
+import { IstelProvider, useIstel } from '@/state/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,17 +52,63 @@ export default function RootLayout() {
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <AuthProvider>
         <IstelProvider>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors[scheme].paper } }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="account" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
-            <Stack.Screen name="auth/callback" />
-          </Stack>
+          <AppStack paper={Colors[scheme].paper} />
         </IstelProvider>
       </AuthProvider>
     </ThemeProvider>
   );
 }
+
+function Loading() {
+  return (
+    <View style={styles.loading}>
+      <Blob size={140} variant={1} stars={18} />
+      <Heading3D size={40} depth={4}>
+        Istel
+      </Heading3D>
+      <ActivityIndicator />
+      <Txt variant="label" tone="inkSoft">
+        Loading your island…
+      </Txt>
+    </View>
+  );
+}
+
+/**
+ * Istel needs an account: signed out, only the sign-in screen exists. Builds without Supabase settings
+ * (local development) skip sign-in so the app keeps working.
+ */
+function AppStack({ paper }: { paper: string }) {
+  const auth = useAuth();
+  const { sync } = useIstel();
+  const signedIn = !auth.configured || !!auth.user;
+  // Right after signing in, wait for the account's data so a returning user doesn't see onboarding.
+  // If that first sync fails (offline), carry on with what's on this device.
+  const firstSync =
+    !!auth.user &&
+    (sync.accountId !== auth.user.id || sync.lastSyncedAt === null) &&
+    sync.status.state !== 'error';
+
+  if (auth.loading || firstSync) return <Loading />;
+
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: paper } }}>
+      <Stack.Protected guard={!signedIn}>
+        <Stack.Screen name="login" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="account" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
+      </Stack.Protected>
+      <Stack.Screen name="auth/callback" />
+    </Stack>
+  );
+}
+
+const styles = StyleSheet.create({
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.three },
+});

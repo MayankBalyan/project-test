@@ -22,7 +22,9 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 - `src/components/`, `src/hooks/`, `src/constants/` — UI building blocks.
 - `src/state/` — app state (`store.tsx`) and on-device saving (`persist.ts`, localStorage on web, SQLite-backed on iOS/Android).
 - `src/app/(tabs)/` — the four tab screens; `src/app/habit/` — add/edit habit screens (modal);
-  `src/app/account.tsx` — sign in / account; `src/app/auth/callback.tsx` — OAuth return page.
+  `src/app/login.tsx` — sign-in screen; `src/app/account.tsx` — account (sync, sign out, delete);
+  `src/app/auth/callback.tsx` — OAuth return page. Sign-in is required: `src/app/_layout.tsx` guards every
+  screen with `Stack.Protected` and waits for the first sync after sign-in.
 - `src/lib/supabase.ts` — Supabase client (null when `.env` has no Supabase settings; the app must keep working).
 - `src/state/auth.tsx` — session and sign-in actions (email code, Google, sign out).
 - `src/lib/notifications(.web).ts` — schedules the plan from `core/notify-plan.ts`. Phones get real scheduled

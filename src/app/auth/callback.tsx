@@ -9,7 +9,7 @@ import { useAuth } from '@/state/auth';
 /**
  * Where Google sends people back after signing in. On web the Supabase client reads the `code` from this
  * URL by itself; native apps finish the exchange in `signInWithGoogle`. Either way, we move on to the
- * account screen once a session exists.
+ * app once a session exists.
  */
 export default function AuthCallbackScreen() {
   const params = useLocalSearchParams<{ error_description?: string; error?: string }>();
@@ -18,7 +18,7 @@ export default function AuthCallbackScreen() {
   const error = params.error_description ?? params.error ?? (timedOut ? 'We couldn’t finish signing you in.' : null);
 
   useEffect(() => {
-    if (!loading && user) router.replace('/account');
+    if (!loading && user) router.replace('/');
   }, [loading, user]);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function AuthCallbackScreen() {
         <>
           <Txt variant="section">Sign-in didn’t finish</Txt>
           <Txt role="alert">{error}</Txt>
-          <InkButton label="Try again" onPress={() => router.replace('/account')} />
+          <InkButton label="Try again" onPress={() => router.replace('/login')} />
         </>
       ) : (
         <>

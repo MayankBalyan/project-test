@@ -469,7 +469,7 @@ function useIstelState() {
 
   return {
     today,
-    sync: { ...sync, accountId: meta.accountId },
+    sync: { ...sync, accountId: meta.accountId, lastSyncedAt: meta.lastSyncedAt },
     deleteAccount,
     refreshNotifications,
     interruption,
