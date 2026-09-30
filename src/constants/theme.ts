@@ -1,55 +1,41 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * "Ink & Cosmos" theme. See docs/DESIGN.md — every screen follows it. Monochrome only.
  */
-
-import '@/global.css';
-
-import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    paper: '#E8E7E3',
+    surface: '#F4F3EF',
+    ink: '#0E0E0E',
+    inkSoft: '#4A4A48',
+    muted: '#8C8B87',
+    line: '#C9C8C3',
+    face: '#FFFFFF',
+    space: '#0E0E0E',
+    heat: ['#C9C8C3', '#A8A7A3', '#737270', '#3D3D3B', '#0E0E0E'],
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    paper: '#0E0E0E',
+    surface: '#1A1A1A',
+    ink: '#ECEBE7',
+    inkSoft: '#B4B3AF',
+    muted: '#6E6D6A',
+    line: '#2E2E2E',
+    face: '#FFFFFF',
+    space: '#000000',
+    heat: ['#2E2E2E', '#55554F', '#8A8985', '#BDBCB8', '#ECEBE7'],
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type Palette = (typeof Colors)['light' | 'dark'];
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+export const Fonts = {
+  display: 'Anton_400Regular',
+  label: 'Oswald_500Medium',
+  labelBold: 'Oswald_700Bold',
+  body: 'SpaceMono_400Regular',
+  bodyBold: 'SpaceMono_700Bold',
+} as const;
 
 export const Spacing = {
   half: 2,
@@ -61,5 +47,11 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const Radius = {
+  card: 22,
+  pill: 999,
+} as const;
+
+export const Gutter = 20;
+export const MaxContentWidth = 760;
+export const WideBreakpoint = 768;

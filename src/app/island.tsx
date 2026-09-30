@@ -1,0 +1,116 @@
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
+
+import { Hero } from '@/components/hero';
+import { Blob, Planet } from '@/components/ink-art';
+import { Island } from '@/components/island';
+import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
+import { Fonts, Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { islandTier, nextUnlock, STREAK_UNLOCKS, unlocksFor } from '@/core/world';
+import { usePalette } from '@/hooks/use-palette';
+import { useRootline } from '@/state/store';
+
+function Stat({ value, label }: { value: string; label: string }) {
+  const palette = usePalette();
+  return (
+    <Card style={styles.stat}>
+      <Txt style={[styles.statValue, { color: palette.ink }]}>{value}</Txt>
+      <Txt variant="caption" tone="inkSoft">
+        {label}
+      </Txt>
+    </Card>
+  );
+}
+
+export default function IslandScreen() {
+  const palette = usePalette();
+  const { width } = useWindowDimensions();
+  const { plants, global, lifetimeFocusMinutes } = useRootline();
+  const unlocks = unlocksFor(global.longest);
+  const next = nextUnlock(global.longest);
+  const tier = islandTier(lifetimeFocusMinutes);
+  const mature = plants.filter((p) => p.stage === 'mature').length;
+  const wilted = plants.filter((p) => p.stage === 'wilted').length;
+
+  return (
+    <Screen>
+      <Hero
+        title={'Your\nisland'}
+        subtitle="Every session plants something. Every habit day waters it."
+        art={
+          <>
+            <Blob size={140} variant={2} stars={16} style={styles.heroBlob} />
+            <Planet size={110} style={styles.heroPlanet} />
+          </>
+        }
+      />
+
+      <Island
+        plants={plants}
+        tier={tier}
+        stars={20 + global.current * 2}
+        unlocks={unlocks}
+        width={Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2)}
+      />
+
+      <View style={styles.stats}>
+        <Stat value={String(plants.length)} label="Planted" />
+        <Stat value={String(mature)} label="Fully grown" />
+        <Stat value={String(wilted)} label="Wilted" />
+        <Stat value={`${Math.floor(lifetimeFocusMinutes / 60)}h`} label={`Focus · size ${tier + 1}/6`} />
+      </View>
+
+      {next && (
+        <Card style={styles.next}>
+          <SectionTitle>Next unlock</SectionTitle>
+          <Txt variant="bodyBold">
+            {next.label} at a {next.days}-day streak
+          </Txt>
+          <View style={[styles.track, { borderColor: palette.ink }]}>
+            <View
+              style={[styles.bar, { backgroundColor: palette.ink, width: `${Math.min(100, (global.current / next.days) * 100)}%` }]}
+            />
+          </View>
+          <Txt variant="caption" tone="inkSoft">
+            {global.current} of {next.days} days
+          </Txt>
+        </Card>
+      )}
+
+      <View style={styles.unlocks}>
+        <SectionTitle>Discoveries</SectionTitle>
+        {STREAK_UNLOCKS.map((u) => {
+          const on = unlocks.includes(u.key);
+          return (
+            <View key={u.key} style={[styles.unlockRow, { borderColor: palette.line }]}>
+              <Txt variant="label" tone={on ? 'ink' : 'muted'}>
+                {u.label}
+              </Txt>
+              <Txt variant="caption" tone={on ? 'ink' : 'muted'}>
+                {on ? 'Unlocked' : `${u.days}-day streak`}
+              </Txt>
+            </View>
+          );
+        })}
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  heroBlob: { position: 'absolute', right: -30, top: 10 },
+  heroPlanet: { position: 'absolute', right: 70, top: 0 },
+  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  stat: { flexGrow: 1, flexBasis: 140, gap: 2, borderRadius: Radius.card - 6 },
+  statValue: { fontFamily: Fonts.display, fontSize: 34, lineHeight: 40 },
+  next: { gap: Spacing.two },
+  track: { height: 14, borderWidth: 2, borderRadius: Radius.pill, overflow: 'hidden' },
+  bar: { height: '100%' },
+  unlocks: { gap: Spacing.one },
+  unlockRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+});

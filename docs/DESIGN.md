@@ -1,12 +1,67 @@
-# Rootline design theme
+# Rootline design theme — "Ink & Cosmos"
 
-**Status: waiting for the owner's reference image.**
+Source: the owner's reference image (a "Voyager — Explore the Space" landing page), saved at
+[`docs/design-reference.png`](design-reference.png). Every screen follows this file. Change it only when the owner
+shares a new reference.
 
-Per the ground rules in `CLAUDE.md`, no visual design is made until the owner shares an image of their design idea.
-Once it arrives, this file will record the theme and every screen will follow it:
+## Mood
 
-- Color palette (light and dark)
-- Typography
-- Shapes, corner radius, spacing
-- Iconography and illustration style (including the island world)
-- Motion and mood
+Black ink on grainy paper. Hand-drawn, engraving-style space illustrations (planets, moons, stars, telescopes)
+floating between big organic black blobs filled with stars. Calm, playful, strictly monochrome.
+
+For Rootline this becomes the story: **your island floats in space**. Focus plants things on it, habits water
+them, and streaks light up more stars around it.
+
+## Color (monochrome only — no hues)
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `paper` | `#E8E7E3` | `#0E0E0E` | Screen background |
+| `surface` | `#F4F3EF` | `#1A1A1A` | Cards |
+| `ink` | `#0E0E0E` | `#ECEBE7` | Text, borders, blobs, primary buttons |
+| `inkSoft` | `#4A4A48` | `#B4B3AF` | Secondary text |
+| `muted` | `#8C8B87` | `#6E6D6A` | Hints, disabled, captions |
+| `line` | `#C9C8C3` | `#2E2E2E` | Dividers, empty heatmap cells |
+| `face` | `#FFFFFF` | `#FFFFFF` | Front face of 3D headings, stars |
+| `space` | `#0E0E0E` | `#000000` | Blobs and the island sky; always dark in both modes |
+
+Heatmap (sequential, one "hue" — ink): levels 0–4 are `line`, 30%, 55%, 80% and 100% ink blended over `paper`.
+
+Dark mode swaps paper and ink. Blobs and the space sky stay black in both modes.
+
+## Typography
+
+| Role | Font | Style |
+|---|---|---|
+| **Display (major headings)** | **Anton** | UPPERCASE, **3D extruded** (`Heading3D`): white face, ink outline, stacked ink layers going down |
+| Label / nav / buttons | Oswald Medium | UPPERCASE, letter-spacing 1 |
+| Body | Space Mono | letter-spacing 0.5, bold for emphasis |
+| Numbers (timer, streak count) | Anton | Large; the timer and hero numbers also use the 3D style |
+
+**Rule: every major heading (screen titles, hero numbers) uses `Heading3D`.** Small section titles use Oswald.
+
+## Shapes
+
+- **Blobs**: organic black shapes with scattered white dots and 4-point sparkle stars. Used as hero cards and
+  decorations. They can bleed off the screen edge like in the reference.
+- **Cards**: `surface` fill, 2px ink border, 22px radius.
+- **Buttons**: primary is a solid ink pill with paper text; secondary is a 2px ink outline pill.
+- **Grain**: a fine noise texture covers every screen background.
+
+## Illustration
+
+Ink line art only: 2–2.5px ink strokes, white or paper fills, hatch lines for shading. Motifs: ringed planet,
+cratered moon, sparkles, telescope, and the floating island with plants.
+
+Plant growth stages: seed → sprout → young → mature. A given-up session leaves a **wilted** sprout (drooping
+leaves), never a dead tree.
+
+## Layout
+
+- Phone: content column with 20px gutters and a floating ink pill tab bar at the bottom.
+- Wide screens (≥ 768px, web/desktop/tablet): top nav like the reference — logo mark + **ROOTLINE** on the
+  left, uppercase Oswald links on the right. Content max width 760px.
+
+## Motion
+
+Slow and floaty: gentle drift on decorations, a soft press scale (0.97) on buttons. Nothing bouncy.

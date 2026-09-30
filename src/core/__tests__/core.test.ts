@@ -4,6 +4,7 @@ import { addDays, daysBetween, toLocalDate, weekday } from '../dates';
 import { dailyValues, Habit, HabitEvent, habitStreak } from '../habits';
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak } from '../streaks';
+import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { endsAt, formatRemaining, pause, remainingMs, resume, startTimer } from '../timer';
 
 const done = (habitId: string, date: string, value = 1, id = `${habitId}-${date}`): HabitEvent => ({
@@ -114,5 +115,41 @@ describe('timer', () => {
     let t = startTimer(0, 25);
     for (let i = 0; i < 3; i++) t = resume(pause(t, i * 1000), i * 1000 + 500);
     expect(t.pauses).toHaveLength(2);
+  });
+});
+
+describe('world', () => {
+  const session = (id: string, date: string, minutes: number, status: 'done' | 'given_up' = 'done') => ({
+    id,
+    date,
+    minutes,
+    status,
+    createdAt: Date.parse(date) + Number(id.slice(1)),
+  });
+
+  it('grows plants with watering days and picks species by session length', () => {
+    const plants = growPlants([session('s1', '2026-09-27', 25), session('s2', '2026-09-29', 90)], [
+      '2026-09-26',
+      '2026-09-27',
+      '2026-09-28',
+      '2026-09-29',
+    ]);
+    expect(plants.map((p) => [p.species, p.stage])).toEqual([
+      ['shrub', 'mature'],
+      ['oak', 'sprout'],
+    ]);
+  });
+
+  it('wilts a given-up session until a later session is completed', () => {
+    const wilted = growPlants([session('s1', '2026-09-29', 10, 'given_up')], []);
+    expect(wilted[0].stage).toBe('wilted');
+    const revived = growPlants([session('s1', '2026-09-29', 10, 'given_up'), session('s2', '2026-09-30', 25)], []);
+    expect(revived[0].stage).toBe('sprout');
+  });
+
+  it('unlocks world features by longest streak and grows the island by hours', () => {
+    expect(unlocksFor(31)).toEqual(['stream', 'creatures']);
+    expect(nextUnlock(31)?.days).toBe(100);
+    expect(islandTier(60 * 60)).toBe(2);
   });
 });

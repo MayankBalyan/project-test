@@ -10,12 +10,17 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
    then record the theme (colors, typography, shapes, mood) in [docs/DESIGN.md](docs/DESIGN.md) and follow it
    everywhere in the project. Do not invent a visual style without the owner's image.
 2. The app is named **Rootline** for now.
+3. **Theme: "Ink & Cosmos"** (from the owner's reference, `docs/design-reference.png`). Monochrome ink on grainy
+   paper, starry black blobs, engraving-style space art. Every major heading and hero number uses the 3D font
+   component `Heading3D`. Use tokens from `src/constants/theme.ts` and primitives from `src/components/ui.tsx`;
+   never hard-code new colors or fonts. Full spec in `docs/DESIGN.md`.
 
 ## Layout
 
 - `src/app/` — Expo Router screens only.
 - `src/core/` — pure, platform-free domain logic (dates, streaks, scores, timer). No React or Expo imports here.
 - `src/components/`, `src/hooks/`, `src/constants/` — UI building blocks.
+- `src/state/` — app state (`store.tsx`) and temporary sample data (`demo-data.ts`, remove after onboarding exists).
 
 ## Checks
 
