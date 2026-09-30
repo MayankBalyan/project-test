@@ -8,6 +8,7 @@ import { useIstel } from '@/state/store';
 
 import { AccountButton, SettingsButton } from './account-button';
 import { LogoMark, TabIcon, TabIconName } from './ink-art';
+import { SlidingTabSlot } from './sliding-tab-slot';
 import { Txt } from './ui';
 
 const TABS: { name: string; href: '/' | '/focus' | '/island' | '/streaks'; label: string; icon: TabIconName }[] = [
@@ -16,6 +17,7 @@ const TABS: { name: string; href: '/' | '/focus' | '/island' | '/streaks'; label
   { name: 'island', href: '/island', label: 'Island', icon: 'island' },
   { name: 'streaks', href: '/streaks', label: 'Streaks', icon: 'streaks' },
 ];
+const TAB_ORDER = TABS.map((t) => t.href);
 
 /**
  * One themed tab bar for every platform: a top nav (like the reference) on wide screens and a floating
@@ -26,7 +28,7 @@ export default function AppTabs() {
   const { settings } = useIstel();
   return (
     <Tabs>
-      {wide ? null : <TabSlot style={styles.slot} />}
+      {wide ? null : <SlidingTabSlot order={TAB_ORDER} style={styles.slot} />}
       <TabList asChild>
         <Bar wide={wide}>
           {TABS.map((t) => (
