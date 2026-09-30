@@ -15,8 +15,9 @@ import { applyPlan } from '@/lib/notifications';
 import { load, save } from './persist';
 
 export type NamedHabit = Habit & { name: string; archivedAt?: number; reminders?: string[] };
-export type TaggedSession = FocusSessionRecord & { tag: string };
-export type ActiveFocus = { timer: TimerState; minutes: number; tag: string };
+export type TaggedSession = FocusSessionRecord & { tag: string; habitId?: string };
+/** `habitId` links the session to a duration habit, which gets the focused minutes when it finishes. */
+export type ActiveFocus = { timer: TimerState; minutes: number; tag: string; habitId?: string };
 
 export type Settings = {
   /** False until the first-launch setup is finished or skipped. */
@@ -137,17 +138,16 @@ function useRootlineState() {
       if (!focus) return;
       // A session that ended while the app was closed is recorded at the moment it actually ended.
       const at = Math.min(Date.now(), plannedEndAt(focus.timer) ?? Date.now());
+      const date = toLocalDate(new Date(at), dayConfig);
+      const minutes = Math.round(elapsedMs(focus.timer, at) / 60_000);
       setSessions((prev) => [
         ...prev,
-        {
-          id: randomUUID(),
-          date: toLocalDate(new Date(at), dayConfig),
-          minutes: Math.round(elapsedMs(focus.timer, at) / 60_000),
-          status,
-          createdAt: at,
-          tag: focus.tag,
-        },
+        { id: randomUUID(), date, minutes, status, createdAt: at, tag: focus.tag, habitId: focus.habitId },
       ]);
+      if (status === 'done' && focus.habitId && minutes > 0) {
+        const habitId = focus.habitId;
+        setEvents((prev) => [...prev, { id: randomUUID(), habitId, date, type: 'complete', value: minutes, createdAt: at }]);
+      }
       setFocus(null);
     },
     [focus, dayConfig],
@@ -166,7 +166,8 @@ function useRootlineState() {
 
   const focusActions = useMemo(
     () => ({
-      start: (minutes: number, tag: string) => setFocus({ timer: startTimer(Date.now(), minutes), minutes, tag }),
+      start: (minutes: number, tag: string, habitId?: string) =>
+        setFocus({ timer: startTimer(Date.now(), minutes), minutes, tag, habitId }),
       pause: () => setFocus((f) => f && { ...f, timer: pause(f.timer, Date.now()) }),
       resume: () => setFocus((f) => f && { ...f, timer: resume(f.timer, Date.now()) }),
       giveUp: () => endFocus('given_up'),

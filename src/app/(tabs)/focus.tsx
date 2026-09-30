@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
@@ -12,7 +13,7 @@ import { speciesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useNow, useRootline } from '@/state/store';
 
-const PRESETS = [25, 50, 90];
+const PRESETS = [10, 25, 50, 90];
 const TAGS = ['Study', 'Work', 'Reading'];
 const SPECIES_NAME = { flower: 'a flower', shrub: 'a shrub', sapling: 'a sapling', pine: 'a pine', oak: 'a rare oak' };
 
@@ -58,11 +59,23 @@ function TimerRing({ progress, size, children }: { progress: number; size: numbe
 }
 
 export default function FocusScreen() {
+  // `?habit=` comes from tapping a minutes habit on Today; remount so the choice resets to it.
+  const { habit } = useLocalSearchParams<{ habit?: string }>();
+  return <Focus key={habit ?? 'none'} initialHabitId={habit} />;
+}
+
+function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const wide = useIsWide();
-  const { focus, focusActions, sessionsToday, settings } = useRootline();
-  const [minutes, setMinutes] = useState(settings.focusMinutes);
+  const { focus, focusActions, sessionsToday, settings, habitStats } = useRootline();
+  const durationHabits = habitStats.filter((h) => h.habit.kind === 'duration');
+  const initial = durationHabits.find((h) => h.habit.id === initialHabitId);
+  const leftFor = (h: (typeof durationHabits)[number]) => Math.max(5, Math.ceil((h.habit.target - h.value) / 5) * 5);
+  const [habitId, setHabitId] = useState<string | undefined>(initial?.habit.id);
+  const [minutes, setMinutes] = useState(initial && !initial.done ? leftFor(initial) : settings.focusMinutes);
   const [tag, setTag] = useState(TAGS[0]);
   const now = useNow(!!focus);
+  const linked = durationHabits.find((h) => h.habit.id === (focus ? focus.habitId : habitId));
+  const presets = [...new Set([...PRESETS, minutes])].sort((a, b) => a - b);
 
   const planned = focus ? focus.minutes : minutes;
   const remaining = focus ? remainingMs(focus.timer, now) : planned * 60_000;
@@ -90,8 +103,13 @@ export default function FocusScreen() {
             {formatRemaining(remaining)}
           </Heading3D>
           <Txt variant="label" tone="inkSoft">
-            {focus ? (paused ? 'Paused' : focus.tag) : `Plants ${SPECIES_NAME[speciesFor(planned)]}`}
+            {focus ? (paused ? 'Paused' : (linked?.habit.name ?? focus.tag)) : `Plants ${SPECIES_NAME[speciesFor(planned)]}`}
           </Txt>
+          {linked && (
+            <Txt variant="caption" tone="inkSoft">
+              {linked.value}/{linked.habit.target} min today
+            </Txt>
+          )}
         </TimerRing>
       </View>
 
@@ -115,17 +133,36 @@ export default function FocusScreen() {
         <Card style={styles.setup}>
           <SectionTitle>Length</SectionTitle>
           <View style={styles.chips}>
-            {PRESETS.map((m) => (
+            {presets.map((m) => (
               <Chip key={m} label={`${m} min`} selected={minutes === m} onPress={() => setMinutes(m)} />
             ))}
           </View>
+          {durationHabits.length > 0 && (
+            <>
+              <SectionTitle>Counts toward</SectionTitle>
+              <View style={styles.chips}>
+                <Chip label="Nothing" selected={!habitId} onPress={() => setHabitId(undefined)} />
+                {durationHabits.map((h) => (
+                  <Chip
+                    key={h.habit.id}
+                    label={h.habit.name}
+                    selected={habitId === h.habit.id}
+                    onPress={() => {
+                      setHabitId(h.habit.id);
+                      if (!h.done) setMinutes(leftFor(h));
+                    }}
+                  />
+                ))}
+              </View>
+            </>
+          )}
           <SectionTitle>Tag</SectionTitle>
           <View style={styles.chips}>
             {TAGS.map((t) => (
               <Chip key={t} label={t} selected={tag === t} onPress={() => setTag(t)} />
             ))}
           </View>
-          <InkButton label="Start focus" onPress={() => focusActions.start(minutes, tag)} style={styles.start} />
+          <InkButton label="Start focus" onPress={() => focusActions.start(minutes, tag, habitId)} style={styles.start} />
         </Card>
       )}
 

@@ -16,6 +16,7 @@ const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export const LIMITS = {
   countTarget: { min: 2, max: 99 },
+  durationMinutes: { min: 5, max: 240 },
   timesPerWeek: { min: 1, max: 6 },
   everyNDays: { min: 2, max: 30 },
 } as const;
@@ -29,6 +30,12 @@ export function validateHabit(input: HabitInput): string | null {
     const { min, max } = LIMITS.countTarget;
     if (!Number.isInteger(input.target) || input.target < min || input.target > max) {
       return `Daily goal must be between ${min} and ${max}.`;
+    }
+  }
+  if (input.kind === 'duration') {
+    const { min, max } = LIMITS.durationMinutes;
+    if (!Number.isInteger(input.target) || input.target < min || input.target > max) {
+      return `Daily minutes must be between ${min} and ${max}.`;
     }
   }
   const s = input.schedule;

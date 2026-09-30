@@ -14,8 +14,8 @@ export const STARTER_HABITS: { id: string; note: string; input: HabitInput }[] =
   },
   {
     id: 'meditate',
-    note: 'Every day',
-    input: { name: 'Meditate', kind: 'check', target: 1, schedule: { type: 'daily' } },
+    note: '10 minutes a day, with the focus timer',
+    input: { name: 'Meditate', kind: 'duration', target: 10, schedule: { type: 'daily' } },
   },
   {
     id: 'exercise',

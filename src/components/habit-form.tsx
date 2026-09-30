@@ -77,6 +77,7 @@ export function HabitForm({
   const [name, setName] = useState(initial?.name ?? '');
   const [kind, setKind] = useState<HabitKind>(initial?.kind ?? 'check');
   const [target, setTarget] = useState(initial && initial.kind === 'count' ? initial.target : 8);
+  const [minutes, setMinutes] = useState(initial && initial.kind === 'duration' ? initial.target : 30);
   const [scheduleType, setScheduleType] = useState<ScheduleType>(s?.type ?? 'daily');
   const [days, setDays] = useState<number[]>(s?.type === 'weekdays' ? s.days : [1, 2, 3, 4, 5]);
   const [times, setTimes] = useState(s?.type === 'timesPerWeek' ? s.times : 3);
@@ -120,7 +121,7 @@ export function HabitForm({
     const input: HabitInput = {
       name,
       kind,
-      target: kind === 'count' ? target : 1,
+      target: kind === 'count' ? target : kind === 'duration' ? minutes : 1,
       schedule: schedule(),
       reminders,
     };
@@ -161,6 +162,7 @@ export function HabitForm({
         <View style={styles.row}>
           <Chip label="Done / not done" selected={kind === 'check'} onPress={() => setKind('check')} />
           <Chip label="Count" selected={kind === 'count'} onPress={() => setKind('count')} />
+          <Chip label="Minutes" selected={kind === 'duration'} onPress={() => setKind('duration')} />
         </View>
         {kind === 'count' && (
           <Stepper
@@ -171,6 +173,22 @@ export function HabitForm({
             unit="times a day"
             onChange={setTarget}
           />
+        )}
+        {kind === 'duration' && (
+          <>
+            <Stepper
+              label="daily minutes"
+              value={minutes}
+              min={LIMITS.durationMinutes.min}
+              max={LIMITS.durationMinutes.max}
+              step={5}
+              unit="minutes a day"
+              onChange={setMinutes}
+            />
+            <Txt variant="caption" tone="inkSoft">
+              Tap the habit on Today to start a focus session for it. Finished sessions add their minutes.
+            </Txt>
+          </>
         )}
       </Card>
 

@@ -149,14 +149,20 @@ export default function TodayScreen() {
                 detail={
                   (habit.kind === 'count'
                     ? `${value}/${habit.target} today · tap to add`
-                    : describeSchedule(habit.schedule)) +
+                    : habit.kind === 'duration'
+                      ? `${value}/${habit.target} min today · tap to focus`
+                      : describeSchedule(habit.schedule)) +
                   (habit.reminders?.length ? ` · reminds ${habit.reminders.join(', ')}` : '')
                 }
                 done={done}
-                progress={habit.kind === 'count' ? Math.min(1, value / habit.target) : undefined}
+                progress={habit.kind === 'check' ? undefined : Math.min(1, value / habit.target)}
                 streak={streak.current}
                 streakUnit={habit.schedule.type === 'timesPerWeek' ? 'weeks' : 'days'}
-                onToggle={() => state.toggleHabit(habit.id)}
+                onToggle={() =>
+                  habit.kind === 'duration'
+                    ? router.navigate({ pathname: '/focus', params: { habit: habit.id } })
+                    : state.toggleHabit(habit.id)
+                }
                 onEdit={() => router.push({ pathname: '/habit/[id]', params: { id: habit.id } })}
               />
             ))}

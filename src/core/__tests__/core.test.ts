@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { addDays, daysBetween, toLocalDate, weekday } from '../dates';
-import { dailyValues, Habit, HabitEvent, habitStreak } from '../habits';
+import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn } from '../habits';
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
@@ -323,5 +323,24 @@ describe('streak status', () => {
       nextMilestone: 7,
     });
     expect(streakStatus({ ...s, current: 400 }, '2026-09-30').nextMilestone).toBe(730);
+  });
+});
+
+describe('duration habits', () => {
+  const habit = { name: 'Read', kind: 'duration' as const, target: 30, schedule: { type: 'daily' as const } };
+
+  it('validates minutes and keeps the target', () => {
+    expect(validateHabit(habit)).toBeNull();
+    expect(validateHabit({ ...habit, target: 3 })).toMatch(/minutes/);
+    expect(validateHabit({ ...habit, target: 300 })).toMatch(/minutes/);
+    expect(normalizeHabit(habit).target).toBe(30);
+  });
+
+  it('is done once logged minutes reach the target', () => {
+    const h: Habit = { id: 'h', kind: 'duration', target: 30, schedule: { type: 'daily' }, createdOn: '2026-09-01' };
+    const events = [done('h', '2026-09-29', 20, 'a'), done('h', '2026-09-29', 15, 'b'), done('h', '2026-09-30', 25, 'c')];
+    const values = dailyValues(events);
+    expect(isDoneOn(h, values, '2026-09-29')).toBe(true);
+    expect(isDoneOn(h, values, '2026-09-30')).toBe(false);
   });
 });
