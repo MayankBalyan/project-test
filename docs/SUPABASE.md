@@ -28,7 +28,8 @@ Sign-in emails are not really sent locally. Open Mailpit at http://127.0.0.1:543
 ## Hosted project
 
 1. Create a project at https://supabase.com/dashboard.
-2. Apply the migrations:
+2. Apply the migrations, oldest first: either paste each file from `supabase/migrations/` into the
+   **SQL Editor** and run it, or use the CLI:
    ```bash
    npx supabase login
    npx supabase link --project-ref <your-project-ref>
