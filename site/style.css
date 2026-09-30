@@ -17,6 +17,9 @@
   --display: 'Anton', Impact, 'Arial Narrow', sans-serif;
   --label: 'Oswald', 'Arial Narrow', sans-serif;
   --body: 'Space Mono', ui-monospace, Menlo, monospace;
+  /* Motion: fast out, soft landing. */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --fast: 180ms;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -52,7 +55,12 @@ img, svg { display: block; max-width: 100%; }
 .brand { flex-shrink: 0; display: flex; align-items: center; gap: 10px; text-decoration: none; font: 500 16px var(--label); letter-spacing: 0.12em; text-transform: uppercase; }
 .nav ul { display: flex; flex-wrap: wrap; gap: 8px 28px; list-style: none; margin: 0; padding: 0; }
 .nav ul a { font: 500 14px var(--label); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; color: var(--ink-soft); }
-.nav ul a:hover, .nav ul a[aria-current='page'] { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+.nav ul a:not(.btn) {
+  padding-bottom: 4px;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+  transition: background-size 220ms var(--ease), color var(--fast) var(--ease);
+}
+.nav ul a:not(.btn):hover, .nav ul a[aria-current='page'] { color: var(--ink); background-size: 100% 2px; }
 
 /* The 3D display heading: white face, ink outline, stacked ink extrusion */
 .h3d {
@@ -85,9 +93,11 @@ img, svg { display: block; max-width: 100%; }
   display: inline-flex; align-items: center; justify-content: center;
   padding: 14px 26px; border: 2px solid var(--ink); border-radius: 999px;
   font: 500 16px var(--label); letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
-  transition: transform 120ms ease;
+  transition: transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
 }
-.btn:active { transform: scale(0.97); }
+/* Buttons lift onto the same stacked ink shadow as the 3D headings. */
+.btn:not([aria-disabled='true']):hover { transform: translate(-2px, -2px); box-shadow: 3px 4px 0 var(--ink); }
+.btn:not([aria-disabled='true']):active { transform: translate(0, 0) scale(0.97); box-shadow: 0 0 0 var(--ink); transition-duration: 80ms; }
 .btn.primary { background: var(--ink); color: var(--paper); }
 .btn[aria-disabled='true'] { opacity: 0.45; cursor: default; }
 .btn:focus-visible, a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -220,8 +230,8 @@ footer nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
 .faq details:first-of-type { border-top: 2px solid var(--ink); }
 .faq summary { cursor: pointer; list-style: none; font: 700 18px var(--label); letter-spacing: 0.05em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 16px; }
 .faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: '+'; font-family: var(--display); font-size: 24px; line-height: 1; }
-.faq details[open] summary::after { content: '–'; }
+.faq summary::after { content: '+'; font-family: var(--display); font-size: 24px; line-height: 1; transition: transform 240ms var(--ease); }
+.faq details[open] summary::after { transform: rotate(45deg); }
 .faq details p { margin: 12px 0 0; color: var(--ink-soft); }
 
 .cta { position: relative; text-align: center; padding: 120px 0 110px; }
@@ -249,3 +259,60 @@ footer nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
   .section { padding-top: 72px; }
   .ticker span { font-size: 20px; }
 }
+
+/* ---------- Motion ---------- */
+/* Everything below animates opacity, translate and scale only, and is off when people ask for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero: copy slides up in sequence, art pops in, phones rise into place. */
+  .hero-copy > * { animation: rise 640ms var(--ease) both; }
+  .hero-copy > :nth-child(2) { animation-delay: 70ms; }
+  .hero-copy > :nth-child(3) { animation-delay: 160ms; }
+  .hero-copy > :nth-child(4) { animation-delay: 240ms; }
+  .hero-copy > :nth-child(5) { animation-delay: 300ms; }
+  .hero-c .art .float { animation: pop 820ms var(--ease) both, drift 9s ease-in-out infinite; }
+  .hero-c .art .h-blob-r { animation-delay: 0ms, 0s; }
+  .hero-c .art .h-blob-l { animation-delay: 90ms, -4s; }
+  .hero-c .art .h-planet { animation-delay: 200ms, -2s; }
+  .hero-c .art .h-moon { animation-delay: 280ms, -6s; }
+  .h-spark { animation: twinkle 3.2s ease-in-out infinite; }
+  .h-spark.s2 { animation-delay: -1.1s; }
+  .h-spark.s3 { animation-delay: -2.2s; }
+  .phones .phone { animation: rise-far 900ms var(--ease) both; }
+  .phones .mid { animation-delay: 260ms; }
+  .phones .tilt-l { animation-delay: 360ms; }
+  .phones .tilt-r { animation-delay: 440ms; }
+
+  /* Cards and phones lift on hover. */
+  .step { transition: transform 220ms var(--ease), box-shadow 220ms var(--ease); }
+  .step:hover { transform: translate(-3px, -4px); box-shadow: 5px 7px 0 var(--ink); }
+  .feature .phone { transition: transform 360ms var(--ease), box-shadow 360ms var(--ease); }
+  .feature .phone:hover, .feature.flip .phone:hover { transform: rotate(0deg) translateY(-8px); box-shadow: 9px 12px 0 var(--ink); }
+  .ticker:hover .ticker-track { animation-play-state: paused; }
+
+  /* FAQ answers open and close smoothly where the browser supports it. */
+  .faq { interpolate-size: allow-keywords; }
+  .faq details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition: block-size 280ms var(--ease), content-visibility 280ms allow-discrete;
+  }
+  .faq details[open]::details-content { block-size: auto; }
+  .faq details[open] p { animation: rise 320ms var(--ease) both; }
+
+  /* Reveal on scroll (motion.js adds .rv and then .in). */
+  .motion .rv {
+    opacity: 0;
+    translate: 0 28px;
+    transition: opacity 520ms var(--ease), translate 680ms var(--ease), scale 680ms var(--ease),
+      transform 220ms var(--ease), box-shadow 220ms var(--ease);
+  }
+  .motion .h3d.rv { scale: 0.94; }
+  .motion .rv.in { opacity: 1; translate: 0 0; scale: 1; }
+  .motion .feature .phone.rv { transition: opacity 520ms var(--ease), translate 680ms var(--ease),
+      transform 360ms var(--ease), box-shadow 360ms var(--ease); }
+}
+
+@keyframes rise { from { opacity: 0; translate: 0 22px; } }
+@keyframes rise-far { from { opacity: 0; translate: 0 90px; } }
+@keyframes pop { from { opacity: 0; scale: 0.6; } }
+@keyframes twinkle { 50% { opacity: 0.35; scale: 0.6; } }
