@@ -13,7 +13,7 @@ import { ISLAND_NAME_MAX, MAX_STARTER_PICKS, STARTER_HABITS } from '@/core/start
 import { speciesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useAuth } from '@/state/auth';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 const FOCUS_OPTIONS = [
   { minutes: 25, note: 'A good start. Grows a shrub.' },
@@ -96,7 +96,7 @@ function Steps({ step }: { step: number }) {
 export default function WelcomeScreen() {
   const wide = useIsWide();
   const { width } = useWindowDimensions();
-  const { habitActions, updateSettings, settings } = useRootline();
+  const { habitActions, updateSettings, settings } = useIstel();
   const { configured: signInAvailable } = useAuth();
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
@@ -203,7 +203,7 @@ export default function WelcomeScreen() {
               }}
               hitSlop={8}
               style={styles.signIn}>
-              <Txt variant="label">Already use Rootline? Sign in</Txt>
+              <Txt variant="label">Already use Istel? Sign in</Txt>
             </Pressable>
           )}
         </>

@@ -19,7 +19,7 @@ import {
 } from '@/core/timer';
 import { speciesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
-import { FocusMode, useNow, useRootline } from '@/state/store';
+import { FocusMode, useNow, useIstel } from '@/state/store';
 
 const PRESETS = [10, 25, 50, 90];
 const TAGS = ['Study', 'Work', 'Reading'];
@@ -74,7 +74,7 @@ export default function FocusScreen() {
 
 function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const wide = useIsWide();
-  const { focus, focusActions, sessionsToday, settings, habitStats, interruption, clearInterruption } = useRootline();
+  const { focus, focusActions, sessionsToday, settings, habitStats, interruption, clearInterruption } = useIstel();
   const [mode, setMode] = useState<FocusMode>('timer');
   const durationHabits = habitStats.filter((h) => h.habit.kind === 'duration');
   const initial = durationHabits.find((h) => h.habit.id === initialHabitId);
@@ -171,7 +171,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
           {interruption && (
             <View style={styles.interruption} role="alert">
               <Txt variant="bodyBold">
-                You left Rootline for {interruption.awaySeconds}s, so that session wilted.
+                You left Istel for {interruption.awaySeconds}s, so that session wilted.
               </Txt>
               <Pressable role="button" onPress={clearInterruption} hitSlop={8}>
                 <Txt variant="label">OK</Txt>

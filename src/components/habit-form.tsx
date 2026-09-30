@@ -95,9 +95,9 @@ export function HabitForm({
     setPermissionNote(
       granted
         ? notificationReach === 'while-open'
-          ? 'In the browser, reminders only show while Rootline is open in a tab.'
+          ? 'In the browser, reminders only show while Istel is open in a tab.'
           : null
-        : 'Notifications are turned off for Rootline. Allow them in your device or browser settings.',
+        : 'Notifications are turned off for Istel. Allow them in your device or browser settings.',
     );
   };
 

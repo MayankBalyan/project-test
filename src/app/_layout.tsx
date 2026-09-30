@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/state/auth';
-import { RootlineProvider } from '@/state/store';
+import { IstelProvider } from '@/state/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -40,7 +40,7 @@ export default function RootLayout() {
     <ThemeProvider value={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <AuthProvider>
-        <RootlineProvider>
+        <IstelProvider>
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors[scheme].paper } }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
@@ -50,7 +50,7 @@ export default function RootLayout() {
             <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
             <Stack.Screen name="auth/callback" />
           </Stack>
-        </RootlineProvider>
+        </IstelProvider>
       </AuthProvider>
     </ThemeProvider>
   );

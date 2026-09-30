@@ -10,9 +10,9 @@ export interface ExportInput {
   sessions: { date: string; minutes: number; status: string; tag: string }[];
 }
 
-/** Everything Rootline stores, as one JSON document the user can keep or import later. */
+/** Everything Istel stores, as one JSON document the user can keep or import later. */
 export function toJsonExport(data: ExportInput): string {
-  return JSON.stringify({ app: 'rootline', version: EXPORT_VERSION, ...data }, null, 2);
+  return JSON.stringify({ app: 'istel', version: EXPORT_VERSION, ...data }, null, 2);
 }
 
 function cell(value: string | number): string {

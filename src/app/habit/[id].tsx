@@ -6,7 +6,7 @@ import { HabitForm } from '@/components/habit-form';
 import { Heading3D } from '@/components/heading-3d';
 import { InkButton, Screen, Txt } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 function close() {
   if (router.canGoBack()) router.back();
@@ -15,7 +15,7 @@ function close() {
 
 export default function EditHabitScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { today, habits, habitActions } = useRootline();
+  const { today, habits, habitActions } = useIstel();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const habit = habits.find((h) => h.id === id);
 

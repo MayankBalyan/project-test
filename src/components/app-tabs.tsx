@@ -51,7 +51,7 @@ function Bar({ wide, children, ...props }: TabListProps & { wide: boolean }) {
           <View style={styles.brand}>
             <LogoMark size={28} />
             <Txt variant="label" style={styles.brandText}>
-              Rootline
+              Istel
             </Txt>
           </View>
           <View style={styles.topLinks}>

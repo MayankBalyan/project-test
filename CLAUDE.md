@@ -1,4 +1,4 @@
-# Rootline
+# Istel
 
 Habit tracker + Pomodoro focus timer + a growing island world. Cross-device (iOS, Android, Web; desktop later).
 Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
@@ -9,7 +9,7 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
    or anything visual, ask the owner for an image that shows their design idea. Build the design from that image,
    then record the theme (colors, typography, shapes, mood) in [docs/DESIGN.md](docs/DESIGN.md) and follow it
    everywhere in the project. Do not invent a visual style without the owner's image.
-2. The app is named **Rootline** for now.
+2. The app is named **Istel** (renamed from Rootline by the owner). Website and email domain: `istel.space`.
 3. **Theme: "Ink & Cosmos"** (from the owner's reference, `docs/design-reference.png`). Monochrome ink on grainy
    paper, starry black blobs, engraving-style space art. Every major heading and hero number uses the 3D font
    component `Heading3D`. Use tokens from `src/constants/theme.ts` and primitives from `src/components/ui.tsx`;

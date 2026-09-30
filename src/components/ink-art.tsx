@@ -132,7 +132,7 @@ export function Moon({ size, style }: { size: number; style?: StyleProp<ViewStyl
   );
 }
 
-/** Rootline mark: an orbit spiral with a sprout, echoing the reference logo. */
+/** Istel mark: an orbit spiral with a sprout, echoing the reference logo. */
 export function LogoMark({ size = 28, color }: { size?: number; color?: string }) {
   const palette = usePalette();
   const ink = color ?? palette.ink;

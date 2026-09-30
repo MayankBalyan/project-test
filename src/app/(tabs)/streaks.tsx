@@ -11,7 +11,7 @@ import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { focusStats, formatMinutes } from '@/core/focus-stats';
 import { usePalette } from '@/hooks/use-palette';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 function formatDay(date: string) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
@@ -25,7 +25,7 @@ function formatDay(date: string) {
 
 export default function StreaksScreen() {
   const palette = usePalette();
-  const { days, global, habitStats, habits, today, sessions } = useRootline();
+  const { days, global, habitStats, habits, today, sessions } = useIstel();
   const focus = useMemo(() => focusStats(sessions, today), [sessions, today]);
   const archived = habits.filter((h) => h.archivedAt);
   const edit = (id: string) => router.push({ pathname: '/habit/[id]', params: { id } });

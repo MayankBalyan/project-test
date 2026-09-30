@@ -220,12 +220,12 @@ describe('auth input', () => {
   });
 
   it('reads codes and errors from OAuth redirects', () => {
-    expect(parseAuthRedirect('rootline://auth/callback?code=abc123')).toEqual({ code: 'abc123' });
+    expect(parseAuthRedirect('istel://auth/callback?code=abc123')).toEqual({ code: 'abc123' });
     expect(parseAuthRedirect('http://localhost:8081/auth/callback?code=x#')).toEqual({ code: 'x' });
-    expect(parseAuthRedirect('rootline://auth/callback#error=access_denied&error_description=User+cancelled')).toEqual({
+    expect(parseAuthRedirect('istel://auth/callback#error=access_denied&error_description=User+cancelled')).toEqual({
       error: 'User cancelled',
     });
-    expect(parseAuthRedirect('rootline://auth/callback')).toEqual({});
+    expect(parseAuthRedirect('istel://auth/callback')).toEqual({});
   });
 });
 
@@ -256,7 +256,7 @@ describe('export', () => {
   });
 
   it('writes JSON with a version', () => {
-    expect(JSON.parse(toJsonExport(data))).toMatchObject({ app: 'rootline', version: 1, habits: data.habits });
+    expect(JSON.parse(toJsonExport(data))).toMatchObject({ app: 'istel', version: 1, habits: data.habits });
   });
 });
 

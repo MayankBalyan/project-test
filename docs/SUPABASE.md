@@ -1,6 +1,6 @@
 # Supabase setup
 
-Rootline uses Supabase for accounts. Sign-in is optional: without Supabase settings the app still works fully on
+Istel uses Supabase for accounts. Sign-in is optional: without Supabase settings the app still works fully on
 the device, and the Sign in screen says it is not set up.
 
 ## How sign-in works
@@ -39,7 +39,7 @@ Sign-in emails are not really sent locally. Open Mailpit at http://127.0.0.1:543
    (you can paste `supabase/templates/sign-in-code.html`). Without it the email only has a link and the app
    cannot use it.
 4. **Auth > URL Configuration:** set the Site URL to where the web app is hosted and add these redirect URLs:
-   `rootline://auth/callback`, `https://<your-web-domain>/auth/callback`, and `exp://**` for Expo Go during
+   `istel://auth/callback`, `https://<your-web-domain>/auth/callback`, and `exp://**` for Expo Go during
    development.
 5. For real email volume, set up custom SMTP under **Auth > SMTP Settings** (the built-in sender is rate-limited).
 6. Put the project URL and publishable key from the **Connect** dialog into `.env`.

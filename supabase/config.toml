@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "rootline"
+project_id = "istel"
 
 [api]
 enabled = true
@@ -160,7 +160,7 @@ site_url = "http://localhost:8081"
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
-  "rootline://auth/callback",
+  "istel://auth/callback",
   "exp://**",
   "http://localhost:8081/auth/callback",
   "http://127.0.0.1:8081/auth/callback",
@@ -237,13 +237,13 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Rootline signs in with a 6-digit code typed into the app, so the emails must show {{ .Token }}.
+# Istel signs in with a 6-digit code typed into the app, so the emails must show {{ .Token }}.
 [auth.email.template.magic_link]
-subject = "Your Rootline code"
+subject = "Your Istel code"
 content_path = "./supabase/templates/sign-in-code.html"
 
 [auth.email.template.confirmation]
-subject = "Your Rootline code"
+subject = "Your Istel code"
 content_path = "./supabase/templates/sign-in-code.html"
 
 # Use a production-ready SMTP server

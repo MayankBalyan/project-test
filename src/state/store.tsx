@@ -129,7 +129,7 @@ function loadFocus(): Versioned<ActiveFocus | null> {
   return { value: (stored as ActiveFocus | null) ?? null, updatedAt: 0 };
 }
 
-function useRootlineState() {
+function useIstelState() {
   const { user } = useAuth();
   const [allHabits, setAllHabits] = useState<NamedHabit[]>(() => load('habits', []));
   const [events, setEvents] = useState<HabitEvent[]>(() => load('events', []));
@@ -488,16 +488,16 @@ function useRootlineState() {
   };
 }
 
-type RootlineState = ReturnType<typeof useRootlineState>;
-const RootlineContext = createContext<RootlineState | null>(null);
+type IstelState = ReturnType<typeof useIstelState>;
+const IstelContext = createContext<IstelState | null>(null);
 
-export function RootlineProvider({ children }: { children: ReactNode }) {
-  const state = useRootlineState();
-  return <RootlineContext.Provider value={state}>{children}</RootlineContext.Provider>;
+export function IstelProvider({ children }: { children: ReactNode }) {
+  const state = useIstelState();
+  return <IstelContext.Provider value={state}>{children}</IstelContext.Provider>;
 }
 
-export function useRootline() {
-  const ctx = useContext(RootlineContext);
-  if (!ctx) throw new Error('useRootline must be used inside RootlineProvider');
+export function useIstel() {
+  const ctx = useContext(IstelContext);
+  if (!ctx) throw new Error('useIstel must be used inside IstelProvider');
   return ctx;
 }

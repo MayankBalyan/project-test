@@ -2,7 +2,7 @@ import type { PlannedNotification } from '@/core/notify-plan';
 
 export type Permission = 'granted' | 'denied' | 'undetermined';
 
-/** Browsers can only show these while Rootline is open in a tab (no background scheduling). */
+/** Browsers can only show these while Istel is open in a tab (no background scheduling). */
 export const notificationReach: 'always' | 'while-open' = 'while-open';
 
 const supported = () => typeof window !== 'undefined' && 'Notification' in window;

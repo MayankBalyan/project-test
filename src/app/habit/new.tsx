@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 
 import { HabitForm } from '@/components/habit-form';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 export default function NewHabitScreen() {
-  const { today, habitActions } = useRootline();
+  const { today, habitActions } = useIstel();
   return (
     <HabitForm
       title="New habit"

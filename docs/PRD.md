@@ -1,8 +1,8 @@
-# Rootline — Product Requirements Document
+# Istel — Product Requirements Document
 
 | | |
 |---|---|
-| **Product** | Rootline (working title) |
+| **Product** | Istel (working title) |
 | **Type** | Cross-device habit tracker + focus timer with a growing "living world" |
 | **Status** | Draft v0.1 |
 | **Author** | Mayank Balyan |
@@ -12,7 +12,7 @@
 
 ## 1. Summary
 
-Rootline is a habit-building app that combines three ideas into one loop:
+Istel is a habit-building app that combines three ideas into one loop:
 
 1. **Habit tracking** with GitHub-style streaks and a contribution heatmap.
 2. **A Pomodoro focus timer** for deep work sessions.
@@ -41,11 +41,11 @@ Every focus session and every completed habit feeds the same world. Consistency 
 - Deep integrations with to-do tools (Todoist, Notion). Considered for v2.
 - Paid real-world tree planting (a possible later partnership, not v1).
 
-## 4. How Rootline differs from Forest
+## 4. How Istel differs from Forest
 
 We take inspiration from the idea that "your focus grows something." We do not copy the mechanic.
 
-| Forest | Rootline |
+| Forest | Istel |
 |---|---|
 | One tree per session, placed in a grid | **One evolving ecosystem** (an island) that changes over time |
 | Trees are finished right away | Plants **mature over days** and only reach full growth if you keep coming back |
@@ -301,7 +301,7 @@ Friends and shared "group islands", timelapse video, watch apps, integrations (G
 
 ## 13. Monetization (proposal)
 - **Free**: all core habits, streaks, timer, sync, Meadow + 1 extra biome.
-- **Rootline Plus** (optional subscription): all biomes and species packs, advanced stats, timelapse export, custom themes.
+- **Istel Plus** (optional subscription): all biomes and species packs, advanced stats, timelapse export, custom themes.
 - Never sell streak freezes or anything that "buys" progress. Progress must come from real effort.
 
 ## 14. Risks and mitigations
@@ -316,7 +316,7 @@ Friends and shared "group islands", timelapse video, watch apps, integrations (G
 | Looks too similar to Forest | Distinct mechanics (one evolving ecosystem, watering by habits, no deaths), original art style and naming |
 
 ## 15. Open questions
-1. Final product name? "Rootline" is a working title.
+1. Final product name? "Istel" is a working title.
 2. 2D isometric vs. light 3D for the world long-term?
 3. Should "Stay Focused" mode be on by default or opt-in?
 4. Should friends be able to visit each other's islands in v2?

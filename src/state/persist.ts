@@ -1,6 +1,7 @@
 // On iOS/Android this installs a localStorage backed by SQLite; on web it is a no-op and the browser's is used.
 import 'expo-sqlite/localStorage/install';
 
+// The app was called Rootline before it became Istel. This prefix stays so data already saved on devices is kept.
 const PREFIX = 'rootline:v1:';
 
 export type StoredKey = 'habits' | 'events' | 'sessions' | 'focus' | 'settings' | 'sync';

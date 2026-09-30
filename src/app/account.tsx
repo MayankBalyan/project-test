@@ -9,7 +9,7 @@ import { Spacing } from '@/constants/theme';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, OTP_LENGTH } from '@/core/auth-input';
 import { usePalette } from '@/hooks/use-palette';
 import { useAuth } from '@/state/auth';
-import { useNow, useRootline } from '@/state/store';
+import { useNow, useIstel } from '@/state/store';
 import type { SyncStatus } from '@/state/use-sync';
 
 const RESEND_AFTER_MS = 30_000;
@@ -63,7 +63,7 @@ function syncLine(status: SyncStatus, pending: number, now: number): string {
 
 function SignedIn() {
   const { user, signOut } = useAuth();
-  const { sync, deleteAccount } = useRootline();
+  const { sync, deleteAccount } = useIstel();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<'out' | 'delete' | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -206,7 +206,7 @@ function SignIn() {
     <Screen>
       <Header title={'Sign in'} />
       <Txt variant="bodyBold" tone="inkSoft">
-        Keep your streaks safe and pick up on any device. Rootline also works without an account.
+        Keep your streaks safe and pick up on any device. Istel also works without an account.
       </Txt>
 
       {!auth.configured ? (

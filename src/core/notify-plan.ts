@@ -47,7 +47,7 @@ function deviceInstant(date: LocalDate, hour: number, minute: number): number {
 }
 
 /**
- * Everything Rootline should notify about, as one-off notifications over the next `days` days.
+ * Everything Istel should notify about, as one-off notifications over the next `days` days.
  * One-off (not repeating) notifications let us skip reminders for habits already done today;
  * the app re-plans whenever something changes and each time it opens.
  */

@@ -1,4 +1,4 @@
-# Rootline design theme — "Ink & Cosmos"
+# Istel design theme — "Ink & Cosmos"
 
 Source: the owner's reference image (a "Voyager — Explore the Space" landing page), saved at
 [`docs/design-reference.png`](design-reference.png). Every screen follows this file. Change it only when the owner
@@ -9,7 +9,7 @@ shares a new reference.
 Black ink on grainy paper. Hand-drawn, engraving-style space illustrations (planets, moons, stars, telescopes)
 floating between big organic black blobs filled with stars. Calm, playful, strictly monochrome.
 
-For Rootline this becomes the story: **your island floats in space**. Focus plants things on it, habits water
+For Istel this becomes the story: **your island floats in space**. Focus plants things on it, habits water
 them, and streaks light up more stars around it.
 
 ## Color (monochrome only — no hues)
@@ -59,7 +59,7 @@ leaves), never a dead tree.
 ## Layout
 
 - Phone: content column with 20px gutters and a floating ink pill tab bar at the bottom.
-- Wide screens (≥ 768px, web/desktop/tablet): top nav like the reference — logo mark + **ROOTLINE** on the
+- Wide screens (≥ 768px, web/desktop/tablet): top nav like the reference — logo mark + **ISTEL** on the
   left, uppercase Oswald links on the right. Content max width 760px.
 
 ## Motion

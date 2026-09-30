@@ -10,7 +10,7 @@ import { toCsvExport, toJsonExport } from '@/core/export';
 import { ISLAND_NAME_MAX } from '@/core/starters';
 import { getPermission, notificationReach, Permission, requestPermission } from '@/lib/notifications';
 import { shareTextFile } from '@/lib/share-file';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 function close() {
   if (router.canGoBack()) router.back();
@@ -27,7 +27,7 @@ function formatEveningHour(h: number) {
 }
 
 export default function SettingsScreen() {
-  const { settings, updateSettings, habits, events, sessions, today, eraseAll, refreshNotifications } = useRootline();
+  const { settings, updateSettings, habits, events, sessions, today, eraseAll, refreshNotifications } = useIstel();
   const [permission, setPermission] = useState<Permission | null>(null);
 
   useEffect(() => {
@@ -65,11 +65,11 @@ export default function SettingsScreen() {
     };
     try {
       await shareTextFile(
-        `rootline-${today}.${format}`,
+        `istel-${today}.${format}`,
         format === 'json' ? toJsonExport(data) : toCsvExport(data),
         format === 'json' ? 'application/json' : 'text/csv',
       );
-      setStatus(`Exported rootline-${today}.${format}`);
+      setStatus(`Exported istel-${today}.${format}`);
     } catch (e) {
       setStatus(e instanceof Error ? e.message : 'Export failed.');
     }
@@ -167,13 +167,13 @@ export default function SettingsScreen() {
         </Txt>
         {permission === 'denied' && (
           <Txt variant="bodyBold" role="alert">
-            ✦ Notifications are blocked for Rootline. Allow them in your device or browser settings.
+            ✦ Notifications are blocked for Istel. Allow them in your device or browser settings.
           </Txt>
         )}
         {permission === 'undetermined' && <InkButton label="Allow notifications" onPress={allow} />}
         {notificationReach === 'while-open' && (
           <Txt variant="caption" tone="muted">
-            In the browser, notifications only show while Rootline is open in a tab. Install the phone app for
+            In the browser, notifications only show while Istel is open in a tab. Install the phone app for
             reminders at any time.
           </Txt>
         )}

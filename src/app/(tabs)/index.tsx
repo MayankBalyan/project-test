@@ -12,7 +12,7 @@ import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { MAX_RAIN_DAYS, streakStatus } from '@/core/streaks';
 import { islandTier, unlocksFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 function formatShort(date: string) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
@@ -36,7 +36,7 @@ export default function TodayScreen() {
   const palette = usePalette();
   const wide = useIsWide();
   const { width } = useWindowDimensions();
-  const state = useRootline();
+  const state = useIstel();
   const { global, habitStats, todayActivity, plants, lifetimeFocusMinutes } = state;
   const due = habitStats.filter((h) => h.scheduledToday);
   const status = streakStatus(global, state.today);
@@ -49,7 +49,7 @@ export default function TodayScreen() {
         <View style={styles.topRow}>
           <View style={styles.brand}>
             <LogoMark size={24} />
-            <Txt variant="label">Rootline</Txt>
+            <Txt variant="label">Istel</Txt>
           </View>
           <View style={styles.brand}>
             <SettingsButton />

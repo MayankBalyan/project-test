@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Rootline",
-    "slug": "rootline",
+    "name": "Istel",
+    "slug": "istel",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rootline",
+    "scheme": "istel",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"

@@ -11,7 +11,7 @@ const publishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 export const googleSignInEnabled = process.env.EXPO_PUBLIC_AUTH_GOOGLE === 'true';
 
 /**
- * Null when the app is built without Supabase settings. Rootline still works fully offline then;
+ * Null when the app is built without Supabase settings. Istel still works fully offline then;
  * only sign-in is unavailable.
  */
 export const supabase: SupabaseClient | null =

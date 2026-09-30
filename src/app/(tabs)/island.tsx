@@ -8,7 +8,7 @@ import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { islandTier, nextUnlock, PlantStage, Species, STREAK_UNLOCKS, unlocksFor, WATERINGS_TO_MATURE } from '@/core/world';
 import { usePalette } from '@/hooks/use-palette';
-import { useRootline } from '@/state/store';
+import { useIstel } from '@/state/store';
 
 const SPECIES_LABEL: Record<Species, string> = {
   flower: 'Flower',
@@ -50,7 +50,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 export default function IslandScreen() {
   const palette = usePalette();
   const { width } = useWindowDimensions();
-  const { plants, global, lifetimeFocusMinutes, settings, sessions } = useRootline();
+  const { plants, global, lifetimeFocusMinutes, settings, sessions } = useIstel();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = plants.find((p) => p.id === selectedId);
   const session = sessions.find((s) => s.id === selectedId);
