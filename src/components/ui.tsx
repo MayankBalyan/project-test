@@ -40,7 +40,16 @@ export function Txt({
 const grain = require('@/assets/textures/grain.png');
 
 /** Paper background with grain, safe-area padding and a centered content column. */
-export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
+export function Screen({
+  children,
+  scroll = true,
+  center = false,
+}: {
+  children: ReactNode;
+  scroll?: boolean;
+  /** Center the content vertically (short screens like sign-in) instead of stacking it from the top. */
+  center?: boolean;
+}) {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   const wide = useIsWide();
@@ -49,6 +58,7 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
       style={[
         styles.column,
         { paddingTop: wide ? Spacing.four : insets.top + Spacing.three, paddingBottom: wide ? Spacing.six : 120 },
+        center && [styles.centered, { paddingBottom: insets.bottom + Spacing.four }],
       ]}>
       {children}
     </View>
@@ -265,6 +275,7 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   grain: { width: '100%', height: '100%', opacity: 0.9 },
   scroll: { flexGrow: 1 },
+  centered: { flexGrow: 1, justifyContent: 'center' },
   column: {
     width: '100%',
     maxWidth: MaxContentWidth,
