@@ -6,6 +6,20 @@ import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
 import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { focusStats, formatMinutes } from '../focus-stats';
+import {
+  addToOutbox,
+  applyPulled,
+  clearSent,
+  EMPTY_OUTBOX,
+  eventToRow,
+  fullOutbox,
+  habitToRow,
+  nextCursor,
+  rowToEvent,
+  rowToHabit,
+  rowToSession,
+  sessionToRow,
+} from '../sync';
 import { endsAt, formatRemaining, leftTooLong, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
 import { formatTime, normalizeHabit, validateHabit } from '../habit-input';
@@ -389,5 +403,78 @@ describe('focus stats', () => {
 
   it('formats minutes', () => {
     expect([formatMinutes(45), formatMinutes(60), formatMinutes(135)]).toEqual(['45m', '1h', '2h 15m']);
+  });
+});
+
+describe('sync merge', () => {
+  const habit = (id: string, name: string, updatedAt: number, extra = {}) => ({
+    id,
+    name,
+    kind: 'check' as const,
+    target: 1,
+    schedule: { type: 'daily' as const },
+    createdOn: '2026-09-01',
+    updatedAt,
+    ...extra,
+  });
+  const session = (id: string) => ({ id, date: '2026-09-30', minutes: 25, status: 'done' as const, tag: 'Study', createdAt: 1 });
+  const base = {
+    habits: [habit('a', 'Read', 100), habit('b', 'Walk', 100)],
+    events: [done('a', '2026-09-29', 1, 'e1'), done('b', '2026-09-29', 1, 'e2')],
+    sessions: [session('s1')],
+    settings: { value: { islandName: 'Local' }, updatedAt: 50 },
+    focus: { value: null, updatedAt: 10 },
+  };
+
+  it('keeps the newest version of each habit and adds new ones', () => {
+    const merged = applyPulled(base, {
+      habits: [habit('a', 'Read more', 200), habit('b', 'Old walk', 90), habit('c', 'Journal', 150)],
+      events: [],
+      sessions: [],
+      settings: null,
+      focus: null,
+    });
+    expect(merged.habits.map((h) => h.name)).toEqual(['Read more', 'Walk', 'Journal']);
+  });
+
+  it('unions check-ins and sessions by id and drops check-ins of deleted habits', () => {
+    const merged = applyPulled(base, {
+      habits: [habit('b', 'Walk', 300, { deletedAt: 300 })],
+      events: [done('a', '2026-09-30', 1, 'e3'), done('a', '2026-09-29', 1, 'e1')],
+      sessions: [session('s1'), session('s2')],
+      settings: { value: { islandName: 'Remote' }, updatedAt: 60 },
+      focus: { value: null, updatedAt: 5 },
+    });
+    expect(merged.events.map((e) => e.id)).toEqual(['e1', 'e3']);
+    expect(merged.sessions.map((s) => s.id)).toEqual(['s1', 's2']);
+    expect(merged.settings.value).toEqual({ islandName: 'Remote' });
+    expect(merged.focus.updatedAt).toBe(10);
+    // Applying the same pull again changes nothing.
+    expect(applyPulled(merged, { habits: [], events: [done('a', '2026-09-30', 1, 'e3')], sessions: [], settings: null, focus: null })).toEqual(merged);
+  });
+
+  it('tracks what still needs sending', () => {
+    let o = addToOutbox(EMPTY_OUTBOX, 'events', ['e1', 'e2']);
+    o = addToOutbox({ ...o, settings: true }, 'events', ['e2', 'e3']);
+    expect(o.events).toEqual(['e1', 'e2', 'e3']);
+    expect(clearSent(o, { ...EMPTY_OUTBOX, events: ['e1', 'e3'], settings: true })).toEqual({ ...EMPTY_OUTBOX, events: ['e2'] });
+    expect(fullOutbox(base)).toMatchObject({ habits: ['a', 'b'], events: ['e1', 'e2'], sessions: ['s1'], settings: true });
+  });
+
+  it('maps rows both ways', () => {
+    const h = habit('a', 'Read', 100, { reminders: ['08:00'], archivedAt: 5 });
+    expect(rowToHabit(habitToRow(h))).toEqual({ ...h, deletedAt: undefined });
+    const e = done('a', '2026-09-29', 3, 'e1');
+    expect(rowToEvent(eventToRow(e))).toEqual(e);
+    const s = { ...session('s1'), habitId: 'a' };
+    expect(rowToSession(sessionToRow(s))).toEqual(s);
+  });
+
+  it('moves the pull cursor forward with a small overlap, never backward', () => {
+    expect(nextCursor(null, [])).toBeNull();
+    const c = nextCursor(null, ['2026-10-01T12:00:10.000Z', '2026-10-01T12:00:20.123456+00:00']);
+    expect(c).toBe('2026-10-01T12:00:15.123Z');
+    expect(nextCursor(c, [])).toBe(c);
+    expect(nextCursor(c, ['2026-10-01T12:00:16.000Z'])).toBe(c);
   });
 });

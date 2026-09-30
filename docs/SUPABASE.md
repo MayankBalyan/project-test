@@ -54,8 +54,24 @@ Sign-in emails are not really sent locally. Open Mailpit at http://127.0.0.1:543
 Locally, set `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET` and turn on
 `[auth.external.google]` in `supabase/config.toml`.
 
+## Sync
+
+`supabase/migrations/20261001120000_sync.sql` adds the synced tables (habits, check-ins, focus sessions,
+settings, the running timer) and `delete_my_account()`.
+
+- Every table has row-level security: people only reach their own rows. Check-ins and sessions can only be
+  added, never edited. Tested with two users trying to read, edit and insert into each other's data.
+- Conflicts: habits, settings and the timer keep the newest change (by the time it was made on the device);
+  check-ins and sessions are merged by id, so nothing is counted twice.
+- The app syncs right after sign-in, a moment after each change, when it comes back to the foreground, and
+  every minute. Changes made offline wait and go out on the next sync.
+- The first sign-in on a device uploads what is already there. Signing in to a different account on a device
+  that holds another account's data clears that data from the device instead of uploading it.
+- Deleting the account (Account screen) removes the user and all their rows everywhere.
+
 ## Not done yet
 
-- Syncing habits, check-ins and focus sessions to the account (next step; data stays on the device for now).
-- Sign in with Apple (needs an Apple Developer account; required on iOS if Google sign-in ships there).
-- Deleting an account from inside the app.
+- Instant updates between devices (Supabase Realtime); today another device catches up within a minute or
+  when it is opened.
+- Sign in with Apple (not needed while the app is Android-only).
+- The public web page for account deletion requests that Google Play asks for.

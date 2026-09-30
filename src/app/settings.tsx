@@ -207,7 +207,8 @@ export default function SettingsScreen() {
           }}
         />
         <Txt variant="caption" tone="muted">
-          Erasing removes every habit, check-in, focus session and your island. It can’t be undone.
+          Erasing removes every habit, check-in, focus session and your island from this device. If you’re signed
+          in, your account keeps a copy and it syncs back; delete the account to remove that too.
         </Txt>
       </Card>
     </Screen>

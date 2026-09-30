@@ -28,6 +28,8 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 - `src/lib/notifications(.web).ts` — schedules the plan from `core/notify-plan.ts`. Phones get real scheduled
   notifications; browsers only while the tab is open. The store re-plans after every relevant change.
 - `src/lib/share-file(.web).ts` — export files (share sheet on phones, download on web).
+- Sync: rules in `core/sync.ts` (tested), Supabase calls in `lib/sync.ts`, scheduling and account linking in
+  `state/use-sync.ts`. Every change in the store must record `updatedAt` and add to the outbox (`track`).
 - `supabase/` — local config, migrations and email template. Setup guide: [docs/SUPABASE.md](docs/SUPABASE.md).
   Every table needs row-level security so users only reach their own rows.
 

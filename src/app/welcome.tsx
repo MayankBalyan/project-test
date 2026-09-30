@@ -12,6 +12,7 @@ import { HABIT_NAME_MAX, validateHabit } from '@/core/habit-input';
 import { ISLAND_NAME_MAX, MAX_STARTER_PICKS, STARTER_HABITS } from '@/core/starters';
 import { speciesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
+import { useAuth } from '@/state/auth';
 import { useRootline } from '@/state/store';
 
 const FOCUS_OPTIONS = [
@@ -96,6 +97,7 @@ export default function WelcomeScreen() {
   const wide = useIsWide();
   const { width } = useWindowDimensions();
   const { habitActions, updateSettings, settings } = useRootline();
+  const { configured: signInAvailable } = useAuth();
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<string[]>([]);
   const [custom, setCustom] = useState('');
@@ -191,6 +193,19 @@ export default function WelcomeScreen() {
           <Txt variant="caption" tone="muted" style={styles.center}>
             You can change, add or remove habits any time.
           </Txt>
+          {signInAvailable && (
+            <Pressable
+              role="button"
+              onPress={() => {
+                updateSettings({ onboarded: true });
+                router.replace('/');
+                router.push('/account');
+              }}
+              hitSlop={8}
+              style={styles.signIn}>
+              <Txt variant="label">Already use Rootline? Sign in</Txt>
+            </Pressable>
+          )}
         </>
       )}
 
@@ -287,4 +302,5 @@ const styles = StyleSheet.create({
   optionTitle: { fontSize: 17 },
   summary: { gap: Spacing.one },
   center: { textAlign: 'center' },
+  signIn: { alignSelf: 'center', paddingVertical: Spacing.two },
 });
