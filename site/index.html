@@ -4,15 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Istel — habits, focus and a growing island</title>
-  <meta name="description" content="Istel is a calm habit tracker with GitHub-style streaks, a Pomodoro focus timer and a little island in space that grows as you stay consistent.">
+  <meta name="description" content="Istel is a calm habit tracker with GitHub-style streaks, a Pomodoro focus timer and a little island in space that grows as you stay consistent. Free, no ads, works offline.">
   <meta name="theme-color" content="#e8e7e3">
-  <meta property="og:title" content="Istel">
-  <meta property="og:description" content="Build habits, focus deeply, and watch your island grow.">
+  <link rel="canonical" href="https://istel.space/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://istel.space/">
+  <meta property="og:title" content="Istel — grow your island">
+  <meta property="og:description" content="Build habits, focus deeply, and watch a little island in space grow as you show up.">
+  <meta property="og:image" content="https://istel.space/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="/fonts/Anton_400Regular.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
   <div class="wrap">
     <header class="nav">
       <a class="brand" href="/" aria-label="Istel home">
@@ -20,72 +26,172 @@
         Istel
       </a>
       <nav aria-label="Main">
-        <ul>
-          <li><a href="https://app.istel.space">Open app</a></li>
-          <li><a href="/privacy">Privacy</a></li>
-          <li><a href="/delete-account">Delete account</a></li>
+        <ul class="landing-links">
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a class="btn small primary" href="https://app.istel.space">Open app</a></li>
         </ul>
       </nav>
     </header>
+  </div>
 
-    <main>
-      <section class="hero">
-        <div class="art" aria-hidden="true">
-          <svg class="blob blob-a float" viewBox="0 0 200 200">
-            <defs><clipPath id="b1"><path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z"/></clipPath></defs>
-            <path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z" fill="var(--space)"/>
-            <g clip-path="url(#b1)" fill="#fff">
-              <circle cx="40" cy="60" r="1.6"/><circle cx="150" cy="40" r="1.2"/><circle cx="120" cy="150" r="1.8"/><circle cx="70" cy="140" r="1"/><circle cx="170" cy="110" r="1.4"/><circle cx="95" cy="30" r="1"/><circle cx="30" cy="110" r="1.2"/><circle cx="140" cy="175" r="1"/>
-              <path d="M150 80q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z"/><path d="M60 170q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/>
-            </g>
-          </svg>
-          <svg class="planet float" viewBox="0 0 200 140">
-            <ellipse cx="100" cy="74" rx="92" ry="22" fill="none" stroke="var(--ink)" stroke-width="3" transform="rotate(-14 100 74)"/>
-            <circle cx="100" cy="70" r="44" fill="#fff" stroke="var(--ink)" stroke-width="3"/>
-            <g stroke="var(--ink)"><line x1="68" y1="42" x2="132" y2="45" stroke-width="2.4"/><line x1="60" y1="52" x2="140" y2="55" stroke-width="1.2"/><line x1="57" y1="62" x2="143" y2="65" stroke-width="2.4"/><line x1="57" y1="72" x2="143" y2="75" stroke-width="1.2"/><line x1="60" y1="82" x2="140" y2="85" stroke-width="2.4"/><line x1="66" y1="92" x2="134" y2="95" stroke-width="1.2"/></g>
-            <path d="M18 86 Q100 114 184 62" fill="none" stroke="var(--ink)" stroke-width="3"/>
-          </svg>
-          <svg class="blob blob-b float" viewBox="0 0 200 200">
-            <path d="M104 8c38 2 78 26 88 66 10 42-8 92-48 112-40 20-100 14-128-20C-10 132 2 76 28 42 46 18 72 6 104 8z" fill="var(--space)"/>
-            <g fill="#fff"><circle cx="120" cy="60" r="1.4"/><circle cx="150" cy="120" r="1.8"/><circle cx="90" cy="100" r="1"/><path d="M130 150q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
-          </svg>
-          <svg class="moon float" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="46" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/>
-            <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle cx="32" cy="30" r="9"/><circle cx="62" cy="24" r="5"/><circle cx="70" cy="52" r="10"/><circle cx="40" cy="62" r="6"/><circle cx="55" cy="76" r="5"/></g>
-          </svg>
+  <main id="main">
+    <!-- Hero: centered 3D headline with art floating around it, like the reference -->
+    <section class="hero-c">
+      <div class="art" aria-hidden="true">
+        <svg class="blob h-blob-l float" viewBox="0 0 200 200">
+          <path d="M104 8c38 2 78 26 88 66 10 42-8 92-48 112-40 20-100 14-128-20C-10 132 2 76 28 42 46 18 72 6 104 8z" fill="var(--space)"/>
+          <g fill="#fff"><circle cx="120" cy="60" r="1.4"/><circle cx="150" cy="120" r="1.8"/><circle cx="90" cy="100" r="1"/><circle cx="60" cy="70" r="1.2"/><circle cx="110" cy="160" r="1.4"/><path d="M130 130q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
+        </svg>
+        <svg class="blob h-blob-r float" viewBox="0 0 200 200">
+          <defs><clipPath id="hb"><path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z"/></clipPath></defs>
+          <path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z" fill="var(--space)"/>
+          <g clip-path="url(#hb)" fill="#fff"><circle cx="40" cy="60" r="1.6"/><circle cx="150" cy="40" r="1.2"/><circle cx="120" cy="150" r="1.8"/><circle cx="70" cy="140" r="1"/><circle cx="170" cy="110" r="1.4"/><circle cx="95" cy="30" r="1"/><path d="M150 80q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z"/><path d="M60 170q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
+        </svg>
+        <svg class="h-planet float" viewBox="0 0 200 140">
+          <ellipse cx="100" cy="74" rx="92" ry="22" fill="none" stroke="var(--ink)" stroke-width="3" transform="rotate(-14 100 74)"/>
+          <circle cx="100" cy="70" r="44" fill="#fff" stroke="var(--ink)" stroke-width="3"/>
+          <g stroke="var(--ink)"><line x1="68" y1="42" x2="132" y2="45" stroke-width="2.4"/><line x1="60" y1="52" x2="140" y2="55" stroke-width="1.2"/><line x1="57" y1="62" x2="143" y2="65" stroke-width="2.4"/><line x1="57" y1="72" x2="143" y2="75" stroke-width="1.2"/><line x1="60" y1="82" x2="140" y2="85" stroke-width="2.4"/><line x1="66" y1="92" x2="134" y2="95" stroke-width="1.2"/></g>
+          <path d="M18 86 Q100 114 184 62" fill="none" stroke="var(--ink)" stroke-width="3"/>
+        </svg>
+        <svg class="h-moon float" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="46" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle cx="32" cy="30" r="9"/><circle cx="62" cy="24" r="5"/><circle cx="70" cy="52" r="10"/><circle cx="40" cy="62" r="6"/><circle cx="55" cy="76" r="5"/></g>
+        </svg>
+        <svg class="h-spark s1" viewBox="0 0 20 20"><path d="M10 0q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
+        <svg class="h-spark s2" viewBox="0 0 20 20"><path d="M10 0q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
+        <svg class="h-spark s3" viewBox="0 0 20 20"><path d="M10 0q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
+      </div>
+      <div class="wrap hero-copy">
+        <p class="eyebrow">Habits · Streaks · Focus</p>
+        <h1 class="h3d xl">Grow your<br>island</h1>
+        <p class="lead">A calm habit tracker. Keep streaks like GitHub, focus with a Pomodoro timer, and watch a little island in space grow every time you show up.</p>
+        <div class="actions center">
+          <a class="btn primary" href="https://app.istel.space">Start in your browser</a>
+          <a class="btn" aria-disabled="true" role="link" aria-label="Android app coming soon to Google Play">Android · coming soon</a>
         </div>
-        <div class="copy">
-          <h1 class="h3d xl">Grow your<br>island</h1>
-          <p class="lead">Istel is a calm habit tracker. Keep streaks like GitHub, focus with a Pomodoro timer, and watch a little island in space grow as you show up.</p>
-          <div class="actions">
-            <a class="btn primary" href="https://app.istel.space">Open the web app</a>
-            <a class="btn" aria-disabled="true" role="link" aria-label="Android app coming soon to Google Play">Android · coming soon</a>
+        <p class="fine">Free · No ads · Works offline · No account needed</p>
+      </div>
+
+      <div class="phones" aria-label="Screens from the Istel app">
+        <figure class="phone tilt-l"><img src="/img/focus.jpg" width="390" height="844" alt="Focus screen with a 25-minute timer counting down" loading="eager"></figure>
+        <figure class="phone mid"><img src="/img/today.jpg" width="390" height="844" alt="Today screen with a long streak and today's habits" loading="eager"></figure>
+        <figure class="phone tilt-r"><img src="/img/island.jpg" width="390" height="844" alt="A floating island in space covered in trees grown from focus sessions" loading="eager"></figure>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>Habits ✦ Streaks ✦ Deep focus ✦ Rain Days ✦ Your island ✦ Phone &amp; laptop ✦ </span>
+        <span>Habits ✦ Streaks ✦ Deep focus ✦ Rain Days ✦ Your island ✦ Phone &amp; laptop ✦ </span>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <!-- How it works -->
+      <section id="how" class="section">
+        <h2 class="h3d lg center">How it<br>works</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="num">01</span>
+            <svg viewBox="0 0 120 90" aria-hidden="true"><ellipse cx="60" cy="72" rx="46" ry="10" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5"/><ellipse cx="60" cy="64" rx="9" ry="5" fill="#fff" stroke="var(--ink)" stroke-width="2"/><circle cx="60" cy="62" r="1.8" fill="var(--ink)"/><path d="M92 24q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
+            <h3>Focus to plant</h3>
+            <p>Start a focus session. When it ends, a seed lands on your island. Longer sessions plant bigger things, from flowers to rare oaks.</p>
+          </li>
+          <li class="step">
+            <span class="num">02</span>
+            <svg viewBox="0 0 120 90" aria-hidden="true"><ellipse cx="60" cy="72" rx="46" ry="10" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5"/><path d="M60 66V44" stroke="var(--ink)" stroke-width="3"/><path d="M60 46q-12-2-14-12q11 0 14 12zM60 50q10-4 14-14q-12 2-14 14z" fill="#fff" stroke="var(--ink)" stroke-width="2"/><g fill="var(--ink)"><path d="M88 14c-4 6-6 9-6 12a6 6 0 0 0 12 0c0-3-2-6-6-12z"/><path d="M100 30c-3 4-4 6-4 8a4 4 0 0 0 8 0c0-2-1-4-4-8z"/></g></svg>
+            <h3>Habits water it</h3>
+            <p>Every day you check off a habit waters what you planted. Three watered days and a plant is fully grown.</p>
+          </li>
+          <li class="step">
+            <span class="num">03</span>
+            <svg viewBox="0 0 120 90" aria-hidden="true"><ellipse cx="60" cy="74" rx="50" ry="10" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5"/><rect x="36" y="50" width="4" height="22" fill="#fff" stroke="var(--ink)" stroke-width="1.6"/><circle cx="38" cy="42" r="13" fill="#fff" stroke="var(--ink)" stroke-width="2"/><rect x="76" y="48" width="4" height="24" fill="#fff" stroke="var(--ink)" stroke-width="1.6"/><path d="M78 10l14 20H64zM78 24l16 22H62z" fill="#fff" stroke="var(--ink)" stroke-width="2"/><path d="M50 72q-3-10 5-12q2-8 8-5q6-5 10 3q6 2 0 14z" fill="#fff" stroke="var(--ink)" stroke-width="2"/></svg>
+            <h3>Streaks grow the world</h3>
+            <p>Keep showing up and the island changes: a stream at 7 days, birds at 30, a waterfall at 100, seasons at a year.</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Features -->
+      <section id="features" class="section">
+        <div class="feature">
+          <div class="feature-copy">
+            <p class="eyebrow">Streaks</p>
+            <h2 class="h3d md">Every day,<br>in ink</h2>
+            <p>A year-long grid like GitHub’s shows every day you showed up. The darker the square, the more you did.</p>
+            <ul class="ticks">
+              <li>A streak for each habit, and one for you</li>
+              <li><strong>Rain Days</strong> save your streak on a missed day, one earned every 7 days</li>
+              <li>Late night? The day ends at 4 AM, not midnight</li>
+            </ul>
           </div>
+          <figure class="phone"><img src="/img/streaks.jpg" width="390" height="844" alt="Streaks screen with a 12-month grid of days in shades of ink" loading="lazy"></figure>
+        </div>
+
+        <div class="feature flip">
+          <div class="feature-copy">
+            <p class="eyebrow">Focus</p>
+            <h2 class="h3d md">Deep work,<br>quietly</h2>
+            <p>A Pomodoro timer or a stopwatch, with 10, 25, 50 or 90 minutes. Start it on your laptop and it’s the same countdown on your phone.</p>
+            <ul class="ticks">
+              <li>Sessions can fill habits like “read 30 minutes”</li>
+              <li>Optional <strong>Stay Focused</strong> mode: leave the app and the plant wilts</li>
+              <li>A reminder when your session ends</li>
+            </ul>
+          </div>
+          <figure class="phone"><img src="/img/focus.jpg" width="390" height="844" alt="Focus timer with pause and give up buttons" loading="lazy"></figure>
+        </div>
+
+        <div class="feature">
+          <div class="feature-copy">
+            <p class="eyebrow">Your island</p>
+            <h2 class="h3d md">A world that<br>remembers</h2>
+            <p>Your island floats in space and grows from your real effort. Tap any tree to see the session that planted it.</p>
+            <ul class="ticks">
+              <li>Grows bigger with every 10, 50, 100 hours of focus</li>
+              <li>Given-up sessions leave a wilted sprout, never a dead tree</li>
+              <li>Finish your next session to bring it back</li>
+            </ul>
+          </div>
+          <figure class="phone"><img src="/img/island.jpg" width="390" height="844" alt="Island screen with trees, stats and unlocks" loading="lazy"></figure>
+        </div>
+
+        <div class="feature flip">
+          <div class="feature-copy">
+            <p class="eyebrow">Habits</p>
+            <h2 class="h3d md">Your habits,<br>your way</h2>
+            <p>Tick it off, count it, or time it. Every day, some days, a few times a week, or every few days.</p>
+            <ul class="ticks">
+              <li>Done / not done, counts (8 glasses of water) or minutes</li>
+              <li>Up to 3 reminders per habit, skipped once it’s done</li>
+              <li>An evening nudge if your streak is at risk</li>
+            </ul>
+          </div>
+          <figure class="phone"><img src="/img/today.jpg" width="390" height="844" alt="Today screen listing habits with streak counts" loading="lazy"></figure>
         </div>
       </section>
 
-      <section class="features" aria-label="What Istel does">
-        <article class="card">
-          <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="9.5" y="3" width="5" height="5" rx="1" fill="currentColor"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="9.5" width="5" height="5" rx="1" fill="currentColor"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><rect x="16" y="9.5" width="5" height="5" rx="1" fill="currentColor"/><rect x="3" y="16" width="5" height="5" rx="1"/><rect x="9.5" y="16" width="5" height="5" rx="1" fill="currentColor"/><rect x="16" y="16" width="5" height="5" rx="1"/></g></svg>
-          <h3>Habits &amp; streaks</h3>
-          <p>Daily, weekly or every few days. A year-long grid shows every day you showed up, and Rain Days protect a streak when life happens.</p>
-        </article>
-        <article class="card">
-          <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13.5" r="8"/><path d="M12 9v4.5l3 2M9.5 2.5h5"/></g></svg>
-          <h3>Deep focus</h3>
-          <p>A Pomodoro timer or stopwatch that stays in sync across your devices. Finished sessions can count toward habits like “read 30 minutes”.</p>
-        </article>
-        <article class="card">
-          <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 13h18l-5 6h-8z"/><path d="M12 13V6M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zM12 7c0-2 2-4 4-4 0 3-2 4-4 4z"/></g></svg>
-          <h3>Your island</h3>
-          <p>Every focus session plants something. Days with habits water it. Streaks unlock a stream, birds, a waterfall and seasons.</p>
-        </article>
+      <!-- Phone and laptop -->
+      <section class="section devices">
+        <div class="feature-copy center">
+          <p class="eyebrow">Everywhere</p>
+          <h2 class="h3d lg">Phone &amp;<br>laptop</h2>
+          <p>Sign in with just your email and everything stays in sync: habits, streaks, your island, even a running timer. On an iPhone? Open the web app in Safari and add it to your home screen.</p>
+        </div>
+        <figure class="laptop">
+          <div class="screen"><img src="/img/laptop.jpg" width="1920" height="1200" alt="Istel on a laptop showing the streak grid and focus charts" loading="lazy"></div>
+          <div class="base" aria-hidden="true"></div>
+        </figure>
       </section>
 
+      <!-- Privacy -->
       <section class="band" aria-label="Your data">
         <div>
           <h2>Yours, and quiet</h2>
-          <p>No ads, no tracking, no selling data. Use Istel without an account and everything stays on your device, or sign in to keep your phone and laptop in sync.</p>
+          <p>No ads, no tracking, no selling data. Use Istel without an account and everything stays on your device. Sign in only if you want your phone and laptop in sync, and delete your account any time.</p>
+          <p class="band-link"><a href="/privacy">Read the privacy policy →</a></p>
         </div>
         <svg viewBox="0 0 360 220" aria-hidden="true" style="width:100%;max-width:420px;justify-self:center">
           <g fill="#fff"><circle cx="30" cy="30" r="1.4"/><circle cx="320" cy="40" r="1.8"/><circle cx="60" cy="180" r="1.2"/><circle cx="300" cy="170" r="1.4"/><circle cx="200" cy="20" r="1"/><path d="M280 90q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z"/></g>
@@ -100,16 +206,62 @@
           </g>
         </svg>
       </section>
-    </main>
 
-    <footer>
-      <span>© 2026 Istel</span>
-      <nav aria-label="Legal">
-        <a href="/privacy">Privacy policy</a>
-        <a href="/delete-account">Delete your account</a>
-        <a href="mailto:support@istel.space">support@istel.space</a>
-      </nav>
-    </footer>
-  </div>
+      <!-- FAQ -->
+      <section id="faq" class="section faq">
+        <h2 class="h3d lg center">Questions</h2>
+        <details>
+          <summary>Is Istel free?</summary>
+          <p>Yes. Everything in Istel today is free, with no ads.</p>
+        </details>
+        <details>
+          <summary>Do I need an account?</summary>
+          <p>No. Istel works fully without one and keeps everything on your device. An account (just your email, no password) is only for syncing between devices.</p>
+        </details>
+        <details>
+          <summary>Is it on Android and iPhone?</summary>
+          <p>The Android app is coming to Google Play soon. On iPhone, iPad or any computer, use the web app at <a href="https://app.istel.space">app.istel.space</a>. In Safari, tap Share → Add to Home Screen to keep it like an app.</p>
+        </details>
+        <details>
+          <summary>Does it work offline?</summary>
+          <p>Yes. Everything you do is saved on the device first. If you’re signed in, changes sync the next time you’re online.</p>
+        </details>
+        <details>
+          <summary>What happens if I miss a day?</summary>
+          <p>Every 7-day streak earns a Rain Day (you can hold 3). A missed day uses one automatically and your streak lives on. If a streak does break, your best is kept and the island never loses what it grew.</p>
+        </details>
+        <details>
+          <summary>How is this different from Forest?</summary>
+          <p>Instead of one tree per session, you grow one island over time. Habits water it, streaks unlock new parts of the world, and giving up only wilts a sprout. It also tracks your habits, not just focus.</p>
+        </details>
+        <details>
+          <summary>How do I delete my data?</summary>
+          <p>In the app: Account → Delete my account, or Settings → Erase all data on this device. Or follow <a href="/delete-account">these steps</a>.</p>
+        </details>
+      </section>
+
+      <!-- Final call to action -->
+      <section class="cta">
+        <svg class="blob cta-blob" viewBox="0 0 200 200" aria-hidden="true">
+          <path d="M112 6c34 8 70 34 80 72 12 44-4 88-44 106-44 20-104 6-130-34C-6 114 8 58 42 30 62 12 88 0 112 6z" fill="var(--space)"/>
+          <g fill="#fff"><circle cx="60" cy="60" r="1.4"/><circle cx="140" cy="50" r="1.8"/><circle cx="150" cy="140" r="1.2"/><circle cx="50" cy="130" r="1.6"/><path d="M110 150q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
+        </svg>
+        <h2 class="h3d lg center">Plant your<br>first seed</h2>
+        <p class="lead center">It takes one habit or one 25-minute session.</p>
+        <div class="actions center">
+          <a class="btn primary" href="https://app.istel.space">Open Istel</a>
+        </div>
+      </section>
+
+      <footer>
+        <span>© 2026 Istel · Made with ink</span>
+        <nav aria-label="Legal">
+          <a href="/privacy">Privacy policy</a>
+          <a href="/delete-account">Delete your account</a>
+          <a href="mailto:support@istel.space">support@istel.space</a>
+        </nav>
+      </footer>
+    </div>
+  </main>
 </body>
 </html>
