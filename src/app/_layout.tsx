@@ -46,6 +46,8 @@ export default function RootLayout() {
             <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
             <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
             <Stack.Screen name="account" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
             <Stack.Screen name="auth/callback" />
           </Stack>
         </RootlineProvider>

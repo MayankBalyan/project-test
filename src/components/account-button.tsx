@@ -42,7 +42,37 @@ export function AccountButton() {
   );
 }
 
+export function SettingsButton() {
+  const palette = usePalette();
+  return (
+    <Pressable
+      role="button"
+      aria-label="Settings"
+      onPress={() => router.push('/settings')}
+      hitSlop={8}
+      style={({ pressed }) => [styles.round, { borderColor: palette.ink, transform: [{ scale: pressed ? 0.96 : 1 }] }]}>
+      <Svg width={18} height={18} viewBox="0 0 24 24">
+        <Circle cx={12} cy={12} r={3.2} stroke={palette.ink} strokeWidth={2.2} fill="none" />
+        <Path
+          d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"
+          stroke={palette.ink}
+          strokeWidth={2.2}
+          strokeLinecap="round"
+        />
+      </Svg>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  round: {
+    width: 36,
+    height: 36,
+    borderWidth: 2,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pill: {
     minWidth: 36,
     height: 36,

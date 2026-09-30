@@ -59,8 +59,8 @@ function TimerRing({ progress, size, children }: { progress: number; size: numbe
 
 export default function FocusScreen() {
   const wide = useIsWide();
-  const { focus, focusActions, sessionsToday } = useRootline();
-  const [minutes, setMinutes] = useState(25);
+  const { focus, focusActions, sessionsToday, settings } = useRootline();
+  const [minutes, setMinutes] = useState(settings.focusMinutes);
   const [tag, setTag] = useState(TAGS[0]);
   const now = useNow(!!focus);
 

@@ -24,7 +24,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 export default function IslandScreen() {
   const palette = usePalette();
   const { width } = useWindowDimensions();
-  const { plants, global, lifetimeFocusMinutes } = useRootline();
+  const { plants, global, lifetimeFocusMinutes, settings } = useRootline();
   const unlocks = unlocksFor(global.longest);
   const next = nextUnlock(global.longest);
   const tier = islandTier(lifetimeFocusMinutes);
@@ -35,7 +35,7 @@ export default function IslandScreen() {
     <Screen>
       <Hero
         title={'Your\nisland'}
-        subtitle="Every session plants something. Every habit day waters it."
+        subtitle={`${settings.islandName} · every session plants something, every habit day waters it.`}
         art={
           <>
             <Blob size={140} variant={2} stars={16} style={styles.heroBlob} />

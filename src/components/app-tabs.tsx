@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 
-import { AccountButton } from './account-button';
+import { AccountButton, SettingsButton } from './account-button';
 import { LogoMark, TabIcon, TabIconName } from './ink-art';
 import { Txt } from './ui';
 
@@ -56,7 +56,10 @@ function Bar({ wide, children, ...props }: TabListProps & { wide: boolean }) {
           </View>
           <View style={styles.topLinks}>
             {children}
-            <AccountButton />
+            <View style={styles.brand}>
+              <SettingsButton />
+              <AccountButton />
+            </View>
           </View>
         </View>
       </View>

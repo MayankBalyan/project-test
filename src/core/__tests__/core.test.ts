@@ -8,6 +8,8 @@ import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
 import { endsAt, formatRemaining, pause, plannedEndAt, remainingMs, resume, startTimer } from '../timer';
 import { isCompleteOtp, isValidEmail, normalizeEmail, normalizeOtp, parseAuthRedirect } from '../auth-input';
 import { normalizeHabit, validateHabit } from '../habit-input';
+import { STARTER_HABITS } from '../starters';
+import { toCsvExport, toJsonExport } from '../export';
 
 const done = (habitId: string, date: string, value = 1, id = `${habitId}-${date}`): HabitEvent => ({
   id,
@@ -208,5 +210,36 @@ describe('auth input', () => {
       error: 'User cancelled',
     });
     expect(parseAuthRedirect('rootline://auth/callback')).toEqual({});
+  });
+});
+
+describe('starter habits', () => {
+  it('are all valid habits with unique ids', () => {
+    for (const s of STARTER_HABITS) expect(validateHabit(s.input)).toBeNull();
+    expect(new Set(STARTER_HABITS.map((s) => s.id)).size).toBe(STARTER_HABITS.length);
+  });
+});
+
+describe('export', () => {
+  const data = {
+    exportedAt: '2026-09-30T10:00:00Z',
+    settings: { islandName: 'Kepler' },
+    habits: [{ id: 'h', name: 'Read, then "journal"' }],
+    events: [done('h', '2026-09-29'), done('h', '2026-09-28')],
+    sessions: [{ date: '2026-09-29', minutes: 25, status: 'done', tag: '=SUM(A1)' }],
+  };
+
+  it('writes CSV sorted by date with quoting and formula protection', () => {
+    expect(toCsvExport(data).split('\n')).toEqual([
+      'date,type,name,value,status',
+      '2026-09-28,habit,"Read, then ""journal""",1,done',
+      '2026-09-29,habit,"Read, then ""journal""",1,done',
+      "2026-09-29,focus,'=SUM(A1),25,done",
+      '',
+    ]);
+  });
+
+  it('writes JSON with a version', () => {
+    expect(JSON.parse(toJsonExport(data))).toMatchObject({ app: 'rootline', version: 1, habits: data.habits });
   });
 });

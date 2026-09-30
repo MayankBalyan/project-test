@@ -15,18 +15,33 @@ export type NamedHabit = Habit & { name: string; archivedAt?: number };
 export type TaggedSession = FocusSessionRecord & { tag: string };
 export type ActiveFocus = { timer: TimerState; minutes: number; tag: string };
 
-const dayConfig = {
-  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+export type Settings = {
+  /** False until the first-launch setup is finished or skipped. */
+  onboarded: boolean;
+  islandName: string;
+  /** Default focus length in minutes. */
+  focusMinutes: number;
+  /** Hour (0–23) when a new day starts. */
+  dayStartHour: number;
+};
+
+export const DEFAULT_SETTINGS: Settings = {
+  onboarded: false,
+  islandName: 'My island',
+  focusMinutes: 25,
   dayStartHour: DEFAULT_DAY_START_HOUR,
 };
 
-function useToday(): LocalDate {
-  const [today, setToday] = useState(() => toLocalDate(new Date(), dayConfig));
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+function useToday(dayStartHour: number): LocalDate {
+  const config = useMemo(() => ({ timeZone, dayStartHour }), [dayStartHour]);
+  const [tick, setTick] = useState(() => Date.now());
   useEffect(() => {
-    const id = setInterval(() => setToday(toLocalDate(new Date(), dayConfig)), 60_000);
+    const id = setInterval(() => setTick(Date.now()), 60_000);
     return () => clearInterval(id);
   }, []);
-  return today;
+  return useMemo(() => toLocalDate(new Date(tick), config), [tick, config]);
 }
 
 /** Re-renders every `ms` while `active`; returns the current time. */
@@ -41,12 +56,20 @@ export function useNow(active: boolean, ms = 250) {
 }
 
 function useRootlineState() {
-  const today = useToday();
   const [habits, setHabits] = useState<NamedHabit[]>(() => load('habits', []));
   const [events, setEvents] = useState<HabitEvent[]>(() => load('events', []));
   const [sessions, setSessions] = useState<TaggedSession[]>(() => load('sessions', []));
   const [focus, setFocus] = useState<ActiveFocus | null>(() => load('focus', null));
+  const [settings, setSettings] = useState<Settings>(() => ({
+    ...DEFAULT_SETTINGS,
+    // People who used the app before onboarding existed skip it.
+    onboarded: habits.length > 0 || sessions.length > 0,
+    ...load<Partial<Settings>>('settings', {}),
+  }));
+  const today = useToday(settings.dayStartHour);
+  const dayConfig = useMemo(() => ({ timeZone, dayStartHour: settings.dayStartHour }), [settings.dayStartHour]);
 
+  useEffect(() => save('settings', settings), [settings]);
   useEffect(() => save('habits', habits), [habits]);
   useEffect(() => save('events', events), [events]);
   useEffect(() => save('sessions', sessions), [sessions]);
@@ -117,8 +140,19 @@ function useRootlineState() {
       ]);
       setFocus(null);
     },
-    [focus],
+    [focus, dayConfig],
   );
+
+  const updateSettings = useCallback((patch: Partial<Settings>) => setSettings((prev) => ({ ...prev, ...patch })), []);
+
+  /** Removes every habit, check-in, session and setting on this device and starts over. */
+  const eraseAll = useCallback(() => {
+    setHabits([]);
+    setEvents([]);
+    setSessions([]);
+    setFocus(null);
+    setSettings(DEFAULT_SETTINGS);
+  }, []);
 
   const focusActions = useMemo(
     () => ({
@@ -194,7 +228,20 @@ function useRootlineState() {
     };
   }, [habits, activeHabits, values, events, sessions, today]);
 
-  return { today, habits, sessions, focus, toggleHabit, habitActions, focusActions, ...derived };
+  return {
+    today,
+    habits,
+    sessions,
+    focus,
+    events,
+    settings,
+    updateSettings,
+    eraseAll,
+    toggleHabit,
+    habitActions,
+    focusActions,
+    ...derived,
+  };
 }
 
 type RootlineState = ReturnType<typeof useRootlineState>;

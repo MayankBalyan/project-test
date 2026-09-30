@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import { AccountButton } from '@/components/account-button';
+import { AccountButton, SettingsButton } from '@/components/account-button';
 import { describeSchedule, HabitRow } from '@/components/habit-row';
 import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
@@ -40,7 +40,10 @@ export default function TodayScreen() {
             <LogoMark size={24} />
             <Txt variant="label">Rootline</Txt>
           </View>
-          <AccountButton />
+          <View style={styles.brand}>
+            <SettingsButton />
+            <AccountButton />
+          </View>
         </View>
       )}
       <Hero
