@@ -11,7 +11,8 @@ import { TodoRow } from '@/components/todo-row';
 import { Card, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { MAX_RAIN_DAYS, streakStatus } from '@/core/streaks';
-import { describeDue, groupTodos, isOverdue } from '@/core/todos';
+import { toLocalDate } from '@/core/dates';
+import { describeDue, groupTodos, isOverdue, todayTodos } from '@/core/todos';
 import { islandTier, unlocksFor } from '@/core/world';
 import { useClock } from '@/hooks/use-clock';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
@@ -51,7 +52,13 @@ function TodayScreen() {
   const due = habitStats.filter((h) => h.scheduledToday);
   const { nowDate, nowMinutes } = useClock();
   const todoGroups = groupTodos(state.todos, state.today, nowMinutes, nowDate);
-  const dueTodos = [...todoGroups.overdue, ...todoGroups.today];
+  const todayList = todayTodos(todoGroups, state.today, (ms) =>
+    toLocalDate(new Date(ms), { timeZone, dayStartHour: state.settings.dayStartHour }),
+  );
+  const openTodos = todayList.filter((t) => !t.doneAt);
+  const finishedTodos = todayList.filter((t) => t.doneAt);
+  // Open ones first (a few), then everything already ticked off today, struck through.
+  const shownTodos = [...openTodos.slice(0, DUE_TODOS_SHOWN), ...finishedTodos];
   const status = streakStatus(global, state.today);
   const doneCount = due.filter((h) => h.done).length;
   const contentWidth = Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2);
@@ -118,7 +125,7 @@ function TodayScreen() {
         </View>
       </View>
 
-      {dueTodos.length > 0 && (
+      {todayList.length > 0 && (
         <View style={styles.section}>
           <SectionTitle
             right={
@@ -126,22 +133,22 @@ function TodayScreen() {
                 <Txt variant="label">All to-dos →</Txt>
               </Pressable>
             }>
-            Due today
+            {`Due today · ${finishedTodos.length}/${todayList.length}`}
           </SectionTitle>
-          {dueTodos.slice(0, DUE_TODOS_SHOWN).map((t) => (
+          {shownTodos.map((t) => (
             <TodoRow
               key={t.id}
               title={t.title}
-              due={describeDue(t, state.today, nowMinutes, nowDate)}
+              due={t.doneAt ? 'Done' : describeDue(t, state.today, nowMinutes, nowDate)}
               late={isOverdue(t, state.today, nowMinutes, nowDate)}
-              done={false}
+              done={!!t.doneAt}
               onToggle={() => state.todoActions.toggleDone(t.id)}
               onEdit={() => router.push({ pathname: '/todo/[id]', params: { id: t.id } })}
             />
           ))}
-          {dueTodos.length > DUE_TODOS_SHOWN && (
+          {openTodos.length > DUE_TODOS_SHOWN && (
             <Txt variant="caption" tone="inkSoft">
-              +{dueTodos.length - DUE_TODOS_SHOWN} more on the To-do tab
+              +{openTodos.length - DUE_TODOS_SHOWN} more on the To-do tab
             </Txt>
           )}
         </View>
@@ -230,6 +237,7 @@ function TodayScreen() {
 }
 
 const DUE_TODOS_SHOWN = 4;
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const styles = StyleSheet.create({
   heroBlob: { position: 'absolute', right: -60, top: -10 },

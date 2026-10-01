@@ -147,3 +147,15 @@ export function monthGrid(year: number, month: number): (LocalDate | null)[] {
   while (cells.length % 7) cells.push(null);
   return cells;
 }
+
+/**
+ * The to-dos the Today screen lists: open ones that are late or due today first, then the ones ticked off
+ * today (or due today and already done) at the bottom, in the order they were finished. `dayOf` turns an
+ * instant into the app's day.
+ */
+export function todayTodos(groups: TodoGroups, today: LocalDate, dayOf: (ms: number) => LocalDate): Todo[] {
+  const finished = groups.done
+    .filter((t) => t.dueDate === today || (t.doneAt != null && dayOf(t.doneAt) === today))
+    .sort((a, b) => (a.doneAt ?? 0) - (b.doneAt ?? 0));
+  return [...groups.overdue, ...groups.today, ...finished];
+}

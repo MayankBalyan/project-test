@@ -29,7 +29,13 @@ export default function AppTabs() {
   const { settings } = useIstel();
   return (
     <Tabs>
-      {wide ? null : <SlidingTabSlot order={TAB_ORDER} style={styles.slot} />}
+      {wide ? null : (
+        <SlidingTabSlot
+          // Swipes and slides skip the Today tab while habits are turned off.
+          order={settings.habitsEnabled ? TAB_ORDER : TAB_ORDER.filter((href) => href !== '/')}
+          style={styles.slot}
+        />
+      )}
       <TabList asChild>
         <Bar wide={wide}>
           {TABS.map((t) => (

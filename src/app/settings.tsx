@@ -187,6 +187,12 @@ export default function SettingsScreen() {
           ))}
         </View>
         <Toggle
+          label="Keep screen on"
+          detail="Your phone won’t go to sleep while a focus session is running."
+          value={settings.keepScreenOn !== false}
+          onChange={(v) => updateSettings({ keepScreenOn: v })}
+        />
+        <Toggle
           label="Stay Focused mode"
           detail="Leaving the app for more than 10 seconds during a session wilts its plant."
           value={settings.stayFocused}

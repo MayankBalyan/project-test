@@ -1,7 +1,7 @@
-import { usePathname } from 'expo-router';
+import { type Href, router, usePathname } from 'expo-router';
 import { TabSlot, type TabsDescriptor, type TabsSlotRenderOptions } from 'expo-router/ui';
-import { type ReactNode, useEffect, useLayoutEffect, useState } from 'react';
-import { StyleSheet, useWindowDimensions, type StyleProp, type ViewStyle } from 'react-native';
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { PanResponder, Platform, StyleSheet, useWindowDimensions, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -13,6 +13,19 @@ import Animated, {
 import { Screen } from 'react-native-screens';
 
 const DURATION_MS = 280;
+/** A swipe changes tab when it travels this far sideways, or is flicked this fast (px/ms). */
+const SWIPE_DISTANCE = 60;
+const SWIPE_VELOCITY = 0.5;
+
+/** On the web: whether a touch started inside something that scrolls sideways (e.g. a row of chips). */
+function inHorizontalScroller(target: unknown): boolean {
+  if (Platform.OS !== 'web') return false;
+  for (let el = target as HTMLElement | null; el && el !== document.body; el = el.parentElement) {
+    const overflowX = getComputedStyle(el).overflowX;
+    if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) return true;
+  }
+  return false;
+}
 const EASE = Easing.bezier(0.2, 0.8, 0.2, 1);
 
 type Role = 'in' | 'out' | 'idle';
@@ -39,7 +52,10 @@ function Scene({ role, direction, run, children }: { role: Role; direction: 1 | 
   return <Animated.View style={[styles.fill, style]}>{children}</Animated.View>;
 }
 
-/** Tab screens for phones: switching tabs slides left or right in the order of the bottom bar. */
+/**
+ * Tab screens for phones: switching tabs slides left or right in the order of the bottom bar, and swiping
+ * left or right moves to the next or previous tab.
+ */
 export function SlidingTabSlot({ order, style }: { order: readonly string[]; style?: StyleProp<ViewStyle> }) {
   const reduceMotion = useReducedMotion();
   const pathname = usePathname();
@@ -60,6 +76,29 @@ export function SlidingTabSlot({ order, style }: { order: readonly string[]; sty
 
   const direction: 1 | -1 = nav.current > nav.previous ? 1 : -1;
 
+  // Swipes: handlers read the current tab through a ref, so the responder is made once.
+  const latest = useRef({ index, order });
+  useEffect(() => {
+    latest.current = { index, order };
+  });
+  // The handlers only read `latest` when a gesture arrives, never while rendering.
+  // eslint-disable-next-line react-hooks/refs
+  const [swipe] = useState(() =>
+    PanResponder.create({
+      // Only clearly sideways moves; vertical scrolling, the focus dial and sideways rows keep theirs.
+      onMoveShouldSetPanResponder: (e, g) =>
+        Math.abs(g.dx) > 16 && Math.abs(g.dx) > Math.abs(g.dy) * 2 && !inHorizontalScroller(e.nativeEvent.target),
+      onPanResponderRelease: (_, g) => {
+        if (Math.abs(g.dx) < SWIPE_DISTANCE && Math.abs(g.vx) < SWIPE_VELOCITY) return;
+        const { index: at, order: tabs } = latest.current;
+        if (at === -1) return;
+        // Finger moving left brings in the tab to the right, like turning a page.
+        const next = tabs[at + (g.dx < 0 ? 1 : -1)];
+        if (next) router.navigate(next as Href);
+      },
+    }),
+  );
+
   const render = (descriptor: TabsDescriptor, { index: i, isFocused, loaded, detachInactiveScreens }: TabsSlotRenderOptions) => {
     const { lazy = true } = descriptor.options;
     if (lazy && !loaded && !isFocused) return null;
@@ -79,7 +118,11 @@ export function SlidingTabSlot({ order, style }: { order: readonly string[]; sty
     );
   };
 
-  return <TabSlot style={[styles.clip, style]} renderFn={render} />;
+  return (
+    <View style={[styles.fill, style]} {...swipe.panHandlers}>
+      <TabSlot style={[styles.clip, styles.fill]} renderFn={render} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

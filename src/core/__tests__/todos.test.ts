@@ -9,6 +9,7 @@ import {
   monthGrid,
   normalizeTodo,
   quickDueDates,
+  todayTodos,
   Todo,
   validateTodo,
 } from '../todos';
@@ -118,6 +119,33 @@ describe('to-dos', () => {
     expect(plan.map((n) => [n.title, n.body, new Date(n.at).toISOString().slice(0, 16)])).toEqual([
       ['timed', 'Due now.', '2026-10-01T18:30'],
       ['allday', 'Due today.', '2026-10-02T09:00'],
+    ]);
+  });
+
+  it('keeps today’s finished to-dos on Today, at the bottom', () => {
+    const DAY = 86_400_000;
+    const base = Date.UTC(2026, 9, 1, 12);
+    const dayOf = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+    const g = groupTodos(
+      [
+        todo('open', { dueDate: TODAY }),
+        todo('late', { dueDate: '2026-09-29' }),
+        todo('doneLate', { dueDate: '2026-09-29', doneAt: base + 2000 }),
+        todo('doneDue', { dueDate: TODAY, doneAt: base - 3 * DAY }),
+        todo('doneSomeday', { doneAt: base + 1000 }),
+        todo('doneYesterday', { doneAt: base - DAY }),
+        todo('doneTomorrowsTask', { dueDate: '2026-10-02', doneAt: base }),
+      ],
+      TODAY,
+      600,
+    );
+    expect(todayTodos(g, TODAY, dayOf).map((t) => t.id)).toEqual([
+      'late',
+      'open',
+      'doneDue',
+      'doneTomorrowsTask',
+      'doneSomeday',
+      'doneLate',
     ]);
   });
 });

@@ -21,6 +21,7 @@ import {
   elapsedMs,
   endsAt,
   leftTooLong,
+  isPaused,
   pause,
   plannedEndAt,
   resume,
@@ -36,6 +37,8 @@ import { applyPlan } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
 
 import { useAuth } from './auth';
+import { useKeepAwakeWhile } from '@/hooks/use-keep-awake-while';
+
 import { load, save } from './persist';
 import { EMPTY_META, useSyncEngine, useSyncMeta } from './use-sync';
 
@@ -72,6 +75,8 @@ export type Settings = {
   focusMinutes: number;
   /** Hour (0–23) when a new day starts. */
   dayStartHour: number;
+  /** Keep the screen from sleeping while a focus session runs. */
+  keepScreenOn: boolean;
   /** False for people who only use the focus timer: hides the Today tab and habit sections. */
   habitsEnabled: boolean;
   /** Leaving the app for more than a few seconds during a session wilts it. */
@@ -92,6 +97,7 @@ export const DEFAULT_SETTINGS: Settings = {
   focusMinutes: 25,
   dayStartHour: DEFAULT_DAY_START_HOUR,
   habitsEnabled: true,
+  keepScreenOn: true,
   stayFocused: false,
   notifications: { streakAtRisk: true, streakAtRiskHour: 20, focusEnd: true, todoDue: true },
 };
@@ -179,6 +185,9 @@ function useIstelState() {
     [trackFlag],
   );
   const setFocus = useCallback((f: ActiveFocus | null) => changeFocus(() => f), [changeFocus]);
+
+  // The screen stays on while a session is counting (not while paused).
+  useKeepAwakeWhile(settings.keepScreenOn !== false && !!focus && !isPaused(focus.timer));
 
   const activeHabits = useMemo(() => habits.filter((h) => !h.archivedAt), [habits]);
 
