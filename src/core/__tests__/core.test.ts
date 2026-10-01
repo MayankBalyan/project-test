@@ -4,7 +4,7 @@ import { addDays, daysBetween, toLocalDate, weekday } from '../dates';
 import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn } from '../habits';
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
-import { growPlants, islandTier, nextUnlock, unlocksFor } from '../world';
+import { clampFocusMinutes, growPlants, islandTier, nextUnlock, treesFor, unlocksFor } from '../world';
 import { focusStats, formatMinutes } from '../focus-stats';
 import { habitHeatDays, habitSummary } from '../habit-heat';
 import {
@@ -165,7 +165,21 @@ describe('world', () => {
     expect(plants.map((p) => [p.species, p.stage])).toEqual([
       ['shrub', 'mature'],
       ['oak', 'sprout'],
+      ['oak', 'sprout'],
+      ['oak', 'sprout'],
     ]);
+  });
+
+  it('plants one tree per half hour of a finished session', () => {
+    expect([10, 25, 30, 59, 60, 90, 179, 180].map(treesFor)).toEqual([1, 1, 1, 1, 2, 3, 5, 6]);
+    const plants = growPlants([session('s1', '2026-09-29', 180), session('s2', '2026-09-30', 45, 'given_up')], []);
+    expect(plants).toHaveLength(7);
+    expect(plants.filter((p) => p.sessionId === 's1').map((p) => p.id)).toEqual(['s1', 's1#1', 's1#2', 's1#3', 's1#4', 's1#5']);
+    expect(plants[6]).toMatchObject({ sessionId: 's2', stage: 'wilted' });
+  });
+
+  it('snaps focus lengths to the 10–180 minute dial', () => {
+    expect([0, 7, 12, 23, 180, 240].map(clampFocusMinutes)).toEqual([10, 10, 10, 25, 180, 180]);
   });
 
   it('wilts a given-up session until a later session is completed', () => {

@@ -10,7 +10,7 @@ import { Card, InkButton, Screen, TextField, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { HABIT_NAME_MAX, validateHabit } from '@/core/habit-input';
 import { ISLAND_NAME_MAX, MAX_STARTER_PICKS, STARTER_HABITS } from '@/core/starters';
-import { speciesFor } from '@/core/world';
+import { speciesFor, treesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
 
@@ -24,7 +24,7 @@ const USES: { value: Use; title: string; note: string }[] = [
 const FOCUS_OPTIONS = [
   { minutes: 25, note: 'A good start. Grows a shrub.' },
   { minutes: 50, note: 'Deep work. Grows a pine.' },
-  { minutes: 90, note: 'Long haul. Grows a rare oak.' },
+  { minutes: 90, note: 'Long haul. Grows 3 rare oaks (one per half hour).' },
 ];
 
 function Check({ on }: { on: boolean }) {
@@ -260,7 +260,7 @@ export default function WelcomeScreen() {
             <Heading3D size={headingSize}>{'Pick your\nfocus'}</Heading3D>
           </View>
           <Txt variant="bodyBold" tone="inkSoft">
-            Each finished focus session plants something on your island. Longer sessions grow bigger plants.
+            Each finished focus session plants something on your island. Longer sessions grow bigger plants, and every half hour adds a tree.
           </Txt>
           <View style={styles.options}>
             {FOCUS_OPTIONS.map((o) => (
@@ -305,7 +305,9 @@ export default function WelcomeScreen() {
             </Txt>
             <Txt variant="caption">
               {use === 'focus' ? 'Just focus' : picks ? `${picks} habit${picks > 1 ? 's' : ''}` : 'No habits yet'} ·{' '}
-              {minutes}-minute focus (plants a {speciesFor(minutes) === 'oak' ? 'rare oak' : speciesFor(minutes)})
+              {minutes}-minute focus (plants {treesFor(minutes) > 1 ? `${treesFor(minutes)} ` : 'a '}
+              {speciesFor(minutes) === 'oak' ? 'rare oak' : speciesFor(minutes)}
+              {treesFor(minutes) > 1 ? 's' : ''})
             </Txt>
           </Card>
           <InkButton label="Start growing" onPress={() => finish(true)} />

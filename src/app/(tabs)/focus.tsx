@@ -6,6 +6,7 @@ import Svg, { Circle, Line } from 'react-native-svg';
 import { PhoneTopBar } from '@/components/account-button';
 import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
+import { FocusDial } from '@/components/focus-dial';
 import { Blob, Moon } from '@/components/ink-art';
 import { Card, Chip, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
@@ -18,13 +19,26 @@ import {
   remainingMs,
   STOPWATCH_CAP_MINUTES,
 } from '@/core/timer';
-import { speciesFor } from '@/core/world';
+import { clampFocusMinutes, Species, speciesFor, treesFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { FocusMode, useNow, useIstel } from '@/state/store';
 
-const PRESETS = [10, 25, 50, 90];
+const QUICK_PICKS = [25, 50, 90, 120, 180];
 const TAGS = ['Study', 'Work', 'Reading'];
-const SPECIES_NAME = { flower: 'a flower', shrub: 'a shrub', sapling: 'a sapling', pine: 'a pine', oak: 'a rare oak' };
+const SPECIES_NAME: Record<Species, [string, string]> = {
+  flower: ['a flower', 'flowers'],
+  shrub: ['a shrub', 'shrubs'],
+  sapling: ['a sapling', 'saplings'],
+  pine: ['a pine', 'pines'],
+  oak: ['a rare oak', 'rare oaks'],
+};
+
+/** "a shrub", "3 rare oaks": what a session of this length plants. */
+function plantsFor(minutes: number) {
+  const n = treesFor(minutes);
+  const [one, many] = SPECIES_NAME[speciesFor(minutes)];
+  return n === 1 ? one : `${n} ${many}`;
+}
 
 function TimerRing({ progress, size, children }: { progress: number; size: number; children: React.ReactNode }) {
   const palette = usePalette();
@@ -79,13 +93,14 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const [mode, setMode] = useState<FocusMode>('timer');
   const durationHabits = habitStats.filter((h) => h.habit.kind === 'duration');
   const initial = durationHabits.find((h) => h.habit.id === initialHabitId);
-  const leftFor = (h: (typeof durationHabits)[number]) => Math.max(5, Math.ceil((h.habit.target - h.value) / 5) * 5);
+  const leftFor = (h: (typeof durationHabits)[number]) => clampFocusMinutes(Math.ceil((h.habit.target - h.value) / 5) * 5);
   const [habitId, setHabitId] = useState<string | undefined>(initial?.habit.id);
-  const [minutes, setMinutes] = useState(initial && !initial.done ? leftFor(initial) : settings.focusMinutes);
+  const [minutes, setMinutes] = useState(
+    clampFocusMinutes(initial && !initial.done ? leftFor(initial) : settings.focusMinutes),
+  );
   const [tag, setTag] = useState(TAGS[0]);
   const now = useNow(!!focus);
   const linked = durationHabits.find((h) => h.habit.id === (focus ? focus.habitId : habitId));
-  const presets = [...new Set([...PRESETS, minutes])].sort((a, b) => a - b);
 
   const activeMode: FocusMode = focus ? (focus.mode ?? 'timer') : mode;
   const stopwatch = activeMode === 'stopwatch';
@@ -93,10 +108,42 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const remaining = focus ? remainingMs(focus.timer, now) : planned * 60_000;
   const elapsed = focus ? elapsedMs(focus.timer, now) : 0;
   const progress = stopwatch ? (elapsed % 3_600_000) / 3_600_000 : focus ? 1 - remaining / focus.timer.plannedMs : 0;
-  const species = SPECIES_NAME[speciesFor(stopwatch ? Math.floor(elapsed / 60_000) : planned)];
+  const species = plantsFor(stopwatch ? Math.floor(elapsed / 60_000) : planned);
+  const choosing = !focus && !stopwatch;
+  const ringSize = wide ? 340 : 300;
+  const display = formatRemaining(stopwatch ? Math.floor(elapsed / 1000) * 1000 : remaining);
   const paused = focus ? isPaused(focus.timer) : false;
   const pausesLeft = focus ? MAX_PAUSES - focus.timer.pauses.length : MAX_PAUSES;
   const focusedToday = sessionsToday.reduce((sum, s) => sum + s.minutes, 0);
+
+  const ringInner = (
+    <>
+      <Heading3D size={(wide ? 84 : 72) * (display.length > 5 ? 0.85 : 1)} depth={6} align="center">
+        {choosing ? String(minutes) : display}
+      </Heading3D>
+      {choosing && (
+        <Txt variant="label" tone="inkSoft">
+          minutes
+        </Txt>
+      )}
+      <Txt variant="label" tone="inkSoft">
+        {focus
+          ? paused
+            ? 'Paused'
+            : stopwatch
+              ? `Counting up · ${species} so far`
+              : (linked?.habit.name ?? focus.tag)
+          : stopwatch
+            ? 'Stopwatch · stop when you’re done'
+            : `Plants ${species}`}
+      </Txt>
+      {linked && (
+        <Txt variant="caption" tone="inkSoft">
+          {linked.value}/{linked.habit.target} min today
+        </Txt>
+      )}
+    </>
+  );
 
   return (
     <Screen>
@@ -114,27 +161,15 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
       />
 
       <View style={styles.center}>
-        <TimerRing size={wide ? 340 : 300} progress={progress}>
-          <Heading3D size={wide ? 84 : 72} depth={6} align="center">
-            {formatRemaining(stopwatch ? Math.floor(elapsed / 1000) * 1000 : remaining)}
-          </Heading3D>
-          <Txt variant="label" tone="inkSoft">
-            {focus
-              ? paused
-                ? 'Paused'
-                : stopwatch
-                  ? `Counting up · ${species} so far`
-                  : (linked?.habit.name ?? focus.tag)
-              : stopwatch
-                ? 'Stopwatch · stop when you’re done'
-                : `Plants ${species}`}
-          </Txt>
-          {linked && (
-            <Txt variant="caption" tone="inkSoft">
-              {linked.value}/{linked.habit.target} min today
-            </Txt>
-          )}
-        </TimerRing>
+        {choosing ? (
+          <FocusDial size={ringSize} minutes={minutes} onChange={setMinutes}>
+            {ringInner}
+          </FocusDial>
+        ) : (
+          <TimerRing size={ringSize} progress={progress}>
+            {ringInner}
+          </TimerRing>
+        )}
       </View>
 
       {focus ? (
@@ -188,10 +223,18 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
           </View>
           {mode === 'timer' && (
             <>
-              <SectionTitle>Length</SectionTitle>
+              <SectionTitle right={<Txt variant="bodyBold">{minutes} min</Txt>}>Length</SectionTitle>
+              <Txt variant="caption" tone="inkSoft">
+                Drag the dial from 10 minutes to 3 hours. Every half hour plants one more tree.
+              </Txt>
               <View style={styles.chips}>
-                {presets.map((m) => (
-                  <Chip key={m} label={`${m} min`} selected={minutes === m} onPress={() => setMinutes(m)} />
+                {QUICK_PICKS.map((m) => (
+                  <Chip
+                    key={m}
+                    label={m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)}h ${m % 60}` : `${m / 60}h`}
+                    selected={minutes === m}
+                    onPress={() => setMinutes(m)}
+                  />
                 ))}
               </View>
             </>

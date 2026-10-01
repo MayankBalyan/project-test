@@ -153,7 +153,8 @@ export function Island({
   const rx = 112 + tier * 10;
   const ry = 26 + tier * 2;
   const cx = W / 2;
-  const capacity = 16 + tier * 8;
+  // Long sessions plant several trees, so there is room for plenty; the newest are shown.
+  const capacity = 30 + tier * 12;
   const shown = plants.slice(-capacity);
   const rand = seeded(97);
 

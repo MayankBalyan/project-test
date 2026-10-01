@@ -6,7 +6,7 @@ import { Blob, Planet } from '@/components/ink-art';
 import { Island } from '@/components/island';
 import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { islandTier, nextUnlock, PlantStage, Species, STREAK_UNLOCKS, unlocksFor, WATERINGS_TO_MATURE } from '@/core/world';
+import { islandTier, nextUnlock, PlantStage, Species, STREAK_UNLOCKS, treesFor, unlocksFor, WATERINGS_TO_MATURE } from '@/core/world';
 import { usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
 
@@ -53,7 +53,7 @@ export default function IslandScreen() {
   const { plants, global, lifetimeFocusMinutes, settings, sessions } = useIstel();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = plants.find((p) => p.id === selectedId);
-  const session = sessions.find((s) => s.id === selectedId);
+  const session = selected ? sessions.find((s) => s.id === selected.sessionId) : undefined;
   const unlocks = unlocksFor(global.longest);
   const next = nextUnlock(global.longest);
   const tier = islandTier(lifetimeFocusMinutes);
@@ -92,7 +92,8 @@ export default function IslandScreen() {
             </Txt>
           </View>
           <Txt variant="caption">
-            Planted {formatDay(selected.plantedOn)} from a {session.minutes}-minute {session.tag} session.
+            Planted {formatDay(selected.plantedOn)} from a {session.minutes}-minute {session.tag} session
+            {treesFor(session.minutes) > 1 && session.status === 'done' ? `, one of its ${treesFor(session.minutes)} trees` : ''}.
           </Txt>
           <Txt variant="caption" tone="inkSoft">
             {selected.stage === 'wilted'
