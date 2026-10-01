@@ -159,6 +159,7 @@ export function TextField({ label, ...props }: TextInputProps & { label: string 
             borderWidth: focused ? 3 : 2,
             paddingHorizontal: focused ? Spacing.three - 1 : Spacing.three,
           },
+          props.style,
         ]}
       />
     </View>

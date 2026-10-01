@@ -4,7 +4,7 @@ import { isScheduledOn, Schedule } from './habits';
 
 export interface PlannedNotification {
   id: string;
-  kind: 'habit' | 'streak' | 'focus';
+  kind: 'habit' | 'streak' | 'focus' | 'todo';
   /** Epoch milliseconds. */
   at: number;
   title: string;
@@ -30,6 +30,8 @@ export interface PlanInput {
   currentStreak: number;
   streakAtRisk: { enabled: boolean; hour: number };
   focusEnd: { enabled: boolean; at: number | null };
+  /** Open to-dos with a deadline: a reminder at the deadline time, or at 9:00 on the day without one. */
+  todos?: { id: string; title: string; dueDate?: LocalDate; dueTime?: string; doneAt?: number }[];
   /** Turns a calendar date and wall-clock time on this device into an instant. */
   toInstant?: (date: LocalDate, hour: number, minute: number) => number;
   /** How many days ahead to schedule. Reminders stop if the app isn't opened for this long. */
@@ -40,6 +42,8 @@ export interface PlanInput {
 
 export const PLAN_DAYS = 14;
 export const PLAN_MAX = 60;
+/** To-dos without a time are mentioned in the morning of their day. */
+export const TODO_DAY_REMINDER_HOUR = 9;
 
 function deviceInstant(date: LocalDate, hour: number, minute: number): number {
   const [y, m, d] = date.split('-').map(Number);
@@ -85,6 +89,21 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
         });
       }
     }
+  }
+
+  const lastDay = addDays(input.today, days - 1);
+  for (const t of input.todos ?? []) {
+    if (t.doneAt || !t.dueDate || daysBetween(t.dueDate, lastDay) < 0) continue;
+    const { hour, minute } = t.dueTime ? parseTime(t.dueTime) : { hour: TODO_DAY_REMINDER_HOUR, minute: 0 };
+    const at = toInstant(t.dueDate, hour, minute);
+    if (at <= input.now) continue;
+    out.push({
+      id: `todo:${t.id}:${t.dueDate}:${t.dueTime ?? ''}`,
+      kind: 'todo',
+      at,
+      title: t.title,
+      body: t.dueTime ? 'Due now.' : 'Due today.',
+    });
   }
 
   if (input.focusEnd.enabled && input.focusEnd.at && input.focusEnd.at > input.now) {

@@ -7,10 +7,13 @@ import { Heading3D } from '@/components/heading-3d';
 import { Hero } from '@/components/hero';
 import { Blob, Planet, RainDrop } from '@/components/ink-art';
 import { Island } from '@/components/island';
+import { TodoRow } from '@/components/todo-row';
 import { Card, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { MAX_RAIN_DAYS, streakStatus } from '@/core/streaks';
+import { describeDue, groupTodos, isOverdue } from '@/core/todos';
 import { islandTier, unlocksFor } from '@/core/world';
+import { useClock } from '@/hooks/use-clock';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
 
@@ -46,6 +49,9 @@ function TodayScreen() {
   const state = useIstel();
   const { global, habitStats, todayActivity, plants, lifetimeFocusMinutes } = state;
   const due = habitStats.filter((h) => h.scheduledToday);
+  const { nowDate, nowMinutes } = useClock();
+  const todoGroups = groupTodos(state.todos, state.today, nowMinutes, nowDate);
+  const dueTodos = [...todoGroups.overdue, ...todoGroups.today];
   const status = streakStatus(global, state.today);
   const doneCount = due.filter((h) => h.done).length;
   const contentWidth = Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2);
@@ -111,6 +117,35 @@ function TodayScreen() {
           )}
         </View>
       </View>
+
+      {dueTodos.length > 0 && (
+        <View style={styles.section}>
+          <SectionTitle
+            right={
+              <Pressable role="link" onPress={() => router.navigate('/todos')} hitSlop={8}>
+                <Txt variant="label">All to-dos →</Txt>
+              </Pressable>
+            }>
+            Due today
+          </SectionTitle>
+          {dueTodos.slice(0, DUE_TODOS_SHOWN).map((t) => (
+            <TodoRow
+              key={t.id}
+              title={t.title}
+              due={describeDue(t, state.today, nowMinutes, nowDate)}
+              late={isOverdue(t, state.today, nowMinutes, nowDate)}
+              done={false}
+              onToggle={() => state.todoActions.toggleDone(t.id)}
+              onEdit={() => router.push({ pathname: '/todo/[id]', params: { id: t.id } })}
+            />
+          ))}
+          {dueTodos.length > DUE_TODOS_SHOWN && (
+            <Txt variant="caption" tone="inkSoft">
+              +{dueTodos.length - DUE_TODOS_SHOWN} more on the To-do tab
+            </Txt>
+          )}
+        </View>
+      )}
 
       <View style={styles.section}>
         <SectionTitle
@@ -193,6 +228,8 @@ function TodayScreen() {
     </Screen>
   );
 }
+
+const DUE_TODOS_SHOWN = 4;
 
 const styles = StyleSheet.create({
   heroBlob: { position: 'absolute', right: -60, top: -10 },

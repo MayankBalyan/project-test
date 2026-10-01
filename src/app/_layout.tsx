@@ -104,6 +104,7 @@ function AppStack({ paper }: { paper: string }) {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="habit/new" options={{ presentation: 'modal' }} />
         <Stack.Screen name="habit/[id]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="todo/[id]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="account" options={{ presentation: 'modal' }} />
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
         <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />

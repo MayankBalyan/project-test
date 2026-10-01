@@ -27,7 +27,16 @@ const AUTO_SYNC_MS = 60_000;
 const DEBOUNCE_MS = 1_500;
 
 export function useSyncMeta() {
-  const [meta, setMeta] = useState<SyncMeta>(() => ({ ...EMPTY_META, ...load<Partial<SyncMeta>>('sync', {}) }));
+  const [meta, setMeta] = useState<SyncMeta>(() => {
+    const stored = load<Partial<SyncMeta>>('sync', {});
+    // Fill in lists and cursors added in newer versions (e.g. to-dos).
+    return {
+      ...EMPTY_META,
+      ...stored,
+      outbox: { ...EMPTY_OUTBOX, ...stored.outbox },
+      cursors: { ...EMPTY_CURSORS, ...stored.cursors },
+    };
+  });
   useEffect(() => save('sync', meta), [meta]);
   return [meta, setMeta] as const;
 }
@@ -117,7 +126,7 @@ export function useSyncEngine<S, F>({
 
   // Sync soon after local changes.
   const pending =
-    meta.outbox.habits.length + meta.outbox.events.length + meta.outbox.sessions.length +
+    meta.outbox.habits.length + meta.outbox.events.length + meta.outbox.sessions.length + (meta.outbox.todos?.length ?? 0) +
     (meta.outbox.settings ? 1 : 0) + (meta.outbox.focus ? 1 : 0);
   const linked = !!userId && meta.accountId === userId;
   useEffect(() => {

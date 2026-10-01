@@ -72,7 +72,7 @@ function InstallCard() {
 }
 
 export default function SettingsScreen() {
-  const { settings, updateSettings, habits, events, sessions, today, eraseAll, refreshNotifications } = useIstel();
+  const { settings, updateSettings, habits, events, sessions, todos, today, eraseAll, refreshNotifications } = useIstel();
   const [permission, setPermission] = useState<Permission | null>(null);
   const theme = useThemePreference();
 
@@ -108,6 +108,7 @@ export default function SettingsScreen() {
       habits,
       events,
       sessions,
+      todos,
     };
     try {
       await shareTextFile(
@@ -237,6 +238,12 @@ export default function SettingsScreen() {
           value={notify.focusEnd}
           onChange={(v) => setNotify({ focusEnd: v })}
         />
+        <Toggle
+          label="To-do deadlines"
+          detail="At a to-do's deadline time, or at 9:00 on its day if it has no time."
+          value={notify.todoDue !== false}
+          onChange={(v) => setNotify({ todoDue: v })}
+        />
         <Txt variant="caption" tone="inkSoft">
           Habit reminders are set on each habit.
         </Txt>
@@ -282,7 +289,7 @@ export default function SettingsScreen() {
           }}
         />
         <Txt variant="caption" tone="muted">
-          Erasing removes every habit, check-in, focus session and your island from this device. Your account keeps
+          Erasing removes every habit, check-in, focus session, to-do and your island from this device. Your account keeps
           a copy and it syncs back; delete the account to remove that too.
         </Txt>
       </Card>

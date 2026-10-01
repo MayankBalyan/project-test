@@ -1,10 +1,11 @@
 import { HabitKind, HabitEvent, Schedule } from './habits';
+import type { Todo } from './todos';
 
 /**
  * Pure sync rules, shared by every device:
- * - Habits, settings and the running timer: last write wins, by `updatedAt` (ms on the device).
- * - Deleted habits stay as tombstones (`deletedAt`) so other devices learn about the delete,
- *   and their check-ins are dropped everywhere.
+ * - Habits, to-dos, settings and the running timer: last write wins, by `updatedAt` (ms on the device).
+ * - Deleted habits and to-dos stay as tombstones (`deletedAt`) so other devices learn about the delete;
+ *   a deleted habit's check-ins are dropped everywhere.
  * - Check-ins and focus sessions never change after they are made, so merging is a union by id.
  */
 
@@ -31,6 +32,8 @@ export interface SyncSession {
   createdAt: number;
 }
 
+export type SyncTodo = Todo;
+
 export interface Versioned<T> {
   value: T;
   updatedAt: number;
@@ -40,6 +43,8 @@ export interface SyncState<S, F> {
   habits: SyncHabit[];
   events: HabitEvent[];
   sessions: SyncSession[];
+  /** Optional so data saved before to-dos existed still loads. */
+  todos?: SyncTodo[];
   settings: Versioned<S>;
   focus: Versioned<F | null>;
 }
@@ -48,6 +53,7 @@ export interface Pulled<S, F> {
   habits: SyncHabit[];
   events: HabitEvent[];
   sessions: SyncSession[];
+  todos?: SyncTodo[];
   settings: Versioned<S> | null;
   focus: Versioned<F | null> | null;
 }
@@ -57,14 +63,17 @@ export interface Outbox {
   habits: string[];
   events: string[];
   sessions: string[];
+  todos: string[];
   settings: boolean;
   focus: boolean;
 }
 
-export const EMPTY_OUTBOX: Outbox = { habits: [], events: [], sessions: [], settings: false, focus: false };
+export const EMPTY_OUTBOX: Outbox = { habits: [], events: [], sessions: [], todos: [], settings: false, focus: false };
 
-export function addToOutbox(o: Outbox, kind: 'habits' | 'events' | 'sessions', ids: string[]): Outbox {
-  return { ...o, [kind]: [...new Set([...o[kind], ...ids])] };
+export type OutboxList = 'habits' | 'events' | 'sessions' | 'todos';
+
+export function addToOutbox(o: Outbox, kind: OutboxList, ids: string[]): Outbox {
+  return { ...o, [kind]: [...new Set([...(o[kind] ?? []), ...ids])] };
 }
 
 /** Everything on this device, e.g. on the first sign-in so local data joins the account. */
@@ -73,6 +82,7 @@ export function fullOutbox(state: SyncState<unknown, unknown>): Outbox {
     habits: state.habits.map((h) => h.id),
     events: state.events.map((e) => e.id),
     sessions: state.sessions.map((s) => s.id),
+    todos: (state.todos ?? []).map((t) => t.id),
     settings: true,
     focus: true,
   };
@@ -88,6 +98,7 @@ export function clearSent(o: Outbox, sent: Outbox): Outbox {
     habits: drop(o.habits, sent.habits),
     events: drop(o.events, sent.events),
     sessions: drop(o.sessions, sent.sessions),
+    todos: drop(o.todos ?? [], sent.todos ?? []),
     settings: o.settings && !sent.settings,
     focus: o.focus && !sent.focus,
   };
@@ -100,6 +111,16 @@ export function newer<T extends { updatedAt?: number }>(a: T, b: T): T {
 export function unionById<T extends { id: string }>(local: T[], remote: T[]): T[] {
   const seen = new Set(local.map((x) => x.id));
   return [...local, ...remote.filter((x) => !seen.has(x.id))];
+}
+
+/** Last write wins per row; rows only one side has are kept. */
+export function mergeNewest<T extends { id: string; updatedAt?: number }>(local: T[], remote: T[]): T[] {
+  const byId = new Map(local.map((x) => [x.id, x]));
+  for (const r of remote) {
+    const l = byId.get(r.id);
+    byId.set(r.id, l ? newer(l, r) : r);
+  }
+  return [...byId.values()];
 }
 
 /** Last write wins per habit; habits only one side has are kept. */
@@ -121,6 +142,7 @@ export function applyPulled<S, F>(state: SyncState<S, F>, pulled: Pulled<S, F>):
     habits,
     events: unionById(state.events, pulled.events).filter((e) => !deleted.has(e.habitId)),
     sessions: unionById(state.sessions, pulled.sessions),
+    todos: mergeNewest(state.todos ?? [], pulled.todos ?? []),
     settings: pulled.settings ? newer(state.settings, pulled.settings) : state.settings,
     focus: pulled.focus ? newer(state.focus, pulled.focus) : state.focus,
   };
@@ -226,6 +248,43 @@ export const rowToSession = (r: SessionRow): SyncSession => ({
   tag: r.tag,
   habitId: r.habit_id ?? undefined,
   createdAt: Number(r.created_at),
+});
+
+export type TodoRow = {
+  id: string;
+  title: string;
+  notes: string | null;
+  due_date: string | null;
+  due_time: string | null;
+  done_at: number | null;
+  deleted_at: number | null;
+  created_at: number;
+  updated_at: number;
+};
+
+export const todoToRow = (t: SyncTodo): TodoRow => ({
+  id: t.id,
+  title: t.title,
+  notes: t.notes ?? null,
+  due_date: t.dueDate ?? null,
+  due_time: t.dueTime ?? null,
+  done_at: t.doneAt ?? null,
+  deleted_at: t.deletedAt ?? null,
+  created_at: t.createdAt,
+  updated_at: t.updatedAt,
+});
+
+export const rowToTodo = (r: TodoRow): SyncTodo => ({
+  id: r.id,
+  title: r.title,
+  notes: r.notes ?? undefined,
+  dueDate: r.due_date ?? undefined,
+  // Postgres `time` comes back as HH:MM:SS.
+  dueTime: r.due_time ? r.due_time.slice(0, 5) : undefined,
+  doneAt: r.done_at != null ? Number(r.done_at) : undefined,
+  deletedAt: r.deleted_at != null ? Number(r.deleted_at) : undefined,
+  createdAt: Number(r.created_at),
+  updatedAt: Number(r.updated_at),
 });
 
 /**

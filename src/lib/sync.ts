@@ -13,9 +13,12 @@ import {
   rowToEvent,
   rowToHabit,
   rowToSession,
+  rowToTodo,
   SessionRow,
   sessionToRow,
   SyncState,
+  TodoRow,
+  todoToRow,
   Versioned,
 } from '@/core/sync';
 
@@ -23,11 +26,19 @@ export interface Cursors {
   habits: string | null;
   events: string | null;
   sessions: string | null;
+  todos: string | null;
   settings: string | null;
   focus: string | null;
 }
 
-export const EMPTY_CURSORS: Cursors = { habits: null, events: null, sessions: null, settings: null, focus: null };
+export const EMPTY_CURSORS: Cursors = {
+  habits: null,
+  events: null,
+  sessions: null,
+  todos: null,
+  settings: null,
+  focus: null,
+};
 
 export interface SyncResult<S, F> {
   pulled: Pulled<S, F>;
@@ -44,6 +55,12 @@ const PAGE = 1000;
 
 // Postgres errors that retrying won't fix: bad data or not allowed.
 const permanent = (code?: string) => !!code && (code.startsWith('22') || code.startsWith('23') || code === '42501');
+
+// The table isn't there (yet): e.g. the to-dos migration hasn't been run on this project.
+const missingTable = (e: unknown) => {
+  const code = (e as { code?: string } | null)?.code;
+  return code === 'PGRST205' || code === '42P01';
+};
 
 /**
  * Sends one table's pending rows. If the batch is refused, retries row by row so one bad row
@@ -153,6 +170,25 @@ export async function syncOnce<S, F>(
   sent.sessions = sessions.accepted;
   rejected += sessions.rejected;
 
+  // To-dos sync on their own: if the server doesn't have the table yet, they wait in the outbox and
+  // everything else still syncs.
+  let todosAvailable = true;
+  const pendingTodos = new Set(outbox.todos ?? []);
+  const localTodos = state.todos ?? [];
+  try {
+    const todos = await push<TodoRow>(
+      client,
+      'todos',
+      localTodos.filter((t) => pendingTodos.has(t.id)).map(todoToRow),
+      { onConflict: 'id', ignoreDuplicates: false },
+    );
+    sent.todos = [...todos.accepted, ...(outbox.todos ?? []).filter((id) => !localTodos.some((t) => t.id === id))];
+    rejected += todos.rejected;
+  } catch (err) {
+    if (!missingTable(err)) throw err;
+    todosAvailable = false;
+  }
+
   if (outbox.settings) {
     const { error } = await client
       .from('user_settings')
@@ -171,6 +207,14 @@ export async function syncOnce<S, F>(
   const h = await pullTable<HabitRow>(client, 'habits', 'server_updated_at', cursors.habits);
   const e = await pullTable<EventRow>(client, 'habit_events', 'server_inserted_at', cursors.events);
   const s = await pullTable<SessionRow>(client, 'focus_sessions', 'server_inserted_at', cursors.sessions);
+  let t: { rows: TodoRow[]; cursor: string | null } = { rows: [], cursor: cursors.todos ?? null };
+  if (todosAvailable) {
+    try {
+      t = await pullTable<TodoRow>(client, 'todos', 'server_updated_at', cursors.todos ?? null);
+    } catch (err) {
+      if (!missingTable(err)) throw err;
+    }
+  }
   const st = await pullTable<{ data: S; updated_at: number }>(client, 'user_settings', 'server_updated_at', cursors.settings);
   const f = await pullTable<{ data: F | null; updated_at: number }>(client, 'active_focus', 'server_updated_at', cursors.focus);
 
@@ -182,11 +226,19 @@ export async function syncOnce<S, F>(
       habits: h.rows.map(rowToHabit),
       events: e.rows.map(rowToEvent),
       sessions: s.rows.map(rowToSession),
+      todos: t.rows.map(rowToTodo),
       settings: versioned(st.rows),
       focus: versioned(f.rows),
     },
     sent,
     rejected,
-    cursors: { habits: h.cursor, events: e.cursor, sessions: s.cursor, settings: st.cursor, focus: f.cursor },
+    cursors: {
+      habits: h.cursor,
+      events: e.cursor,
+      sessions: s.cursor,
+      todos: t.cursor,
+      settings: st.cursor,
+      focus: f.cursor,
+    },
   };
 }

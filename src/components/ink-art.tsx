@@ -147,7 +147,7 @@ export function LogoMark({ size = 28, color }: { size?: number; color?: string }
   );
 }
 
-export type TabIconName = 'today' | 'focus' | 'island' | 'streaks';
+export type TabIconName = 'today' | 'todo' | 'focus' | 'island' | 'streaks';
 
 export function TabIcon({ name, color, size = 22 }: { name: TabIconName; color: string; size?: number }) {
   const common = { fill: 'none', stroke: color, strokeWidth: 2.2, strokeLinecap: 'round' as const };
@@ -169,6 +169,15 @@ export function TabIcon({ name, color, size = 22 }: { name: TabIconName; color: 
               />
             );
           })}
+        </G>
+      )}
+      {name === 'todo' && (
+        <G>
+          {/* A checklist: a ticked box on top, an empty one below, each with a line of text. */}
+          <Rect x={3} y={3.5} width={6} height={6} rx={1.5} {...common} strokeWidth={1.8} />
+          <Path d="M4.6 6.6l1.4 1.4 2.6-3" {...common} strokeWidth={1.8} />
+          <Rect x={3} y={14.5} width={6} height={6} rx={1.5} {...common} strokeWidth={1.8} />
+          <Path d="M12.5 6.5h8.5M12.5 17.5h8.5" {...common} />
         </G>
       )}
       {name === 'focus' && (

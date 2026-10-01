@@ -29,7 +29,8 @@ import {
   TimerState,
 } from '@/core/timer';
 import { planNotifications } from '@/core/notify-plan';
-import { addToOutbox, mergeHabits, Pulled, SyncState, unionById, Versioned } from '@/core/sync';
+import { addToOutbox, mergeHabits, mergeNewest, OutboxList, Pulled, SyncState, unionById, Versioned } from '@/core/sync';
+import { normalizeTodo, Todo, TodoInput } from '@/core/todos';
 import { FocusSessionRecord, growPlants } from '@/core/world';
 import { applyPlan } from '@/lib/notifications';
 import { supabase } from '@/lib/supabase';
@@ -80,6 +81,8 @@ export type Settings = {
     streakAtRisk: boolean;
     streakAtRiskHour: number;
     focusEnd: boolean;
+    /** A reminder when a to-do is due. */
+    todoDue: boolean;
   };
 };
 
@@ -90,7 +93,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dayStartHour: DEFAULT_DAY_START_HOUR,
   habitsEnabled: true,
   stayFocused: false,
-  notifications: { streakAtRisk: true, streakAtRiskHour: 20, focusEnd: true },
+  notifications: { streakAtRisk: true, streakAtRiskHour: 20, focusEnd: true, todoDue: true },
 };
 
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -137,6 +140,8 @@ function useIstelState() {
   const [allHabits, setAllHabits] = useState<NamedHabit[]>(() => load('habits', []));
   const [events, setEvents] = useState<HabitEvent[]>(() => load('events', []));
   const [sessions, setSessions] = useState<TaggedSession[]>(() => load('sessions', []));
+  const [allTodos, setAllTodos] = useState<Todo[]>(() => load('todos', []));
+  const todos = useMemo(() => allTodos.filter((t) => !t.deletedAt), [allTodos]);
   const [focusBox, setFocusBox] = useState(loadFocus);
   const [settingsBox, setSettingsBox] = useState(() => loadSettings(allHabits.length > 0 || sessions.length > 0));
   const [meta, setMeta] = useSyncMeta();
@@ -152,11 +157,12 @@ function useIstelState() {
   useEffect(() => save('habits', allHabits), [allHabits]);
   useEffect(() => save('events', events), [events]);
   useEffect(() => save('sessions', sessions), [sessions]);
+  useEffect(() => save('todos', allTodos), [allTodos]);
   useEffect(() => save('focus', focusBox), [focusBox]);
 
   // Changes are queued for sync once this device is linked to an account (the first link sends everything).
   const track = useCallback(
-    (kind: 'habits' | 'events' | 'sessions', ids: string[]) =>
+    (kind: OutboxList, ids: string[]) =>
       setMeta((m) => (m.accountId ? { ...m, outbox: addToOutbox(m.outbox, kind, ids) } : m)),
     [setMeta],
   );
@@ -197,6 +203,33 @@ function useIstelState() {
       },
     };
   }, [today, track]);
+
+  const todoActions = useMemo(() => {
+    const edit = (id: string, patch: (t: Todo) => Partial<Todo>) => {
+      setAllTodos((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch(t), updatedAt: Date.now() } : t)));
+      track('todos', [id]);
+    };
+    return {
+      add: (input: TodoInput) => {
+        const id = randomUUID();
+        const now = Date.now();
+        setAllTodos((prev) => [...prev, { id, ...normalizeTodo(input), createdAt: now, updatedAt: now }]);
+        track('todos', [id]);
+        return id;
+      },
+      update: (id: string, input: TodoInput) => edit(id, () => normalizeTodo(input)),
+      toggleDone: (id: string) => edit(id, (t) => ({ doneAt: t.doneAt ? undefined : Date.now() })),
+      /** Deletes it on every device. */
+      remove: (id: string) => edit(id, () => ({ deletedAt: Date.now() })),
+      /** Deletes these to-dos (e.g. every finished one) in one go. */
+      removeMany: (ids: string[]) => {
+        const now = Date.now();
+        const gone = new Set(ids);
+        setAllTodos((prev) => prev.map((t) => (gone.has(t.id) ? { ...t, deletedAt: now, updatedAt: now } : t)));
+        track('todos', ids);
+      },
+    };
+  }, [track]);
 
   const values = useMemo(() => {
     const byHabit = new Map<string, Map<LocalDate, number>>();
@@ -272,6 +305,7 @@ function useIstelState() {
     setAllHabits([]);
     setEvents([]);
     setSessions([]);
+    setAllTodos([]);
     setFocusBox({ value: null, updatedAt: 0 });
     setSettingsBox({ value: DEFAULT_SETTINGS, updatedAt: 0 });
   }, []);
@@ -411,23 +445,26 @@ function useIstelState() {
           enabled: settings.notifications.focusEnd && focus?.mode !== 'stopwatch',
           at: focus ? plannedEndAt(focus.timer) : null,
         },
+        // Settings saved before this option existed count as on.
+        todos: settings.notifications.todoDue === false ? [] : todos,
       });
       applyPlan(plan).catch(() => {});
     }, 400);
     return () => clearTimeout(id);
-  }, [today, dayConfig, habits, habitsEnabled, derived, settings.notifications, focus, notificationsVersion]);
+  }, [today, dayConfig, habits, habitsEnabled, todos, derived, settings.notifications, focus, notificationsVersion]);
 
   // Sync
   const latest = useRef<SyncState<Settings, ActiveFocus>>({
     habits: allHabits,
     events,
     sessions,
+    todos: allTodos,
     settings: settingsBox,
     focus: focusBox,
   });
   useLayoutEffect(() => {
-    latest.current = { habits: allHabits, events, sessions, settings: settingsBox, focus: focusBox };
-  }, [allHabits, events, sessions, settingsBox, focusBox]);
+    latest.current = { habits: allHabits, events, sessions, todos: allTodos, settings: settingsBox, focus: focusBox };
+  }, [allHabits, events, sessions, allTodos, settingsBox, focusBox]);
   const snapshot = useCallback(() => latest.current, []);
   const applyRemote = useCallback((pulled: Pulled<Settings, ActiveFocus>) => {
     if (pulled.habits.length) {
@@ -438,6 +475,8 @@ function useIstelState() {
       setEvents((prev) => unionById(prev, pulled.events).filter((e) => !deleted.has(e.habitId)));
     }
     if (pulled.sessions.length) setSessions((prev) => unionById(prev, pulled.sessions as TaggedSession[]));
+    const remoteTodos = pulled.todos ?? [];
+    if (remoteTodos.length) setAllTodos((prev) => mergeNewest(prev, remoteTodos));
     const remoteSettings = pulled.settings;
     if (remoteSettings) {
       setSettingsBox((b) =>
@@ -483,6 +522,9 @@ function useIstelState() {
     /** Logged value per habit per day, for per-habit views. */
     habitValues: values,
     sessions,
+    /** Live to-dos (deleted ones are kept only for sync). */
+    todos,
+    todoActions,
     focus,
     events,
     settings,

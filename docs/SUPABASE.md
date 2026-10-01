@@ -69,6 +69,14 @@ settings, the running timer) and `delete_my_account()`.
   that holds another account's data clears that data from the device instead of uploading it.
 - Deleting the account (Account screen) removes the user and all their rows everywhere.
 
+### To-dos
+
+`supabase/migrations/20261001180000_todos.sql` adds the `todos` table (title, notes, deadline day and time,
+done, deleted), with the same row-level security and newest-change-wins rule as habits.
+**On the hosted project, run this file in the SQL Editor once** (after the sync migration). Until then the
+app keeps working: to-dos are saved on each device and wait in the sync queue, and they upload on the first
+sync after the table exists.
+
 ## Not done yet
 
 - Instant updates between devices (Supabase Realtime); today another device catches up within a minute or

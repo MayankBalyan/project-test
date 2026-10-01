@@ -8,6 +8,7 @@ export interface ExportInput {
   habits: { id: string; name: string }[];
   events: HabitEvent[];
   sessions: { date: string; minutes: number; status: string; tag: string }[];
+  todos?: { title: string; dueDate?: string; dueTime?: string; doneAt?: number }[];
 }
 
 /** Everything Istel stores, as one JSON document the user can keep or import later. */
@@ -33,6 +34,10 @@ export function toCsvExport(data: ExportInput): string {
     for (const [date, value] of values) if (value > 0) rows.push([date, 'habit', h.name, value, 'done']);
   }
   for (const s of data.sessions) rows.push([s.date, 'focus', s.tag, s.minutes, s.status]);
-  rows.sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+  // To-dos with a deadline sit on their due day; the rest go last.
+  for (const t of data.todos ?? []) {
+    rows.push([t.dueDate ? `${t.dueDate}${t.dueTime ? ` ${t.dueTime}` : ''}` : '', 'todo', t.title, '', t.doneAt ? 'done' : 'open']);
+  }
+  rows.sort((a, b) => (!a[0] ? 1 : !b[0] ? -1 : String(a[0]).localeCompare(String(b[0]))));
   return [['date', 'type', 'name', 'value', 'status'], ...rows].map((r) => r.map(cell).join(',')).join('\n') + '\n';
 }

@@ -129,7 +129,7 @@ score = (habits_completed / habits_scheduled) * 60      // up to 60 points
 | ID | Requirement | Priority |
 |---|---|---|
 | F1 | Default cycle: 25 min focus / 5 min short break / 15 min long break after 4 sessions | P0 |
-| F2 | Custom durations (focus 10–120 min, breaks 1–30 min) and presets | P0 |
+| F2 | Custom durations on a draggable circular dial (focus 10 min – 3 h, 5-minute steps), quick picks, breaks 1–30 min | P0 |
 | F3 | Start, pause (limited to 2 pauses per session), resume, give up | P0 |
 | F4 | Tag sessions (Study, Work, Reading…) and optionally link one to a duration habit | P0 |
 | F5 | **Cross-device live timer**: a timer started on the laptop shows the same countdown on the phone, and can be paused or stopped there | P0 |
@@ -140,6 +140,18 @@ score = (habits_completed / habits_scheduled) * 60      // up to 60 points
 | F10 | Stopwatch mode (count up) for open-ended sessions | P1 |
 | F11 | Lock-screen / Dynamic Island / persistent notification countdown | P1 |
 | F12 | Focus stats: total today/week/month, by tag, best time of day | P0 (basic), P1 (charts) |
+
+| F13 | A finished session plants one tree per full half hour (3 h = 6 trees); a given-up session leaves one wilted sprout | P0 |
+
+### 7.3b To-dos
+
+| ID | Requirement | Priority |
+|---|---|---|
+| T1 | A separate To-do tab: add a to-do with an optional deadline (quick picks or any day on a calendar, optional time) | P0 |
+| T2 | Grouped as Late, Today, Coming up, No deadline and Done; tick off with a tap, edit notes and deadline, delete | P0 |
+| T3 | Late and due-today to-dos also show on the Today screen | P0 |
+| T4 | A reminder at the deadline (or 9:00 on the day without a time), with a switch in Settings | P0 |
+| T5 | Synced across devices like habits (newest change wins, deletes reach every device) | P0 |
 
 ### 7.4 The living world ("Your Island")
 

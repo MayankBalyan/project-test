@@ -22,6 +22,7 @@ const CHANNELS = {
   habit: { id: 'reminders', name: 'Habit reminders' },
   streak: { id: 'streak', name: 'Streak at risk' },
   focus: { id: 'focus', name: 'Focus timer' },
+  todo: { id: 'todos', name: 'To-do deadlines' },
 } as const;
 
 async function ensureChannels() {

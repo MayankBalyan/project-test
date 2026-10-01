@@ -11,8 +11,9 @@ import { LogoMark, TabIcon, TabIconName } from './ink-art';
 import { SlidingTabSlot } from './sliding-tab-slot';
 import { Txt } from './ui';
 
-const TABS: { name: string; href: '/' | '/focus' | '/island' | '/streaks'; label: string; icon: TabIconName }[] = [
+const TABS: { name: string; href: '/' | '/todos' | '/focus' | '/island' | '/streaks'; label: string; icon: TabIconName }[] = [
   { name: 'index', href: '/', label: 'Today', icon: 'today' },
+  { name: 'todos', href: '/todos', label: 'To-do', icon: 'todo' },
   { name: 'focus', href: '/focus', label: 'Focus', icon: 'focus' },
   { name: 'island', href: '/island', label: 'Island', icon: 'island' },
   { name: 'streaks', href: '/streaks', label: 'Streaks', icon: 'streaks' },
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 13,
     borderRadius: Radius.pill,
   },
   pillLabel: { fontSize: 14 },
