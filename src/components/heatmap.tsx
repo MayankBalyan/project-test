@@ -20,8 +20,11 @@ export function Heatmap({
   selected,
   onSelect,
   rainDays = [],
+  describe,
 }: {
   days: HeatDay[];
+  /** What a square says to screen readers; defaults to its score. */
+  describe?: (day: HeatDay) => string;
   /** Missed days a Rain Day covered; drawn with a dot. */
   rainDays?: LocalDate[];
   selected?: LocalDate;
@@ -78,7 +81,7 @@ export function Heatmap({
                     day ? (
                       <Pressable
                         key={day.date}
-                        accessibilityLabel={`${day.date}: ${day.muted ? 'not due' : `score ${day.score}`}${rain.has(day.date) ? ', Rain Day' : ''}`}
+                        accessibilityLabel={`${day.date}: ${describe ? describe(day) : day.muted ? 'not due' : `score ${day.score}`}${rain.has(day.date) ? ', Rain Day' : ''}`}
                         onPress={() => onSelect(day.date)}
                         onHoverIn={() => onSelect(day.date)}
                         hitSlop={1}

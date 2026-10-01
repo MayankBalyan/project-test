@@ -140,6 +140,7 @@ score = (habits_completed / habits_scheduled) * 60      // up to 60 points
 | F10 | Stopwatch mode (count up) for open-ended sessions | P1 |
 | F11 | Lock-screen / Dynamic Island / persistent notification countdown | P1 |
 | F12 | Focus stats: total today/week/month, by tag, best time of day | P0 (basic), P1 (charts) |
+| F14 | Focus heatmap on Streaks: 12 months of focus days (full square at 2 h+), focus streak, best streak, days focused, best day | P0 |
 
 | F13 | A finished session plants one tree per full half hour (3 h = 6 trees); a given-up session leaves one wilted sprout | P0 |
 

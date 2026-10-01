@@ -9,7 +9,7 @@ import { Hero } from '@/components/hero';
 import { Blob, Moon } from '@/components/ink-art';
 import { Card, Chip, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Radius, Spacing } from '@/constants/theme';
-import { focusStats, formatMinutes } from '@/core/focus-stats';
+import { FOCUS_HEAT_FULL_MIN, focusHeatDays, focusHeatSummary, focusStats, formatMinutes } from '@/core/focus-stats';
 import { HabitDay, habitHeatDays, habitSummary } from '@/core/habit-heat';
 import { Habit } from '@/core/habits';
 import { usePalette } from '@/hooks/use-palette';
@@ -48,6 +48,10 @@ export default function StreaksScreen() {
   );
   const summary = chosen ? habitSummary(chosen.habit, chosenValues ?? new Map(), today) : null;
   const focus = useMemo(() => focusStats(sessions, today), [sessions, today]);
+  const focusDays = useMemo(() => focusHeatDays(sessions, today), [sessions, today]);
+  const focusSummary = useMemo(() => focusHeatSummary(focusDays), [focusDays]);
+  const [focusSelected, setFocusSelected] = useState(today);
+  const focusDay = focusDays.find((d) => d.date === focusSelected) ?? focusDays[focusDays.length - 1];
   const archived = settings.habitsEnabled ? habits.filter((h) => h.archivedAt) : [];
   const edit = (id: string) => router.push({ pathname: '/habit/[id]', params: { id } });
   const [selected, setSelected] = useState(today);
@@ -156,6 +160,43 @@ export default function StreaksScreen() {
           ))}
         </View>
       </View>
+
+      <Card style={styles.heatCard}>
+        <SectionTitle right={<Txt variant="caption" tone="muted">Last 12 months</Txt>}>Focus days</SectionTitle>
+        <View style={styles.habitTiles}>
+          {[
+            [`${focusSummary.currentStreak}`, 'Focus streak'],
+            [`${focusSummary.longestStreak}`, 'Best streak'],
+            [`${focusSummary.daysFocused}`, 'Days focused'],
+            [focusSummary.best ? formatMinutes(focusSummary.best.minutes) : '–', 'Best day'],
+          ].map(([value, label]) => (
+            <View key={label} style={[styles.habitTile, { borderColor: palette.line }]}>
+              <Txt style={[styles.tileValue, { color: palette.ink }]}>{value}</Txt>
+              <Txt variant="caption" tone="inkSoft">
+                {label}
+              </Txt>
+            </View>
+          ))}
+        </View>
+        <Heatmap
+          days={focusDays}
+          selected={focusSelected}
+          onSelect={setFocusSelected}
+          describe={(d) => {
+            const m = focusDays.find((f) => f.date === d.date)?.minutes ?? 0;
+            return m ? `${m} minutes of focus` : 'no focus';
+          }}
+        />
+        <View style={[styles.dayDetail, { borderColor: palette.line }]}>
+          <Txt variant="bodyBold">{formatDay(focusDay.date)}</Txt>
+          <Txt variant="caption" tone="inkSoft">
+            {focusDay.minutes
+              ? `${formatMinutes(focusDay.minutes)} focused · ${focusDay.sessions} session${focusDay.sessions === 1 ? '' : 's'}`
+              : 'No focus this day'}
+            {` · full square at ${FOCUS_HEAT_FULL_MIN / 60}h+`}
+          </Txt>
+        </View>
+      </Card>
 
       <Card style={styles.heatCard}>
         <SectionTitle>Last 12 weeks</SectionTitle>

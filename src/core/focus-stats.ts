@@ -59,3 +59,55 @@ export function formatMinutes(minutes: number): string {
   const m = minutes % 60;
   return m ? `${h}h ${m}m` : `${h}h`;
 }
+
+/** Minutes of finished focus that fill a focus-heatmap square completely (2 hours). */
+export const FOCUS_HEAT_FULL_MIN = 120;
+
+export interface FocusDay {
+  date: LocalDate;
+  /** 0–100: share of FOCUS_HEAT_FULL_MIN focused that day. */
+  score: number;
+  minutes: number;
+  sessions: number;
+}
+
+/** The last `days` days of finished focus, for the focus heatmap (oldest first). */
+export function focusHeatDays(sessions: SessionLike[], today: LocalDate, days = 365): FocusDay[] {
+  const byDay = new Map<LocalDate, { minutes: number; sessions: number }>();
+  for (const s of sessions) {
+    if (s.status !== 'done') continue;
+    const d = byDay.get(s.date) ?? { minutes: 0, sessions: 0 };
+    byDay.set(s.date, { minutes: d.minutes + s.minutes, sessions: d.sessions + 1 });
+  }
+  return Array.from({ length: days }, (_, i) => {
+    const date = addDays(today, i - days + 1);
+    const d = byDay.get(date) ?? { minutes: 0, sessions: 0 };
+    const score = d.minutes > 0 ? Math.max(1, Math.round((Math.min(d.minutes, FOCUS_HEAT_FULL_MIN) / FOCUS_HEAT_FULL_MIN) * 100)) : 0;
+    return { date, score, ...d };
+  });
+}
+
+export interface FocusHeatSummary {
+  /** Days with any finished focus in the window. */
+  daysFocused: number;
+  /** Consecutive days with focus, ending today (or yesterday, if today has none yet). */
+  currentStreak: number;
+  longestStreak: number;
+  best: { date: LocalDate; minutes: number } | null;
+}
+
+export function focusHeatSummary(days: FocusDay[]): FocusHeatSummary {
+  let longest = 0;
+  let run = 0;
+  let best: FocusHeatSummary['best'] = null;
+  for (const d of days) {
+    run = d.minutes > 0 ? run + 1 : 0;
+    longest = Math.max(longest, run);
+    if (d.minutes > 0 && (!best || d.minutes > best.minutes)) best = { date: d.date, minutes: d.minutes };
+  }
+  // Today without focus yet doesn't break the streak.
+  let current = 0;
+  const last = days.length - 1;
+  for (let i = days[last]?.minutes > 0 ? last : last - 1; i >= 0 && days[i].minutes > 0; i--) current++;
+  return { daysFocused: days.filter((d) => d.minutes > 0).length, currentStreak: current, longestStreak: longest, best };
+}
