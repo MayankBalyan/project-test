@@ -59,9 +59,11 @@ Plant growth stages: seed → sprout → young → mature. A given-up session le
 leaves), never a dead tree.
 
 ## Logo mark
-- Two open ink rings (a spiral opening to the upper right) with a small sapling (stem and two leaves)
-  centered in the middle of the rings. Drawn on a 32×32 grid, rings centered on (16,16); the sapling sits on
-  that same center and must not touch the inner ring.
+- **Orbit** (chosen by the owner, inspired by their reference: thick even strokes, a drop with something
+  nested inside, open gaps). An open drop, tip up, with a gap at the lower left, around an open ring (a
+  planet's orbit) with a gap at the upper right. Flat stroke ends, sharp tip, ink only.
+- Drawn on a 100×100 grid: drop circle r 26 centred at x 50, stroke 9; ring r 11, stroke 7.5. The whole shape
+  is centred vertically in the box (tip to bottom 7.8–92.2).
 - One source: `LogoMark` in `src/components/ink-art.tsx`. The same paths are in `site/favicon.svg`,
   `public/favicon.svg` and the site headers. The PNG icons (`public/icons/`, `assets/images/icon.png`,
   favicon, Android adaptive icon, splash) are rendered from `site/favicon.svg`. Change them all together.

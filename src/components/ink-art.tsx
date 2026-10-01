@@ -132,17 +132,15 @@ export function Moon({ size, style }: { size: number; style?: StyleProp<ViewStyl
   );
 }
 
-/** Istel mark: an orbit spiral with a sprout, echoing the reference logo. */
+/** Istel mark: an orbit inside an open drop (see docs/DESIGN.md → Logo mark). */
 export function LogoMark({ size = 28, color }: { size?: number; color?: string }) {
   const palette = usePalette();
   const ink = color ?? palette.ink;
   return (
-    <Svg width={size} height={size} viewBox="0 0 32 32">
-      <Path d="M16 29a13 13 0 1 1 12-18" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
-      <Path d="M16 23a7 7 0 1 1 6-10" fill="none" stroke={ink} strokeWidth={3} strokeLinecap="round" />
-      {/* Sapling: stem and two leaves, centered on the rings' middle (16,16). */}
-      <Path d="M16 18.8v-4.8" fill="none" stroke={ink} strokeWidth={1.3} strokeLinecap="round" />
-      <Path d="M16 15.6c-2.08 0-2.88-1.28-2.88-2.88 1.92 0 2.88 1.12 2.88 2.88zM16 14.56c0-1.6.96-2.96 2.88-2.96 0 1.76-.96 2.96-2.88 2.96z" fill={ink} stroke={ink} strokeWidth={0.72} strokeLinejoin="round" />
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      {/* An open drop (tip up, gap at lower left) around an open ring, like a planet's orbit. */}
+      <Path d="M27.95 75.51A26 26 0 0 1 28.55 47.04L50 15.73L71.45 47.04A26 26 0 0 1 41.11 86.16" fill="none" stroke={ink} strokeWidth={9} />
+      <Path d="M60.34 58.97A11 11 0 1 1 53.76 52.39" fill="none" stroke={ink} strokeWidth={7.5} />
     </Svg>
   );
 }

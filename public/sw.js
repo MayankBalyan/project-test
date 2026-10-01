@@ -4,8 +4,8 @@
  * - Built files (/_expo/static, /assets, /icons): cache first. Their names change with every build.
  * - Anything else, including Supabase (another origin), is never touched.
  */
-const SHELL = 'istel-shell-v2';
-const STATIC = 'istel-static-v2';
+const SHELL = 'istel-shell-v3';
+const STATIC = 'istel-static-v3';
 const STATIC_LIMIT = 80;
 
 self.addEventListener('install', (event) => {
