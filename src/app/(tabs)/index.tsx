@@ -1,19 +1,17 @@
 import { Redirect, router } from 'expo-router';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { PhoneTopBar } from '@/components/account-button';
 import { describeSchedule, HabitRow } from '@/components/habit-row';
 import { Heading3D } from '@/components/heading-3d';
-import { Hero } from '@/components/hero';
-import { Blob, Planet, RainDrop } from '@/components/ink-art';
-import { Island } from '@/components/island';
+import { RainDrop } from '@/components/ink-art';
 import { TodoRow } from '@/components/todo-row';
 import { Card, InkButton, Screen, SectionTitle, Txt } from '@/components/ui';
-import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { MAX_RAIN_DAYS, streakStatus } from '@/core/streaks';
-import { toLocalDate } from '@/core/dates';
+import { Radius, Spacing } from '@/constants/theme';
+import { toLocalDate, weekday } from '@/core/dates';
+import { heatLevel } from '@/core/score';
+import { streakStatus } from '@/core/streaks';
 import { describeDue, groupTodos, isOverdue, todayTodos } from '@/core/todos';
-import { islandTier, unlocksFor } from '@/core/world';
 import { useClock } from '@/hooks/use-clock';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
@@ -46,9 +44,8 @@ export default function TodayRoute() {
 function TodayScreen() {
   const palette = usePalette();
   const wide = useIsWide();
-  const { width } = useWindowDimensions();
   const state = useIstel();
-  const { global, habitStats, todayActivity, plants, lifetimeFocusMinutes } = state;
+  const { global, habitStats, todayActivity } = state;
   const due = habitStats.filter((h) => h.scheduledToday);
   const { nowDate, nowMinutes } = useClock();
   const todoGroups = groupTodos(state.todos, state.today, nowMinutes, nowDate);
@@ -60,70 +57,62 @@ function TodayScreen() {
   // Open ones first (a few), then everything already ticked off today, struck through.
   const shownTodos = [...openTodos.slice(0, DUE_TODOS_SHOWN), ...finishedTodos];
   const status = streakStatus(global, state.today);
+  const week = state.days.slice(-7);
   const doneCount = due.filter((h) => h.done).length;
-  const contentWidth = Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2);
 
   return (
     <Screen>
       {!wide && <PhoneTopBar />}
-      <Hero
-        title={'Keep it\ngrowing'}
-        subtitle={`${formatToday(state.today)} · day score ${todayActivity.score}`}
-        art={
-          <>
-            <Blob size={170} variant={1} stars={22} style={styles.heroBlob} />
-            <Planet size={150} style={styles.heroPlanet} />
-          </>
-        }
-      />
-
-      <View style={[styles.streakCard, { backgroundColor: palette.space }]}>
-        <Blob size={160} variant={2} stars={16} style={styles.streakBlob} />
-        <View style={styles.streakTop}>
-          <View>
-            <Heading3D size={76} depth={6} face="#FFFFFF" ink="#5E5E5B">
-              {String(global.current)}
-            </Heading3D>
-            <Txt variant="label" tone="face" style={styles.streakLabel}>
-              Day streak
-            </Txt>
-          </View>
-          <View style={styles.streakMeta}>
-            <Txt variant="caption" style={styles.onSpace}>
-              Best · {global.longest} days
-            </Txt>
-            <View style={styles.drops} aria-label={`${global.rainDaysLeft} of ${MAX_RAIN_DAYS} Rain Days saved`}>
-              <Txt variant="caption" style={styles.onSpace}>
-                Rain days
-              </Txt>
-              {Array.from({ length: MAX_RAIN_DAYS }, (_, i) => (
-                <RainDrop key={i} size={14} filled={i < global.rainDaysLeft} color="#D8D7D2" />
-              ))}
-            </View>
-            <Txt variant="caption" style={styles.onSpace}>
-              Focus today · {todayActivity.activity.focusMinutes} min
-            </Txt>
-          </View>
+      <View style={styles.head}>
+        <View style={styles.headText}>
+          <Txt variant="label" tone="inkSoft">
+            {formatToday(state.today)} · score {todayActivity.score}
+          </Txt>
+          <Heading3D size={wide ? 64 : 52} depth={5}>
+            Today
+          </Heading3D>
         </View>
-        <View style={styles.streakNote}>
-          {status.rescuedOn ? (
-            <>
-              <RainDrop size={14} filled color="#FFFFFF" />
-              <Txt variant="caption" tone="face" style={styles.noteText}>
-                A Rain Day covered {formatShort(status.rescuedOn)} and kept your streak alive.
-              </Txt>
-            </>
-          ) : (
-            <Txt variant="caption" style={[styles.onSpace, styles.noteText]}>
-              {status.restarting
-                ? `Your best is ${global.longest} days. One habit or a 25-minute focus starts a new streak today.`
-                : global.current === 0
-                  ? 'One habit or a 25-minute focus starts your first streak.'
-                  : `${status.daysToNext} ${status.daysToNext === 1 ? 'day' : 'days'} to your ${status.nextMilestone}-day milestone. Every 7 days earns a Rain Day.`}
-            </Txt>
-          )}
+        <View style={styles.headStreak} aria-label={`${global.current}-day streak, best ${global.longest}`}>
+          <Heading3D size={wide ? 56 : 46} depth={4}>
+            {String(global.current)}
+          </Heading3D>
+          <Txt variant="caption" tone="inkSoft">
+            day streak
+          </Txt>
         </View>
       </View>
+
+      <Pressable
+        role="link"
+        accessibilityLabel="This week. Open Streaks"
+        onPress={() => router.navigate('/streaks')}
+        style={({ pressed }) => [styles.week, { borderColor: palette.ink, backgroundColor: palette.surface, opacity: pressed ? 0.8 : 1 }]}>
+        {week.map((d, i) => {
+          const isToday = i === week.length - 1;
+          return (
+            <View key={d.date} style={styles.weekDay} aria-label={`${formatShort(d.date)}: score ${d.score}`}>
+              <Txt variant="caption" tone={isToday ? 'ink' : 'muted'}>
+                {WEEKDAY[weekday(d.date)]}
+              </Txt>
+              <View
+                style={[
+                  styles.dot,
+                  { backgroundColor: palette.heat[heatLevel(d.score)] },
+                  isToday && { borderWidth: 2, borderColor: palette.ink },
+                ]}
+              />
+            </View>
+          );
+        })}
+      </Pressable>
+      {status.rescuedOn && (
+        <View style={styles.rescued}>
+          <RainDrop size={14} filled color={palette.ink} />
+          <Txt variant="caption" tone="inkSoft" style={styles.noteText}>
+            A Rain Day covered {formatShort(status.rescuedOn)} and kept your streak alive.
+          </Txt>
+        </View>
+      )}
 
       {todayList.length > 0 && (
         <View style={styles.section}>
@@ -212,26 +201,6 @@ function TodayScreen() {
         )}
       </View>
 
-      <Card style={styles.focusCard}>
-        <View style={styles.focusText}>
-          <Txt variant="section">Plant a seed</Txt>
-          <Txt variant="caption" tone="inkSoft">
-            A 25-minute focus session plants a shrub on your island. Habits water it.
-          </Txt>
-        </View>
-        <InkButton label="Start focus" onPress={() => router.navigate('/focus')} />
-      </Card>
-
-      <Pressable accessibilityLabel="Open your island" onPress={() => router.navigate('/island')} style={styles.section}>
-        <SectionTitle right={<Txt variant="label">Open →</Txt>}>Your island</SectionTitle>
-        <Island
-          plants={plants}
-          tier={islandTier(lifetimeFocusMinutes)}
-          stars={20 + global.current * 2}
-          unlocks={unlocksFor(global.longest)}
-          width={contentWidth}
-        />
-      </Pressable>
     </Screen>
   );
 }
@@ -239,33 +208,25 @@ function TodayScreen() {
 const DUE_TODOS_SHOWN = 4;
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+const WEEKDAY = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
 const styles = StyleSheet.create({
-  heroBlob: { position: 'absolute', right: -60, top: -10 },
-  heroPlanet: { position: 'absolute', right: -10, top: 30 },
-  streakCard: {
-    borderRadius: Radius.card + 8,
-    padding: Spacing.four,
-    gap: Spacing.three,
-    overflow: 'hidden',
-  },
-  streakTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  drops: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  streakNote: {
+  head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: Spacing.two },
+  headText: { gap: Spacing.one, flexShrink: 1 },
+  headStreak: { alignItems: 'flex-end' },
+  week: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.two,
-    borderTopWidth: 1,
-    borderTopColor: '#3A3A38',
-    paddingTop: Spacing.two + 2,
+    justifyContent: 'space-between',
+    borderWidth: 2,
+    borderRadius: Radius.card,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.three,
   },
+  weekDay: { alignItems: 'center', gap: 6 },
+  dot: { width: 30, height: 30, borderRadius: 15 },
+  rescued: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, marginTop: -Spacing.two },
   noteText: { flex: 1 },
-  streakBlob: { position: 'absolute', right: -40, top: -50, opacity: 0.9 },
-  streakLabel: { fontSize: 15 },
-  streakMeta: { alignItems: 'flex-end', gap: 4 },
-  onSpace: { color: '#D8D7D2' },
   section: { gap: Spacing.two + 2 },
   empty: { gap: Spacing.two + 2 },
   hint: { textAlign: 'center' },
-  focusCard: { gap: Spacing.three },
-  focusText: { gap: Spacing.one },
 });
