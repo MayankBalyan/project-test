@@ -260,11 +260,31 @@ footer nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
   .ticker span { font-size: 20px; }
 }
 
+/* Hero: heading and button on the left, one app screen on a blob on the right */
+.soon { font-size: 12px; color: var(--muted); margin-top: 14px; }
+.lead { margin-top: 22px; }
+
+.hero-s { padding: 48px 0 80px; }
+.s-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; }
+.s-copy .lead { max-width: 440px; }
+.s-copy .h3d.xl { font-size: clamp(56px, 9vw, 112px); }
+.s-visual { position: relative; display: flex; justify-content: center; padding: 30px 0; }
+.s-blob { position: absolute; width: 380px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.s-phone { position: relative; max-width: 260px; transform: rotate(3deg); }
+@media (max-width: 860px) {
+  .s-grid { grid-template-columns: 1fr; text-align: center; }
+  .s-copy .lead { margin-left: auto; margin-right: auto; }
+  .s-copy .actions { justify-content: center; }
+  .s-blob { width: 280px; }
+  .s-phone { max-width: 220px; }
+}
+
 /* ---------- Motion ---------- */
 /* Everything below animates opacity, translate and scale only, and is off when people ask for less motion. */
 @media (prefers-reduced-motion: no-preference) {
   /* Hero: copy slides up in sequence, art pops in, phones rise into place. */
-  .hero-copy > * { animation: rise 640ms var(--ease) both; }
+  .hero-copy > *, .s-copy > * { animation: rise 640ms var(--ease) both; }
+  .s-visual { animation: rise-far 900ms var(--ease) 200ms both; }
   .hero-copy > :nth-child(2) { animation-delay: 70ms; }
   .hero-copy > :nth-child(3) { animation-delay: 160ms; }
   .hero-copy > :nth-child(4) { animation-delay: 240ms; }

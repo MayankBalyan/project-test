@@ -46,55 +46,22 @@
 
   <main id="main">
     <!-- Hero: centered 3D headline with art floating around it, like the reference -->
-    <section class="hero-c">
-      <div class="art" aria-hidden="true">
-        <svg class="blob h-blob-l float" viewBox="0 0 200 200">
-          <path d="M104 8c38 2 78 26 88 66 10 42-8 92-48 112-40 20-100 14-128-20C-10 132 2 76 28 42 46 18 72 6 104 8z" fill="var(--space)"/>
-          <g fill="#fff"><circle cx="120" cy="60" r="1.4"/><circle cx="150" cy="120" r="1.8"/><circle cx="90" cy="100" r="1"/><circle cx="60" cy="70" r="1.2"/><circle cx="110" cy="160" r="1.4"/><path d="M130 130q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
-        </svg>
-        <svg class="blob h-blob-r float" viewBox="0 0 200 200">
+    <section class="hero-s">
+      <div class="wrap s-grid">
+        <div class="s-copy">
+          <h1 class="h3d xl">Grow your<br>island</h1>
+          <p class="lead">Habits, streaks and focus in one calm app. Show up, and a little island in space grows.</p>
+          <div class="actions"><a class="btn primary" href="https://app.istel.space">Start in your browser</a></div>
+          <p class="soon">Free · Android app coming soon</p>
+        </div>
+        <div class="s-visual"><svg class="blob s-blob" viewBox="0 0 200 200">
           <defs><clipPath id="hb"><path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z"/></clipPath></defs>
           <path d="M96 4c44-2 92 28 100 78 8 48-30 104-82 112C62 202 14 170 6 122-2 74 30 20 60 10c12-4 24-6 36-6z" fill="var(--space)"/>
           <g clip-path="url(#hb)" fill="#fff"><circle cx="40" cy="60" r="1.6"/><circle cx="150" cy="40" r="1.2"/><circle cx="120" cy="150" r="1.8"/><circle cx="70" cy="140" r="1"/><circle cx="170" cy="110" r="1.4"/><circle cx="95" cy="30" r="1"/><path d="M150 80q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z"/><path d="M60 170q1.5 6 7 7q-5.5 1.5-7 7q-1.5-5.5-7-7q5.5-1 7-7z"/></g>
-        </svg>
-        <svg class="h-planet float" viewBox="0 0 200 140">
-          <ellipse cx="100" cy="74" rx="92" ry="22" fill="none" stroke="var(--ink)" stroke-width="3" transform="rotate(-14 100 74)"/>
-          <circle cx="100" cy="70" r="44" fill="#fff" stroke="var(--ink)" stroke-width="3"/>
-          <g stroke="var(--ink)"><line x1="68" y1="42" x2="132" y2="45" stroke-width="2.4"/><line x1="60" y1="52" x2="140" y2="55" stroke-width="1.2"/><line x1="57" y1="62" x2="143" y2="65" stroke-width="2.4"/><line x1="57" y1="72" x2="143" y2="75" stroke-width="1.2"/><line x1="60" y1="82" x2="140" y2="85" stroke-width="2.4"/><line x1="66" y1="92" x2="134" y2="95" stroke-width="1.2"/></g>
-          <path d="M18 86 Q100 114 184 62" fill="none" stroke="var(--ink)" stroke-width="3"/>
-        </svg>
-        <svg class="h-moon float" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="46" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/>
-          <g fill="none" stroke="var(--ink)" stroke-width="1.6"><circle cx="32" cy="30" r="9"/><circle cx="62" cy="24" r="5"/><circle cx="70" cy="52" r="10"/><circle cx="40" cy="62" r="6"/><circle cx="55" cy="76" r="5"/></g>
-        </svg>
-        <svg class="h-spark s1" viewBox="0 0 20 20"><path d="M10 0q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
-        <svg class="h-spark s2" viewBox="0 0 20 20"><path d="M10 0q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
-        <svg class="h-spark s3" viewBox="0 0 20 20"><path d="M10 0q2 8 10 10q-8 2-10 10q-2-8-10-10q8-2 10-10z" fill="var(--ink)"/></svg>
-      </div>
-      <div class="wrap hero-copy">
-        <p class="eyebrow">Habits · Streaks · Focus</p>
-        <h1 class="h3d xl">Grow your<br>island</h1>
-        <p class="lead">A calm habit tracker. Keep streaks like GitHub, focus with a Pomodoro timer, and watch a little island in space grow every time you show up.</p>
-        <div class="actions center">
-          <a class="btn primary" href="https://app.istel.space">Start in your browser</a>
-          <a class="btn" aria-disabled="true" role="link" aria-label="Android app coming soon to Google Play">Android · coming soon</a>
-        </div>
-        <p class="fine">Free · No ads · Works offline · Syncs across devices</p>
-      </div>
-
-      <div class="phones" aria-label="Screens from the Istel app">
-        <figure class="phone tilt-l"><img src="/img/focus.jpg" width="390" height="844" alt="Focus screen with a 25-minute timer counting down" loading="eager"></figure>
-        <figure class="phone mid"><img src="/img/today.jpg" width="390" height="844" alt="Today screen with a long streak and today's habits" loading="eager"></figure>
-        <figure class="phone tilt-r"><img src="/img/island.jpg" width="390" height="844" alt="A floating island in space covered in trees grown from focus sessions" loading="eager"></figure>
+        </svg><figure class="phone s-phone"><img src="/img/today.jpg" width="390" height="844" alt="Today screen with a streak and today's habits" loading="eager"></figure></div>
       </div>
     </section>
 
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-track">
-        <span>Habits ✦ Streaks ✦ Deep focus ✦ Rain Days ✦ Your island ✦ Phone &amp; laptop ✦ </span>
-        <span>Habits ✦ Streaks ✦ Deep focus ✦ Rain Days ✦ Your island ✦ Phone &amp; laptop ✦ </span>
-      </div>
-    </div>
 
     <div class="wrap">
       <!-- How it works -->
