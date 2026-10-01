@@ -70,6 +70,7 @@ export type FocusMode = 'timer' | 'stopwatch';
 export type Settings = {
   /** False until the first-launch setup is finished or skipped. */
   onboarded: boolean;
+  /** The planet's name (stored as islandName from the island days). */
   islandName: string;
   /** Default focus length in minutes. */
   focusMinutes: number;
@@ -79,7 +80,7 @@ export type Settings = {
   keepScreenOn: boolean;
   /** False for people who only use the focus timer: hides the Today tab and habit sections. */
   habitsEnabled: boolean;
-  /** Leaving the app for more than a few seconds during a session wilts it. */
+  /** Leaving the app for more than a few seconds during a session turns its moon dark. */
   stayFocused: boolean;
   notifications: {
     /** Evening nudge when nothing has counted toward the streak yet today. */
@@ -93,7 +94,7 @@ export type Settings = {
 
 export const DEFAULT_SETTINGS: Settings = {
   onboarded: false,
-  islandName: 'My island',
+  islandName: 'My planet',
   focusMinutes: 25,
   dayStartHour: DEFAULT_DAY_START_HOUR,
   habitsEnabled: true,
@@ -351,7 +352,7 @@ function useIstelState() {
     [endFocus, setFocus, changeFocus],
   );
 
-  // Stay Focused: leaving the app for too long during a session gives it up (the plant wilts).
+  // Stay Focused: leaving the app for too long during a session gives it up (its moon goes dark).
   const leftAt = useRef<number | null>(null);
   useEffect(() => {
     if (!settings.stayFocused || !focus) return;

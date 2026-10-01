@@ -2,29 +2,17 @@ import { useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Hero } from '@/components/hero';
-import { Blob, Planet } from '@/components/ink-art';
-import { Island } from '@/components/island';
+import { Blob, Moon } from '@/components/ink-art';
+import { PlanetWorld } from '@/components/planet-world';
 import { Card, Screen, SectionTitle, Txt } from '@/components/ui';
 import { Fonts, Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-import { islandTier, nextUnlock, PlantStage, Species, STREAK_UNLOCKS, treesFor, unlocksFor, WATERINGS_TO_MATURE } from '@/core/world';
+import { islandTier, MOON_NAME, MOON_STAGE, nextUnlock, STREAK_UNLOCKS, treesFor, unlocksFor, WATERINGS_TO_MATURE } from '@/core/world';
 import { usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
 
-const SPECIES_LABEL: Record<Species, string> = {
-  flower: 'Flower',
-  shrub: 'Shrub',
-  sapling: 'Sapling',
-  pine: 'Pine',
-  oak: 'Rare oak',
-};
-
-const STAGE_LABEL: Record<PlantStage, string> = {
-  seed: 'Seed',
-  sprout: 'Sprout',
-  young: 'Growing',
-  mature: 'Fully grown',
-  wilted: 'Wilted',
-};
+function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 function formatDay(date: string) {
   return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', {
@@ -47,7 +35,7 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-export default function IslandScreen() {
+export default function PlanetScreen() {
   const palette = usePalette();
   const { width } = useWindowDimensions();
   const { plants, global, lifetimeFocusMinutes, settings, sessions } = useIstel();
@@ -63,17 +51,17 @@ export default function IslandScreen() {
   return (
     <Screen>
       <Hero
-        title={'Your\nisland'}
-        subtitle={`${settings.islandName} · every session plants something, every habit day waters it.`}
+        title={'Your\nplanet'}
+        subtitle={`${settings.islandName} · every focus session adds a moon, every habit day lights it up.`}
         art={
           <>
             <Blob size={140} variant={2} stars={16} style={styles.heroBlob} />
-            <Planet size={110} style={styles.heroPlanet} />
+            <Moon size={70} style={styles.heroPlanet} />
           </>
         }
       />
 
-      <Island
+      <PlanetWorld
         plants={plants}
         tier={tier}
         stars={20 + global.current * 2}
@@ -86,39 +74,39 @@ export default function IslandScreen() {
       {selected && session ? (
         <Card style={styles.plantCard}>
           <View style={styles.plantHead}>
-            <Txt variant="section">{SPECIES_LABEL[selected.species]}</Txt>
+            <Txt variant="section">{capitalize(MOON_NAME[selected.species].one.replace(/^an? /, ''))}</Txt>
             <Txt variant="label" tone="inkSoft">
-              {STAGE_LABEL[selected.stage]}
+              {MOON_STAGE[selected.stage]}
             </Txt>
           </View>
           <Txt variant="caption">
-            Planted {formatDay(selected.plantedOn)} from a {session.minutes}-minute {session.tag} session
-            {treesFor(session.minutes) > 1 && session.status === 'done' ? `, one of its ${treesFor(session.minutes)} trees` : ''}.
+            Made {formatDay(selected.plantedOn)} by a {session.minutes}-minute {session.tag} session
+            {treesFor(session.minutes) > 1 && session.status === 'done' ? `, one of its ${treesFor(session.minutes)} moons` : ''}.
           </Txt>
           <Txt variant="caption" tone="inkSoft">
             {selected.stage === 'wilted'
-              ? 'That session was given up. Finish your next session to bring this sprout back.'
+              ? 'That session was given up, so this moon went dark. Finish your next session to bring it back.'
               : selected.stage === 'mature'
-                ? 'Fully grown.'
-                : `Watered on ${selected.waterings} of ${WATERINGS_TO_MATURE} habit days. Do a habit to help it grow.`}
+                ? 'Fully lit.'
+                : `Lit on ${selected.waterings} of ${WATERINGS_TO_MATURE} habit days. Do a habit to light it up.`}
           </Txt>
         </Card>
       ) : plants.length > 0 ? (
         <Txt variant="caption" tone="muted" style={styles.emptyNote}>
-          Tap a plant to see where it came from.
+          Tap a moon to see which session made it.
         </Txt>
       ) : null}
 
       {plants.length === 0 && (
         <Txt variant="bodyBold" tone="inkSoft" style={styles.emptyNote}>
-          Bare soil for now. Finish a focus session to plant your first seed.
+          No moons yet. Finish a focus session to put your first moon in orbit.
         </Txt>
       )}
 
       <View style={styles.stats}>
-        <Stat value={String(plants.length)} label="Planted" />
-        <Stat value={String(mature)} label="Fully grown" />
-        <Stat value={String(wilted)} label="Wilted" />
+        <Stat value={String(plants.length)} label="Moons" />
+        <Stat value={String(mature)} label="Full moons" />
+        <Stat value={String(wilted)} label="Dark moons" />
         <Stat value={`${Math.floor(lifetimeFocusMinutes / 60)}h`} label={`Focus · size ${tier + 1}/6`} />
       </View>
 

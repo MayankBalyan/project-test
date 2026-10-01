@@ -10,7 +10,7 @@ const KNOB = 15;
 
 /**
  * Drag around the ring to pick a focus length (10 minutes to 3 hours, 5-minute steps). A full turn is 3 hours;
- * the bold ticks mark every half hour, where a session earns one more tree. The dial stops at both ends
+ * the bold ticks mark every half hour, where a session earns one more moon. The dial stops at both ends
  * instead of wrapping around.
  */
 export function FocusDial({

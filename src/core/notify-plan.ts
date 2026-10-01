@@ -84,7 +84,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
           id: `streak:${date}`,
           kind: 'streak',
           at,
-          title: streak > 0 ? `Your ${streak}-day streak is at risk` : 'Keep your island growing',
+          title: streak > 0 ? `Your ${streak}-day streak is at risk` : 'Keep your planet growing',
           body: 'One habit or a 25-minute focus session keeps your streak alive today.',
         });
       }
@@ -112,7 +112,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
       kind: 'focus',
       at: input.focusEnd.at,
       title: 'Focus session complete',
-      body: 'A new seed just landed on your island.',
+      body: 'A new moon just joined your planet.',
     });
   }
 

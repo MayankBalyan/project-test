@@ -24,7 +24,7 @@ export const Colors = {
     muted: '#6E6D6A',
     line: '#2E2E2E',
     face: '#FFFFFF',
-    // Lifted above the dark paper so blobs, the island sky and dark cards still stand out.
+    // Lifted above the dark paper so blobs, the planet’s sky and dark cards still stand out.
     space: '#2A2A28',
     artFill: '#1A1A1A',
     heat: ['#2E2E2E', '#55554F', '#8A8985', '#BDBCB8', '#ECEBE7'],

@@ -1,6 +1,6 @@
 # Istel
 
-Habit tracker + Pomodoro focus timer + a growing island world. Cross-device (iOS, Android, Web; desktop later).
+Habit tracker + Pomodoro focus timer + a planet that gathers moons. Cross-device (iOS, Android, Web; desktop later).
 Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 
 ## Ground rules (from the project owner — always follow)
@@ -21,7 +21,7 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
 - `src/core/` — pure, platform-free domain logic (dates, streaks, scores, timer). No React or Expo imports here.
 - `src/components/`, `src/hooks/`, `src/constants/` — UI building blocks.
 - `src/state/` — app state (`store.tsx`) and on-device saving (`persist.ts`, localStorage on web, SQLite-backed on iOS/Android).
-- `src/app/(tabs)/` — the tab screens (Today, To-do, Focus, Island, Streaks); `src/app/todo/[id].tsx` — edit a to-do (modal); `src/app/habit/` — add/edit habit screens (modal);
+- `src/app/(tabs)/` — the tab screens (Today, To-do, Focus, Planet, Streaks); `src/app/todo/[id].tsx` — edit a to-do (modal); `src/app/habit/` — add/edit habit screens (modal);
   `src/app/login.tsx` — sign-in screen; `src/app/account.tsx` — account (sync, sign out, delete);
   `src/app/auth/callback.tsx` — OAuth return page. Sign-in is required: `src/app/_layout.tsx` guards every
   screen with `Stack.Protected` and waits for the first sync after sign-in.
@@ -31,7 +31,7 @@ Product spec: [docs/PRD.md](docs/PRD.md). Expo-specific guidance: @AGENTS.md
   notifications; browsers only while the tab is open. The store re-plans after every relevant change.
 - `src/lib/share-file(.web).ts` — export files (share sheet on phones, download on web).
 - To-dos: rules in `core/todos.ts` (tested), deadline picker in `components/due-picker.tsx`, Focus dial in
-  `components/focus-dial.tsx` (trees per session: `treesFor` in `core/world.ts`).
+  `components/focus-dial.tsx` (moons per session: `treesFor`/`moonsFor` in `core/world.ts`; the planet scene is `components/planet-world.tsx`).
 - Sync: rules in `core/sync.ts` (tested), Supabase calls in `lib/sync.ts`, scheduling and account linking in
   `state/use-sync.ts`. Every change in the store must record `updatedAt` and add to the outbox (`track`).
 - `site/` — the public website for `istel.space` (landing, privacy policy, delete-account page): plain HTML/CSS

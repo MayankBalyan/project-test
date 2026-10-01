@@ -5,26 +5,26 @@ import Svg, { Path } from 'react-native-svg';
 
 import { Heading3D } from '@/components/heading-3d';
 import { Blob, Moon, Planet } from '@/components/ink-art';
-import { Island } from '@/components/island';
+import { PlanetWorld } from '@/components/planet-world';
 import { Card, InkButton, Screen, TextField, Txt } from '@/components/ui';
 import { Gutter, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { HABIT_NAME_MAX, validateHabit } from '@/core/habit-input';
 import { ISLAND_NAME_MAX, MAX_STARTER_PICKS, STARTER_HABITS } from '@/core/starters';
-import { speciesFor, treesFor } from '@/core/world';
+import { moonsFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { useIstel } from '@/state/store';
 
 type Use = 'both' | 'focus';
 
 const USES: { value: Use; title: string; note: string }[] = [
-  { value: 'both', title: 'Habits + focus', note: 'Track daily habits and grow your island with focus sessions.' },
-  { value: 'focus', title: 'Just focus', note: 'Only the focus timer and your island. Turn habits on later in Settings.' },
+  { value: 'both', title: 'Habits + focus', note: 'Track daily habits and fill your planet’s sky with moons from focus sessions.' },
+  { value: 'focus', title: 'Just focus', note: 'Only the focus timer and your planet. Turn habits on later in Settings.' },
 ];
 
 const FOCUS_OPTIONS = [
-  { minutes: 25, note: 'A good start. Grows a shrub.' },
+  { minutes: 25, note: 'A good start. Adds a grey moon.' },
   { minutes: 50, note: 'Deep work. Grows a pine.' },
-  { minutes: 90, note: 'Long haul. Grows 3 rare oaks (one per half hour).' },
+  { minutes: 90, note: 'Long haul. Adds 3 rare ringed moons (one per half hour).' },
 ];
 
 function Check({ on }: { on: boolean }) {
@@ -119,7 +119,7 @@ export default function WelcomeScreen() {
   const picks = picked.length + (customName ? 1 : 0);
   const headingSize = wide ? 96 : 58;
   const steps =
-    use === 'focus' ? (['use', 'focus', 'island'] as const) : (['use', 'habits', 'focus', 'island'] as const);
+    use === 'focus' ? (['use', 'focus', 'planet'] as const) : (['use', 'habits', 'focus', 'planet'] as const);
   const current = steps[step];
 
   const toggle = (id: string) =>
@@ -171,7 +171,7 @@ export default function WelcomeScreen() {
             <Heading3D size={headingSize}>{'How will you\nuse Istel?'}</Heading3D>
           </View>
           <Txt variant="bodyBold" tone="inkSoft">
-            Every focus session grows your island either way. You can change this any time in Settings.
+            Every focus session adds moons to your planet either way. You can change this any time in Settings.
           </Txt>
           <View style={styles.options} role="radiogroup">
             {USES.map((u) => (
@@ -194,7 +194,7 @@ export default function WelcomeScreen() {
           <View style={styles.hero}>
             <Blob size={150} variant={1} stars={20} style={styles.blob} />
             <Planet size={100} style={styles.planet} />
-            <Heading3D size={headingSize}>{'Plant your\nfirst habits'}</Heading3D>
+            <Heading3D size={headingSize}>{'Pick your\nfirst habits'}</Heading3D>
           </View>
           <Txt variant="bodyBold" tone="inkSoft">
             Optional. Pick up to {MAX_STARTER_PICKS}, tap a picked one again to remove it, or skip and add habits later.
@@ -260,7 +260,7 @@ export default function WelcomeScreen() {
             <Heading3D size={headingSize}>{'Pick your\nfocus'}</Heading3D>
           </View>
           <Txt variant="bodyBold" tone="inkSoft">
-            Each finished focus session plants something on your island. Longer sessions grow bigger plants, and every half hour adds a tree.
+            Each finished focus session puts moons around your planet. Longer sessions make bigger moons, and every half hour adds one more.
           </Txt>
           <View style={styles.options}>
             {FOCUS_OPTIONS.map((o) => (
@@ -278,12 +278,12 @@ export default function WelcomeScreen() {
         </>
       )}
 
-      {current === 'island' && (
+      {current === 'planet' && (
         <>
           <View style={styles.hero}>
-            <Heading3D size={headingSize}>{'Name your\nisland'}</Heading3D>
+            <Heading3D size={headingSize}>{'Name your\nplanet'}</Heading3D>
           </View>
-          <Island
+          <PlanetWorld
             plants={[]}
             tier={0}
             stars={24}
@@ -291,7 +291,7 @@ export default function WelcomeScreen() {
             width={Math.max(0, Math.min(width, MaxContentWidth) - Gutter * 2)}
           />
           <TextField
-            label="Island name"
+            label="Planet name"
             value={islandName}
             onChangeText={setIslandName}
             placeholder={settings.islandName}
@@ -305,12 +305,10 @@ export default function WelcomeScreen() {
             </Txt>
             <Txt variant="caption">
               {use === 'focus' ? 'Just focus' : picks ? `${picks} habit${picks > 1 ? 's' : ''}` : 'No habits yet'} ·{' '}
-              {minutes}-minute focus (plants {treesFor(minutes) > 1 ? `${treesFor(minutes)} ` : 'a '}
-              {speciesFor(minutes) === 'oak' ? 'rare oak' : speciesFor(minutes)}
-              {treesFor(minutes) > 1 ? 's' : ''})
+              {minutes}-minute focus (adds {moonsFor(minutes)})
             </Txt>
           </Card>
-          <InkButton label="Start growing" onPress={() => finish(true)} />
+          <InkButton label="Start orbiting" onPress={() => finish(true)} />
         </>
       )}
     </Screen>

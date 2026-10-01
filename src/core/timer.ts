@@ -78,7 +78,7 @@ export function plannedEndAt(t: TimerState): number | null {
 /** Stopwatch sessions count up and stop on their own after this long. */
 export const STOPWATCH_CAP_MINUTES = 180;
 
-/** Stay Focused mode: how long someone can leave the app during a session before it wilts. */
+/** Stay Focused mode: how long someone can leave the app during a session before its moon goes dark. */
 export const STAY_FOCUSED_GRACE_MS = 10_000;
 
 /**

@@ -11,11 +11,11 @@ import { LogoMark, TabIcon, TabIconName } from './ink-art';
 import { SlidingTabSlot } from './sliding-tab-slot';
 import { Txt } from './ui';
 
-const TABS: { name: string; href: '/' | '/todos' | '/focus' | '/island' | '/streaks'; label: string; icon: TabIconName }[] = [
+const TABS: { name: string; href: '/' | '/todos' | '/focus' | '/planet' | '/streaks'; label: string; icon: TabIconName }[] = [
   { name: 'index', href: '/', label: 'Today', icon: 'today' },
   { name: 'todos', href: '/todos', label: 'To-do', icon: 'todo' },
   { name: 'focus', href: '/focus', label: 'Focus', icon: 'focus' },
-  { name: 'island', href: '/island', label: 'Island', icon: 'island' },
+  { name: 'planet', href: '/planet', label: 'Planet', icon: 'planet' },
   { name: 'streaks', href: '/streaks', label: 'Streaks', icon: 'streaks' },
 ];
 const TAB_ORDER = TABS.map((t) => t.href);

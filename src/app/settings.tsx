@@ -156,7 +156,7 @@ export default function SettingsScreen() {
           detail={
             settings.habitsEnabled
               ? 'Turn off to use Istel just for focus. The Today tab hides; your habits and check-ins are kept.'
-              : 'Off: Istel is just the focus timer and your island. Turn on to track habits again.'
+              : 'Off: Istel is just the focus timer and your planet. Turn on to track habits again.'
           }
           value={settings.habitsEnabled}
           onChange={(on) => updateSettings({ habitsEnabled: on })}
@@ -165,7 +165,7 @@ export default function SettingsScreen() {
 
       <Card style={styles.group}>
         <TextField
-          label="Island name"
+          label="Planet name"
           value={islandName}
           onChangeText={setIslandName}
           onBlur={saveName}
@@ -194,7 +194,7 @@ export default function SettingsScreen() {
         />
         <Toggle
           label="Stay Focused mode"
-          detail="Leaving the app for more than 10 seconds during a session wilts its plant."
+          detail="Leaving the app for more than 10 seconds during a session turns its moon dark."
           value={settings.stayFocused}
           onChange={(v) => updateSettings({ stayFocused: v })}
         />
@@ -295,7 +295,7 @@ export default function SettingsScreen() {
           }}
         />
         <Txt variant="caption" tone="muted">
-          Erasing removes every habit, check-in, focus session, to-do and your island from this device. Your account keeps
+          Erasing removes every habit, check-in, focus session, to-do and your planet from this device. Your account keeps
           a copy and it syncs back; delete the account to remove that too.
         </Txt>
       </Card>

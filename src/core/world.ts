@@ -80,12 +80,41 @@ export function growPlants(sessions: FocusSessionRecord[], wateredDays: Iterable
   });
 }
 
+// Keys date from the island era and stay as they are; labels are what people see.
 export const STREAK_UNLOCKS = [
-  { days: 7, key: 'stream', label: 'A stream' },
-  { days: 30, key: 'creatures', label: 'Birds & butterflies' },
-  { days: 100, key: 'waterfall', label: 'A waterfall' },
-  { days: 365, key: 'seasons', label: 'Seasons & night sky' },
+  { days: 7, key: 'stream', label: 'Planet rings' },
+  { days: 30, key: 'creatures', label: 'Comets' },
+  { days: 100, key: 'waterfall', label: 'An aurora' },
+  { days: 365, key: 'seasons', label: 'A second sun & constellations' },
 ] as const;
+
+/**
+ * The world is a planet; every finished focus session adds moons to its orbit (one per half hour). Species and
+ * stages keep their original ids so saved data stays valid; these are their names in the app.
+ */
+export const MOON_NAME: Record<Species, { one: string; many: string }> = {
+  flower: { one: 'a moonlet', many: 'moonlets' },
+  shrub: { one: 'a grey moon', many: 'grey moons' },
+  sapling: { one: 'a cratered moon', many: 'cratered moons' },
+  pine: { one: 'a big moon', many: 'big moons' },
+  oak: { one: 'a rare ringed moon', many: 'rare ringed moons' },
+};
+
+/** Habit days light a new moon up: dust, then crescent, half and full. A given-up session leaves a dark moon. */
+export const MOON_STAGE: Record<PlantStage, string> = {
+  seed: 'Moon dust',
+  sprout: 'Crescent',
+  young: 'Half moon',
+  mature: 'Full moon',
+  wilted: 'Dark moon',
+};
+
+/** "a grey moon", "3 big moons": what a session of this length adds to the planet. */
+export function moonsFor(minutes: number): string {
+  const n = treesFor(minutes);
+  const name = MOON_NAME[speciesFor(minutes)];
+  return n === 1 ? name.one : `${n} ${name.many}`;
+}
 
 export type UnlockKey = (typeof STREAK_UNLOCKS)[number]['key'];
 
@@ -97,7 +126,7 @@ export function nextUnlock(longestStreak: number) {
   return STREAK_UNLOCKS.find((u) => longestStreak < u.days) ?? null;
 }
 
-/** Island size tier (0–5) from lifetime focus hours: 10, 50, 100, 250, 500. */
+/** Planet size tier (0–5) from lifetime focus hours: 10, 50, 100, 250, 500. */
 export function islandTier(focusMinutes: number): number {
   const hours = focusMinutes / 60;
   return [10, 50, 100, 250, 500].filter((h) => hours >= h).length;

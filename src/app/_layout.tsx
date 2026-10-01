@@ -72,7 +72,7 @@ function Loading() {
       </Heading3D>
       <ActivityIndicator />
       <Txt variant="label" tone="inkSoft">
-        Loading your island…
+        Loading your planet…
       </Txt>
     </View>
   );

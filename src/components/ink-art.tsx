@@ -145,7 +145,7 @@ export function LogoMark({ size = 28, color }: { size?: number; color?: string }
   );
 }
 
-export type TabIconName = 'today' | 'todo' | 'focus' | 'island' | 'streaks';
+export type TabIconName = 'today' | 'todo' | 'focus' | 'planet' | 'streaks';
 
 export function TabIcon({ name, color, size = 22 }: { name: TabIconName; color: string; size?: number }) {
   const common = { fill: 'none', stroke: color, strokeWidth: 2.2, strokeLinecap: 'round' as const };
@@ -184,10 +184,11 @@ export function TabIcon({ name, color, size = 22 }: { name: TabIconName; color: 
           <Path d="M12 9v4.5l3 2M9.5 2.5h5" {...common} />
         </G>
       )}
-      {name === 'island' && (
+      {name === 'planet' && (
         <G>
-          <Path d="M3 13h18l-5 6h-8z" {...common} />
-          <Path d="M12 13V6M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zM12 7c0-2 2-4 4-4 0 3-2 4-4 4z" {...common} />
+          <Circle cx={12} cy={12} r={5.5} {...common} />
+          <Path d="M3.5 15.5c-1.6 2 6.5 1.2 11-1.7s7.6-6.8 5.8-7.6" {...common} strokeWidth={1.8} />
+          <Circle cx={19.5} cy={18.5} r={1.6} fill={color} />
         </G>
       )}
       {name === 'streaks' && (

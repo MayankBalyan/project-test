@@ -8,7 +8,7 @@ import { Spacing } from '@/constants/theme';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { openSitePage, siteLinks } from '@/lib/site';
 
-const PERKS = ['A streak grid for every habit', 'A focus timer that follows you', 'An island that grows as you do'];
+const PERKS = ['A streak grid for every habit', 'A focus timer that follows you', 'A planet whose moons grow as you do'];
 
 /** The only screen available while signed out (see the protected routes in app/_layout.tsx). */
 export default function LoginScreen() {
@@ -29,7 +29,7 @@ export default function LoginScreen() {
             {'Sign\nin'}
           </Heading3D>
           <Txt tone="inkSoft">
-            Sign in with your email to keep your habits, streaks and island safe on every device. No password —
+            Sign in with your email to keep your habits, streaks and planet safe on every device. No password —
             we’ll email you a code.
           </Txt>
           <View style={styles.perks}>

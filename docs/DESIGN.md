@@ -58,6 +58,13 @@ cratered moon, sparkles, telescope, and the floating island with plants.
 Plant growth stages: seed → sprout → young → mature. A given-up session leaves a **wilted** sprout (drooping
 leaves), never a dead tree.
 
+## World: the planet
+- The world is one planet in space (engraving hatch, ink outline). Every finished focus session adds moons
+  on its orbits, one per half hour; longer sessions make bigger moons (90 min+: rare ringed moons).
+- Habit days light a new moon up: moon dust → crescent → half → full. A given-up session leaves a dark moon.
+- Streak unlocks: rings (7 days), comets (30), an aurora (100), a second sun and constellations (365).
+- Code keeps the old ids (species, stages, `islandName`) so saved data stays valid; only names changed.
+
 ## Logo mark
 - **Orbit** (chosen by the owner, inspired by their reference: thick even strokes, a drop with something
   nested inside, open gaps). An open drop, tip up, with a gap at the lower left, around an open ring (a

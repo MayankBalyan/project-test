@@ -4,7 +4,7 @@ import { addDays, daysBetween, toLocalDate, weekday } from '../dates';
 import { dailyValues, Habit, HabitEvent, habitStreak, isDoneOn } from '../habits';
 import { dailyScore, heatLevel, isQualifyingDay } from '../score';
 import { globalStreak, streakStatus } from '../streaks';
-import { clampFocusMinutes, growPlants, islandTier, nextUnlock, treesFor, unlocksFor } from '../world';
+import { clampFocusMinutes, growPlants, islandTier, moonsFor, nextUnlock, treesFor, unlocksFor } from '../world';
 import { focusStats, formatMinutes } from '../focus-stats';
 import { habitHeatDays, habitSummary } from '../habit-heat';
 import {
@@ -176,6 +176,10 @@ describe('world', () => {
     expect(plants).toHaveLength(7);
     expect(plants.filter((p) => p.sessionId === 's1').map((p) => p.id)).toEqual(['s1', 's1#1', 's1#2', 's1#3', 's1#4', 's1#5']);
     expect(plants[6]).toMatchObject({ sessionId: 's2', stage: 'wilted' });
+  });
+
+  it('names the moons a session adds', () => {
+    expect([10, 25, 45, 60, 180].map(moonsFor)).toEqual(['a moonlet', 'a grey moon', 'a cratered moon', '2 big moons', '6 rare ringed moons']);
   });
 
   it('snaps focus lengths to the 10–180 minute dial', () => {

@@ -19,27 +19,12 @@ import {
   remainingMs,
   STOPWATCH_CAP_MINUTES,
 } from '@/core/timer';
-import { clampFocusMinutes, Species, speciesFor, treesFor } from '@/core/world';
+import { clampFocusMinutes, moonsFor } from '@/core/world';
 import { useIsWide, usePalette } from '@/hooks/use-palette';
 import { FocusMode, useNow, useIstel } from '@/state/store';
 
 const QUICK_PICKS = [25, 50, 90, 120, 180];
 const TAGS = ['Study', 'Work', 'Reading'];
-const SPECIES_NAME: Record<Species, [string, string]> = {
-  flower: ['a flower', 'flowers'],
-  shrub: ['a shrub', 'shrubs'],
-  sapling: ['a sapling', 'saplings'],
-  pine: ['a pine', 'pines'],
-  oak: ['a rare oak', 'rare oaks'],
-};
-
-/** "a shrub", "3 rare oaks": what a session of this length plants. */
-function plantsFor(minutes: number) {
-  const n = treesFor(minutes);
-  const [one, many] = SPECIES_NAME[speciesFor(minutes)];
-  return n === 1 ? one : `${n} ${many}`;
-}
-
 function TimerRing({ progress, size, children }: { progress: number; size: number; children: React.ReactNode }) {
   const palette = usePalette();
   const r = size / 2 - 14;
@@ -108,7 +93,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
   const remaining = focus ? remainingMs(focus.timer, now) : planned * 60_000;
   const elapsed = focus ? elapsedMs(focus.timer, now) : 0;
   const progress = stopwatch ? (elapsed % 3_600_000) / 3_600_000 : focus ? 1 - remaining / focus.timer.plannedMs : 0;
-  const species = plantsFor(stopwatch ? Math.floor(elapsed / 60_000) : planned);
+  const species = moonsFor(stopwatch ? Math.floor(elapsed / 60_000) : planned);
   const choosing = !focus && !stopwatch;
   const ringSize = wide ? 340 : 300;
   const display = formatRemaining(stopwatch ? Math.floor(elapsed / 1000) * 1000 : remaining);
@@ -135,7 +120,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
               : (linked?.habit.name ?? focus.tag)
           : stopwatch
             ? 'Stopwatch · stop when you’re done'
-            : `Plants ${species}`}
+            : `Adds ${species}`}
       </Txt>
       {linked && (
         <Txt variant="caption" tone="inkSoft">
@@ -151,7 +136,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
       {!wide && !settings.habitsEnabled && <PhoneTopBar />}
       <Hero
         title={'Deep\nfocus'}
-        subtitle="Stay with it. When the timer ends, a seed lands on your island."
+        subtitle="Stay with it. When the timer ends, a new moon joins your planet."
         art={
           <>
             <Blob size={150} variant={0} stars={18} style={styles.heroBlob} />
@@ -185,7 +170,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
           )}
           {stopwatch ? (
             <>
-              <InkButton label="Stop · plant it" kind="outline" onPress={focusActions.complete} />
+              <InkButton label="Stop · add the moon" kind="outline" onPress={focusActions.complete} />
               <Txt variant="caption" tone="muted" style={styles.note}>
                 Stops by itself after {STOPWATCH_CAP_MINUTES / 60} hours. Under a minute isn’t saved.
               </Txt>
@@ -194,13 +179,13 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
             <>
               <InkButton label="Give up" kind="outline" onPress={focusActions.giveUp} />
               <Txt variant="caption" tone="muted" style={styles.note}>
-                Giving up leaves a wilted sprout. Finish your next session to bring it back.
+                Giving up leaves a dark moon. Finish your next session to light it again.
               </Txt>
             </>
           )}
           {settings.stayFocused && (
             <Txt variant="caption" tone="inkSoft" style={styles.note}>
-              Stay Focused is on: leaving the app for more than 10 seconds wilts this session.
+              Stay Focused is on: leaving the app for more than 10 seconds turns this moon dark.
             </Txt>
           )}
         </View>
@@ -209,7 +194,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
           {interruption && (
             <View style={styles.interruption} role="alert">
               <Txt variant="bodyBold">
-                You left Istel for {interruption.awaySeconds}s, so that session wilted.
+                You left Istel for {interruption.awaySeconds}s, so that moon went dark.
               </Txt>
               <Pressable role="button" onPress={clearInterruption} hitSlop={8}>
                 <Txt variant="label">OK</Txt>
@@ -225,7 +210,7 @@ function Focus({ initialHabitId }: { initialHabitId?: string }) {
             <>
               <SectionTitle right={<Txt variant="bodyBold">{minutes} min</Txt>}>Length</SectionTitle>
               <Txt variant="caption" tone="inkSoft">
-                Drag the dial from 10 minutes to 3 hours. Every half hour plants one more tree.
+                Drag the dial from 10 minutes to 3 hours. Every half hour adds one more moon.
               </Txt>
               <View style={styles.chips}>
                 {QUICK_PICKS.map((m) => (
